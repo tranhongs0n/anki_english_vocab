@@ -12,11 +12,11 @@ from dotenv import load_dotenv
 load_dotenv()
 CKEY_API_KEY = os.getenv("CKEY_API_KEY")
 CKEY_API_URL = "https://ckey.vn/v1/chat/completions"
-CKEY_MODEL = "minimax-m2.1"
+CKEY_MODEL = "minimax-m2.5"
 ANKI_CONNECT_URL = "http://127.0.0.1:8765"
 SEARCH_DECK = "English"              
 TARGET_DECK = "English::00_Learning" 
-DEFAULT_NOTE_TYPE = "Pronounciation" 
+DEFAULT_NOTE_TYPE = "Concrete Words" 
 FIELD_WORD = "Word" 
 FIELD_IPA = "IPA"   
 FIELD_MEANING = "Reference" 
@@ -40,7 +40,7 @@ def invoke(action, **params):
 
 def build_ram_cache():
     ram_cache = set()
-    query = '"note:Pronounciation" OR "note:Concrete Words"'
+    query = f'"note:{DEFAULT_NOTE_TYPE}"'
     note_ids = invoke('findNotes', query=query)
     
     if note_ids:
@@ -88,10 +88,8 @@ def add_notes_to_anki(flashcard_data_list, ram_cache):
         imported_words.append(item['word'].lower())
     
     if notes:
-        requestJson = {'action': 'addNotes', 'version': 6, 'params': {'notes': notes}}
         try:
-            response = session.post(ANKI_CONNECT_URL, json=requestJson).json()
-            result = response.get('result', [])
+            result = invoke('addNotes', notes=notes)
             
             success_count = 0
             successful_words = []
@@ -108,10 +106,10 @@ def add_notes_to_anki(flashcard_data_list, ram_cache):
                 print(f"[{get_timestamp()}] Imported {success_count} words successfully:")
                 print(f"    ↳ {successful_words}")
             else:
-                print(f"[{get_timestamp()}] No new words imported.")
+                print(f"[{get_timestamp()}] No new words imported. (Notes rejected as duplicates)")
                 
-        except requests.exceptions.ConnectionError:
-            print(f"[{get_timestamp()}] Connection Error during import.")
+        except Exception as e:
+            print(f"[{get_timestamp()}] Anki Import Error: {e}")
 
 def generate_flashcard_data(target_word):
     system_instruction = "You are a speed-optimized vocabulary extractor. Output raw JSON only. Do not wrap in markdown blocks."
