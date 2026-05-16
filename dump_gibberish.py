@@ -7,7 +7,7 @@ from datetime import datetime
 
 # --- CONFIGURATION ---
 ANKI_CONNECT_URL = "http://127.0.0.1:8765"
-SOURCE_DECK = "99_Other"
+SOURCE_DECK = "English::99_Other"
 FIELD_WORD = "Word"
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 GIBBERISH_FILE = os.path.join(SCRIPT_DIR, "gibberish.txt")
