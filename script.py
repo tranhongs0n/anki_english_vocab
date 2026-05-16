@@ -26,6 +26,32 @@ PROCESSED_WORDS_FILE = os.path.join(SCRIPT_DIR, "processed_words.txt")
 
 session = requests.Session() 
 
+# --- UTILS ---
+def get_timestamp():
+    return datetime.now().strftime("%H:%M:%S")
+
+def log_info(message):
+    print(f"[{get_timestamp()}] {message}")
+
+def log_error(message):
+    print(f"\033[91m[{get_timestamp()}] {message}\033[0m")
+
+def try_repair_json(content, depth=0):
+    if depth > 5:
+        return None
+    try:
+        return json.loads(content)
+    except json.JSONDecodeError as e:
+        if "Expecting value" in str(e):
+            pos = e.pos
+            next_quote = content.find('"', pos)
+            if next_quote != -1:
+                prefix = content[max(0, pos-5):pos]
+                if ',' in prefix or '[' in prefix:
+                    repaired = content[:pos] + '"' + content[pos:]
+                    return try_repair_json(repaired, depth + 1)
+        return None
+
 def invoke(action, **params):
     requestJson = {'action': action, 'version': 6, 'params': params}
     try:
@@ -56,10 +82,12 @@ def build_ram_cache():
     return ram_cache
 
 def load_processed_words():
-    if os.path.exists(PROCESSED_WORDS_FILE):
-        with open(PROCESSED_WORDS_FILE, "r", encoding="utf-8") as f:
-            return set(line.strip().lower() for line in f if line.strip())
-    return set()
+    words = set()
+    for file_path in [PROCESSED_WORDS_FILE, GIBBERISH_FILE]:
+        if os.path.exists(file_path):
+            with open(file_path, "r", encoding="utf-8") as f:
+                words.update(line.strip().lower() for line in f if line.strip())
+    return words
 
 def save_processed_word(word):
     with open(PROCESSED_WORDS_FILE, "a", encoding="utf-8") as f:
@@ -103,16 +131,16 @@ def add_notes_to_anki(flashcard_data_list, ram_cache):
                         ram_cache.add(word)
                         
             if success_count > 0:
-                print(f"[{get_timestamp()}] Imported {success_count} words successfully:")
+                log_info(f"Imported {success_count} words successfully:")
                 print(f"    ↳ {successful_words}")
             else:
-                print(f"[{get_timestamp()}] No new words imported. (Notes rejected as duplicates)")
+                log_info("No new words imported. (Notes rejected as duplicates)")
                 
         except Exception as e:
-            print(f"[{get_timestamp()}] Anki Import Error: {e}")
+            log_error(f"Anki Import Error: {e}")
 
 def generate_flashcard_data(target_word):
-    system_instruction = "You are a speed-optimized vocabulary extractor. Output raw JSON only. Do not wrap in markdown blocks."
+    system_instruction = "You are a speed-optimized vocabulary extractor. Output raw JSON only. Do not wrap in markdown blocks. Ensure all strings are properly quoted with double quotes."
     prompt = f"Target word: {target_word}\nGenerate morphologically and etymologically related words. Provide General American IPA and Vietnamese meaning. Format strictly as a JSON array of arrays: [['word', 'ipa', 'meaning'], ...]"
     
     headers = {
@@ -126,23 +154,33 @@ def generate_flashcard_data(target_word):
             {"role": "system", "content": system_instruction},
             {"role": "user", "content": prompt}
         ],
-        "temperature": 0.0
+        "temperature": 0.0,
+        "max_tokens": 2000
     }
     
     try:
         response = session.post(CKEY_API_URL, headers=headers, json=payload)
         response.raise_for_status()
         
-        content = response.json()['choices'][0]['message']['content'].strip()
+        raw_content = response.json()['choices'][0]['message']['content'].strip()
         
-        if content.startswith("```json"):
-            content = content[7:]
-        elif content.startswith("```"):
-            content = content[3:]
-        if content.endswith("```"):
-            content = content[:-3]
-            
-        data = json.loads(content.strip())
+        # Robust JSON extraction: Find the first '[' and last ']'
+        start_index = raw_content.find('[')
+        end_index = raw_content.rfind(']')
+        
+        if start_index != -1 and end_index != -1 and end_index > start_index:
+            content = raw_content[start_index:end_index+1]
+        else:
+            content = raw_content
+
+        try:
+            data = json.loads(content.strip())
+        except json.JSONDecodeError as e:
+            data = try_repair_json(content.strip())
+            if data is None:
+                log_error(f"JSON Decode Error: {e}")
+                log_error(f"Raw Content: {raw_content}")
+                return []
         
         formatted_data = []
         for item in data:
@@ -155,11 +193,9 @@ def generate_flashcard_data(target_word):
             
         return formatted_data
     except Exception as e:
-        print(f"[{get_timestamp()}] LLM API Error: {e}")
+        if not isinstance(e, json.JSONDecodeError):
+            log_error(f"LLM API Error: {e}")
         return []
-
-def get_timestamp():
-    return datetime.now().strftime("%H:%M:%S")
 
 def process_target_word(target_word, ram_cache):
     print(f"\n[{get_timestamp()}] Querying LLM for: '{target_word}'...")
@@ -182,12 +218,12 @@ def background_monitor():
     processed_session_words = load_processed_words()
     
     if invoke('version') is None:
-        print(f"[{get_timestamp()}] ERROR: Cannot connect to AnkiConnect.")
+        log_error("ERROR: Cannot connect to AnkiConnect.")
         return
         
     ram_cache = build_ram_cache()
-    print(f"[{get_timestamp()}] Cached {len(ram_cache)} existing words.")
-    print(f"[{get_timestamp()}] Monitoring Anki...")
+    log_info(f"Cached {len(ram_cache)} existing words.")
+    log_info("Monitoring Anki...")
     
     try:
         while True:
