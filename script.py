@@ -23,8 +23,10 @@ FIELD_MEANING = "Reference"
 POLL_INTERVAL = 0.2  
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROCESSED_WORDS_FILE = os.path.join(SCRIPT_DIR, "processed_words.txt")
+GIBBERISH_FILE = os.path.join(SCRIPT_DIR, "gibberish.txt")
 
 session = requests.Session() 
+ram_cache_lock = threading.Lock()
 
 # --- UTILS ---
 def get_timestamp():
@@ -56,7 +58,7 @@ def invoke(action, **params):
     requestJson = {'action': action, 'version': 6, 'params': params}
     try:
         response = session.post(ANKI_CONNECT_URL, json=requestJson).json()
-        if len(response) != 2 or 'error' not in response or 'result' not in response:
+        if not isinstance(response, dict) or 'error' not in response or 'result' not in response:
             raise Exception('Invalid response from AnkiConnect.')
         if response['error'] is not None:
             raise Exception(response['error'])
@@ -66,19 +68,26 @@ def invoke(action, **params):
 
 def build_ram_cache():
     ram_cache = set()
-    query = f'"note:{DEFAULT_NOTE_TYPE}"'
+    # Query all notes that have the FIELD_WORD field to build a comprehensive cache
+    query = f'"{FIELD_WORD}:*"'
     note_ids = invoke('findNotes', query=query)
-    
+
     if note_ids:
-        notes_info = invoke('notesInfo', notes=note_ids)
-        for note in notes_info:
-            fields = note.get('fields', {})
-            if FIELD_WORD in fields:
-                raw_word = fields[FIELD_WORD]['value']
-                decoded_word = html.unescape(raw_word)
-                clean_word = re.sub(r'<[^>]+>', '', decoded_word).strip().lower()
-                if clean_word:
-                    ram_cache.add(clean_word)
+        # Process in batches to avoid huge requests
+        batch_size = 500
+        for i in range(0, len(note_ids), batch_size):
+            batch_ids = note_ids[i:i+batch_size]
+            notes_info = invoke('notesInfo', notes=batch_ids)
+            if not notes_info:
+                continue
+            for note in notes_info:
+                fields = note.get('fields', {})
+                if FIELD_WORD in fields:
+                    raw_word = fields[FIELD_WORD]['value']
+                    decoded_word = html.unescape(raw_word)
+                    clean_word = re.sub(r'<[^>]+>', '', decoded_word).strip().lower()
+                    if clean_word:
+                        ram_cache.add(clean_word)
     return ram_cache
 
 def load_processed_words():
@@ -96,7 +105,7 @@ def save_processed_word(word):
 def add_notes_to_anki(flashcard_data_list, ram_cache):
     notes = []
     imported_words = []
-    
+
     for item in flashcard_data_list:
         note = {
             "deckName": TARGET_DECK,
@@ -108,37 +117,60 @@ def add_notes_to_anki(flashcard_data_list, ram_cache):
             },
             "options": {
                 "allowDuplicate": False,
-                "duplicateScope": "collection" 
+                "duplicateScope": "collection"
             },
             "tags": ["auto_generated"]
         }
         notes.append(note)
         imported_words.append(item['word'].lower())
-    
+
     if notes:
         try:
-            result = invoke('addNotes', notes=notes)
-            
+            # Double check with Anki before adding to be absolutely sure
+            can_add_results = invoke('canAddNotes', notes=notes)
+
+            filtered_notes = []
+            filtered_words = []
+
+            if can_add_results:
+                for i, can_add in enumerate(can_add_results):
+                    if can_add:
+                        filtered_notes.append(notes[i])
+                        filtered_words.append(imported_words[i])
+                    else:
+                        # Already in Anki (across collection), update ram_cache
+                        with ram_cache_lock:
+                            ram_cache.add(imported_words[i])
+            else:
+                filtered_notes = notes
+                filtered_words = imported_words
+
+            if not filtered_notes:
+                log_info("No new words to add (all were duplicates).")
+                return
+
+            result = invoke('addNotes', notes=filtered_notes)
+
             success_count = 0
-            successful_words = []
-            
+            successful_words_list = []
+
             if result:
                 for i, r in enumerate(result):
                     if r is not None:
                         success_count += 1
-                        word = imported_words[i]
-                        successful_words.append(word)
-                        ram_cache.add(word)
-                        
+                        word = filtered_words[i]
+                        successful_words_list.append(word)
+                        with ram_cache_lock:
+                            ram_cache.add(word)
+
             if success_count > 0:
                 log_info(f"Imported {success_count} words successfully:")
-                print(f"    ↳ {successful_words}")
+                print(f"    ↳ {successful_words_list}")
             else:
                 log_info("No new words imported. (Notes rejected as duplicates)")
-                
+
         except Exception as e:
             log_error(f"Anki Import Error: {e}")
-
 def generate_flashcard_data(target_word):
     system_instruction = "You are a speed-optimized vocabulary extractor. Output raw JSON only. Do not wrap in markdown blocks. Ensure all strings are properly quoted with double quotes."
     prompt = f"Target word: {target_word}\nGenerate morphologically and etymologically related words. Provide General American IPA and Vietnamese meaning. Format strictly as a JSON array of arrays: [['word', 'ipa', 'meaning'], ...]"
@@ -198,18 +230,25 @@ def generate_flashcard_data(target_word):
         return []
 
 def process_target_word(target_word, ram_cache):
+    with ram_cache_lock:
+        if target_word.lower() in ram_cache:
+            return
+        ram_cache.add(target_word.lower())
+
     print(f"\n[{get_timestamp()}] Querying LLM for: '{target_word}'...")
     generated_data = generate_flashcard_data(target_word)
     
     if not generated_data:
         return
 
-    ram_cache.add(target_word.lower())
-    
-    new_flashcards = [
-        item for item in generated_data 
-        if item['word'] not in ram_cache
-    ]
+    with ram_cache_lock:
+        new_flashcards = [
+            item for item in generated_data 
+            if item['word'] not in ram_cache
+        ]
+        # Pre-add to ram_cache to "reserve" them across threads
+        for item in new_flashcards:
+            ram_cache.add(item['word'])
     
     if new_flashcards:
         add_notes_to_anki(new_flashcards, ram_cache)
