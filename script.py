@@ -10,9 +10,7 @@ from dotenv import load_dotenv
 
 # --- CONFIGURATION ---
 load_dotenv()
-CKEY_API_KEY = os.getenv("CKEY_API_KEY")
-CKEY_API_URL = "https://ckey.vn/v1/chat/completions"
-CKEY_MODEL = "minimax-m2.5"
+GEMINI_MODEL = "gemini-3-flash"
 ANKI_CONNECT_URL = "http://127.0.0.1:8765"
 SEARCH_DECK = "English"              
 TARGET_DECK = "English::00_Learning" 
@@ -24,6 +22,7 @@ POLL_INTERVAL = 0.2
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROCESSED_WORDS_FILE = os.path.join(SCRIPT_DIR, "processed_words.txt")
 GIBBERISH_FILE = os.path.join(SCRIPT_DIR, "gibberish.txt")
+LOCAL_API_URL = "http://127.0.0.1:8000/api/generate"
 
 session = requests.Session() 
 ram_cache_lock = threading.Lock()
@@ -173,28 +172,20 @@ def add_notes_to_anki(flashcard_data_list, ram_cache):
             log_error(f"Anki Import Error: {e}")
 def generate_flashcard_data(target_word):
     system_instruction = "You are a speed-optimized vocabulary extractor. Output raw JSON only. Do not wrap in markdown blocks. Ensure all strings are properly quoted with double quotes."
-    prompt = f"Target word: {target_word}\nGenerate morphologically and etymologically related words. Provide General American IPA and Vietnamese meaning. Format strictly as a JSON array of arrays: [['word', 'ipa', 'meaning'], ...]"
-    
-    headers = {
-        "Authorization": f"Bearer {CKEY_API_KEY}",
-        "Content-Type": "application/json"
-    }
-    
-    payload = {
-        "model": CKEY_MODEL,
-        "messages": [
-            {"role": "system", "content": system_instruction},
-            {"role": "user", "content": prompt}
-        ],
-        "temperature": 0.0,
-        "max_tokens": 2000
-    }
+    prompt = f"{system_instruction}\n\nTarget word: {target_word}\nGenerate morphologically and etymologically related words. Provide General American IPA and Vietnamese meaning. Format strictly as a JSON array of arrays: [['word', 'ipa', 'meaning'], ...]"
     
     try:
-        response = session.post(CKEY_API_URL, headers=headers, json=payload)
+        response = session.post(
+            LOCAL_API_URL,
+            data={
+                "prompt": prompt,
+                "model": GEMINI_MODEL,
+                "temporary": True
+            }
+        )
         response.raise_for_status()
         
-        raw_content = response.json()['choices'][0]['message']['content'].strip()
+        raw_content = response.json()["text"].strip()
         
         # Robust JSON extraction: Find the first '[' and last ']'
         start_index = raw_content.find('[')
