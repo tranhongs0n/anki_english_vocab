@@ -806,6 +806,7 @@ animportant
 aninferior
 aninformation
 aninternational
+anir
 anist
 anities
 ankey
@@ -1329,6 +1330,7 @@ autoritratto
 autosufficiente
 autosystems
 autrice
+auttenberg
 autum
 autumnus
 autunno
@@ -1579,6 +1581,7 @@ beouty
 ber
 ber's
 bereplaced
+bergleute
 bering
 berlinerisch
 bernanos
@@ -2585,6 +2588,7 @@ co
 coachbreaks
 coatt
 coblentz
+cocain
 coccolarlo
 coerente
 coeur
@@ -4472,6 +4476,7 @@ esque
 essa
 essary
 essed
+essen
 essencia
 essendo
 essentitas
@@ -4808,6 +4813,7 @@ feninapr
 fenys
 feorful
 feotures
+ferdinand
 ference
 ferent
 fering
@@ -5308,8 +5314,10 @@ gara
 garbate
 gardener's
 gardner's
+garten
 gary's
 gaspipe
+gastarbeiter
 gastil
 gastils
 gateless
@@ -5894,6 +5902,7 @@ heolthy
 heot
 heovy
 her's
+herberg
 here's
 here'syourchange
 herefrom
@@ -8108,6 +8117,7 @@ lasciata
 lasciato
 lasciava
 lascio
+lassen
 lasses
 lassus
 lastlyhouseholds
@@ -8742,6 +8752,7 @@ marciapiede
 marcie
 mardi
 marea
+margarethe
 margine
 margini
 maria's
@@ -10883,6 +10894,7 @@ phibians
 phile
 philo
 philoso
+philosophie
 phim
 phiu
 phnom
@@ -11455,6 +11467,7 @@ psyche's
 psyched
 psychol
 psycholo
+psychologie
 psychologique
 psychologistscall
 psychologyb
@@ -11868,6 +11881,7 @@ reiches
 reichsgewalt
 reimmersion
 reintro
+reiter
 rejecied
 rel
 rela
@@ -12549,7 +12563,10 @@ schietta
 schiettezza
 schivo
 schizzinoso
+schmalt
+schmier
 schnittwaren
+schnorr
 schocken
 scholors
 schonend
@@ -14047,6 +14064,7 @@ taillez
 tain
 taining
 tais
+taisho emperor
 taizan
 takearightatthefirstcorner
 takeashortwalkeverydaythroughthepark
@@ -14075,6 +14093,7 @@ tanh
 tanha
 tankdeckel
 tanked
+tannenbaum
 tant
 tante
 tanti
@@ -15965,6 +15984,7 @@ voluer
 volum
 voluta
 voluto
+von
 vor
 voracekaug
 voragine
@@ -16121,7 +16141,10 @@ weener
 wegener's
 wegotopartiesallthetime
 weight's
+weil
 weirdd
+weise
+weiss
 wel
 welco
 welf
@@ -16316,6 +16339,7 @@ whyyoudidn't
 wi
 wib
 wickedly
+widdrig
 wideleatherbeltandawhitetshirt
 widespreod
 widger
@@ -16703,6 +16727,7 @@ yy
 yyy
 zackledackle
 zadeh
+zahn
 zaike
 zajonc
 zation
@@ -16742,10 +16767,19 @@ zsd
 zst
 zuag
 zuboff
+zucker
 zuj
+zukunft
 zwei
+zzarella
+zzz
 zzzz
 zzzzz
+état
+été
+être
+刻
+规
 🗣️speakairtrnn	"🗣️speakairtrnnˈɛrtreɪn		tàuhỏasânbay(lỗi)"
 🗣️speakasprn	"🗣️speakasprnˈæsprɪn		thuốcaspirin(lỗi)"
 🗣️speakaved	"🗣️speakavedeɪvd		đãcứu(lỗi)"

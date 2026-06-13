@@ -5,8 +5,10 @@ import json
 import os
 import html
 import threading
+import random
 from datetime import datetime
 from dotenv import load_dotenv
+from concurrent.futures import ThreadPoolExecutor
 
 # --- CONFIGURATION ---
 load_dotenv()
@@ -18,14 +20,26 @@ DEFAULT_NOTE_TYPE = "Concrete Words"
 FIELD_WORD = "Word" 
 FIELD_IPA = "IPA"   
 FIELD_MEANING = "Reference" 
-POLL_INTERVAL = 0.2  
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROCESSED_WORDS_FILE = os.path.join(SCRIPT_DIR, "processed_words.txt")
 GIBBERISH_FILE = os.path.join(SCRIPT_DIR, "gibberish.txt")
 LOCAL_API_URL = "http://127.0.0.1:8000/api/generate"
 
-session = requests.Session() 
+thread_local = threading.local()
+
+def get_session():
+    if not hasattr(thread_local, "session"):
+        thread_local.session = requests.Session()
+    return thread_local.session
+
 ram_cache_lock = threading.Lock()
+processed_lock = threading.Lock()
+
+def save_processed_word_threadsafe(word, processed_words):
+    with processed_lock:
+        if word not in processed_words:
+            processed_words.add(word)
+            save_processed_word(word)
 
 # --- UTILS ---
 def get_timestamp():
@@ -56,7 +70,7 @@ def try_repair_json(content, depth=0):
 def invoke(action, **params):
     requestJson = {'action': action, 'version': 6, 'params': params}
     try:
-        response = session.post(ANKI_CONNECT_URL, json=requestJson).json()
+        response = get_session().post(ANKI_CONNECT_URL, json=requestJson).json()
         if not isinstance(response, dict) or 'error' not in response or 'result' not in response:
             raise Exception('Invalid response from AnkiConnect.')
         if response['error'] is not None:
@@ -67,12 +81,10 @@ def invoke(action, **params):
 
 def build_ram_cache():
     ram_cache = set()
-    # Query all notes that have the FIELD_WORD field to build a comprehensive cache
     query = f'"{FIELD_WORD}:*"'
     note_ids = invoke('findNotes', query=query)
 
     if note_ids:
-        # Process in batches to avoid huge requests
         batch_size = 500
         for i in range(0, len(note_ids), batch_size):
             batch_ids = note_ids[i:i+batch_size]
@@ -125,7 +137,6 @@ def add_notes_to_anki(flashcard_data_list, ram_cache):
 
     if notes:
         try:
-            # Double check with Anki before adding to be absolutely sure
             can_add_results = invoke('canAddNotes', notes=notes)
 
             filtered_notes = []
@@ -137,7 +148,6 @@ def add_notes_to_anki(flashcard_data_list, ram_cache):
                         filtered_notes.append(notes[i])
                         filtered_words.append(imported_words[i])
                     else:
-                        # Already in Anki (across collection), update ram_cache
                         with ram_cache_lock:
                             ram_cache.add(imported_words[i])
             else:
@@ -170,12 +180,13 @@ def add_notes_to_anki(flashcard_data_list, ram_cache):
 
         except Exception as e:
             log_error(f"Anki Import Error: {e}")
+
 def generate_flashcard_data(target_word):
     system_instruction = "You are a speed-optimized vocabulary extractor. Output raw JSON only. Do not wrap in markdown blocks. Ensure all strings are properly quoted with double quotes."
     prompt = f"{system_instruction}\n\nTarget word: {target_word}\nGenerate morphologically and etymologically related words. Provide General American IPA and Vietnamese meaning. Format strictly as a JSON array of arrays: [['word', 'ipa', 'meaning'], ...]"
     
     try:
-        response = session.post(
+        response = get_session().post(
             LOCAL_API_URL,
             data={
                 "prompt": prompt,
@@ -184,10 +195,8 @@ def generate_flashcard_data(target_word):
             }
         )
         response.raise_for_status()
-        
         raw_content = response.json()["text"].strip()
         
-        # Robust JSON extraction: Find the first '[' and last ']'
         start_index = raw_content.find('[')
         end_index = raw_content.rfind(']')
         
@@ -235,49 +244,89 @@ def process_target_word(target_word, ram_cache):
             item for item in generated_data 
             if item['word'] not in ram_cache
         ]
-        # Pre-add to ram_cache to "reserve" them across threads
         for item in new_flashcards:
             ram_cache.add(item['word'])
     
     if new_flashcards:
         add_notes_to_anki(new_flashcards, ram_cache)
 
-def background_monitor():
-    processed_session_words = load_processed_words()
-    
+def get_all_words_to_process():
+    query = f'deck:"{SEARCH_DECK}"'
+    note_ids = invoke('findNotes', query=query)
+    words = []
+    if note_ids:
+        batch_size = 500
+        for i in range(0, len(note_ids), batch_size):
+            batch_ids = note_ids[i:i+batch_size]
+            notes_info = invoke('notesInfo', notes=batch_ids)
+            if not notes_info:
+                continue
+            for note in notes_info:
+                fields = note.get('fields', {})
+                if FIELD_WORD in fields:
+                    raw_word = fields[FIELD_WORD]['value']
+                    decoded_word = html.unescape(raw_word)
+                    clean_word = re.sub(r'<[^>]+>', '', decoded_word).strip().lower()
+                    if clean_word and clean_word not in words:
+                        words.append(clean_word)
+    return words
+
+def worker(word, ram_cache, processed_words, counter, total_count):
+    try:
+        # Slight jitter to stagger thread requests
+        time.sleep(random.uniform(0.1, 1.5))
+        
+        # Increment counter thread-safely
+        with processed_lock:
+            counter[0] += 1
+            current_num = counter[0]
+            
+        log_info(f"[{current_num}/{total_count}] Processing target word: '{word}'...")
+        process_target_word(word, ram_cache)
+        save_processed_word_threadsafe(word, processed_words)
+    except Exception as e:
+        log_error(f"Error processing '{word}': {e}")
+
+def batch_process():
     if invoke('version') is None:
-        log_error("ERROR: Cannot connect to AnkiConnect.")
+        log_error("ERROR: Cannot connect to AnkiConnect. Is Anki running?")
         return
         
     ram_cache = build_ram_cache()
-    log_info(f"Cached {len(ram_cache)} existing words.")
-    log_info("Monitoring Anki...")
+    log_info(f"Cached {len(ram_cache)} existing words in Anki.")
     
-    try:
-        while True:
+    processed_words = load_processed_words()
+    log_info(f"Loaded {len(processed_words)} already processed words from files.")
+    
+    words_to_process = get_all_words_to_process()
+    log_info(f"Found {len(words_to_process)} target words in deck '{SEARCH_DECK}'.")
+    
+    # Filter to process list
+    to_do = [w for w in words_to_process if w not in processed_words]
+    total_to_do = len(to_do)
+    log_info(f"Need to process {total_to_do} new words.")
+    
+    if total_to_do == 0:
+        log_info("All words already processed. Exiting.")
+        return
+        
+    counter = [0]
+    
+    log_info("Starting multi-threaded execution (3 threads concurrently)...")
+    with ThreadPoolExecutor(max_workers=3) as executor:
+        futures = [
+            executor.submit(worker, word, ram_cache, processed_words, counter, total_to_do)
+            for word in to_do
+        ]
+        
+        # Wait for all threads to complete
+        for future in futures:
             try:
-                current_card = invoke('guiCurrentCard')
-                
-                if current_card and 'fields' in current_card:
-                    fields = current_card['fields']
-                    if FIELD_WORD in fields:
-                        raw_word = fields[FIELD_WORD]['value']
-                        decoded_word = html.unescape(raw_word)
-                        clean_word = re.sub(r'<[^>]+>', '', decoded_word).strip().lower()
-                        
-                        if clean_word and clean_word not in processed_session_words:
-                            processed_session_words.add(clean_word)
-                            save_processed_word(clean_word)
-                            threading.Thread(target=process_target_word, args=(clean_word, ram_cache)).start()
-                            
+                future.result()
             except Exception as e:
-                if "Gui review is not currently active" not in str(e):
-                    pass
-            
-            time.sleep(POLL_INTERVAL)
-            
-    except KeyboardInterrupt:
-        print(f"\n[{get_timestamp()}] Stopped.")
+                log_error(f"Thread execution failed: {e}")
+                
+    log_info(f"Batch processing completed. Processed {total_to_do} new words.")
 
 if __name__ == "__main__":
-    background_monitor()
+    batch_process()
