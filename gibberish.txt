@@ -522,6 +522,7 @@ amicizia
 amicizie
 amickproduction
 amico
+amicus
 amigo
 amily
 amita
@@ -533,6 +534,8 @@ ammirare
 ammirarlo
 amni
 amo
+amoenitas
+amoenus
 amonth
 amore
 amorem
@@ -974,6 +977,7 @@ arb
 arcaico
 archae-
 architectswho
+architectus
 architettura
 archivist's
 ard
@@ -1287,6 +1291,7 @@ atvx
 atwork
 auf
 aug
+auga
 aught
 augurano
 auguro
@@ -1557,6 +1562,7 @@ bellezza
 bellissima
 bellissimo
 bello
+bellum
 belo
 beloiv
 belooked
@@ -1656,6 +1662,7 @@ blackmai
 blackstone's
 blamingor
 blanc
+blanchisseuse
 blanco
 ble
 blid
@@ -1789,6 +1796,7 @@ browl
 brownthere
 brrrrrrr
 bruco
+brun
 bruscamente
 brutta
 brutte
@@ -2054,10 +2062,13 @@ caed
 caedbudris
 caesar's
 caeteris
+cafetería
+caffè
 caitya
 cakkhupala
 caldo
 calif
+calle
 calledstock
 callin
 calljoe
@@ -2266,6 +2277,7 @@ celeb
 celebra
 celebre
 celebs
+celer
 celere
 celestis
 celia
@@ -2322,6 +2334,7 @@ cessive
 cesso
 cestino
 cette
+cf.
 cfftliaucjh
 cfj
 cflnitak
@@ -2350,6 +2363,7 @@ charney's
 chaseallover
 chasions
 chastons
+chau
 checker's
 cheekon
 chek
@@ -2428,6 +2442,7 @@ chodzin
 choge
 chogyam
 choirmon
+choix
 chokyi
 chole-
 chonge
@@ -2445,6 +2460,9 @@ choste
 chotherapists
 chou
 chow
+chowed
+chowing
+chowk
 chr
 chris's
 chrisguillebeau
@@ -2754,6 +2772,7 @@ conclusione
 concreta
 concreteexploration
 concreto
+condamnent
 condi
 conditionsimproved
 condivide
@@ -3156,6 +3175,8 @@ ctoy
 ctually
 ctw
 cuaj
+cuberite
+cubería
 cubetti
 cubicos
 cucina
@@ -3323,6 +3344,7 @@ deepak
 deez
 defendnot
 defi
+defiador
 defiantnounstr
 definingcharacteristics
 definire
@@ -3739,6 +3761,7 @@ doesshehavelonghair
 doesthekitchen
 dog's
 dogen
+doggo
 dogz
 doinganything
 doingnow
@@ -3799,6 +3822,7 @@ dothesemagazines
 dottorato
 doub
 doubl
+double-dutch
 doubledock
 doublejacedb
 dous
@@ -3980,6 +4004,7 @@ dys
 dyssemia
 dywh
 dzogchen
+dæg
 ea
 eachanswer
 ead
@@ -4043,6 +4068,7 @@ eck
 ecl
 eco
 ecognized
+ecole
 ecommended
 economicol
 economicrecovery
@@ -4300,6 +4326,7 @@ entre
 entreprenant
 entreprendre
 entreprends
+entreprennent
 entreprenons
 entrepris
 entro
@@ -4706,6 +4733,8 @@ fain
 faire
 fait
 fal
+falcone
+falcão
 fale
 fallere
 fallimenti
@@ -4736,6 +4765,7 @@ fantasma
 fantastica
 fantasticare
 fantasticks
+fanum
 faraglioni
 farfalla
 farin
@@ -4770,6 +4800,7 @@ fatti
 fatto
 fattore
 fattura
+faucon
 faustus
 faute
 fautive
@@ -5577,6 +5608,7 @@ grad
 gradisce
 gradu
 graeco-
+grafica
 graini
 grainnothing
 grammatica
@@ -5622,6 +5654,7 @@ grogger
 grosset
 grosso
 grossolani
+grotte
 group's
 groupoffriendsfromworkeverytuesday
 groupwork
@@ -5641,6 +5674,7 @@ guadagnato
 guage
 guages
 guanda
+guante
 guanyin
 guar
 guardando
@@ -5707,6 +5741,7 @@ hadsomelovelyearrings
 haies
 hairdresser's
 hairiest
+halcon
 halfanimaland
 hallo
 hallway's
@@ -5902,6 +5937,7 @@ heolthy
 heot
 heovy
 her's
+heracles
 herberg
 here's
 here'syourchange
@@ -6053,6 +6089,7 @@ horsh
 horsin
 hosn't
 hosp
+hospitium
 hospitol
 hossleexefcise
 host's
@@ -6164,6 +6201,7 @@ http
 hua
 huab
 huan
+huang
 huarango
 huarangos
 huayan
@@ -6669,6 +6707,7 @@ ilovetraveling
 ilovetrying
 ilovewesterns
 iloveworking
+ils
 ily
 im
 im-
@@ -7910,6 +7949,7 @@ kagan's
 kagu
 kagyu
 kah
+kahve
 kajsa
 kakumei
 kalachakra
@@ -7954,6 +7994,7 @@ kek
 ken's
 kendy
 kensho
+kentron
 kerrigan's
 keusang
 kev
@@ -8031,6 +8072,9 @@ kshanti
 kshht
 ksm
 kua
+kuan
+kuang
+kuei
 kukai
 kuklos
 kumara
@@ -8049,6 +8093,7 @@ kushinagara
 kuss
 kutya
 kwa
+kwan
 kweekschool
 kwithout
 kxs
@@ -8286,6 +8331,7 @@ lettori
 lettrice
 lettrici
 lettura
+leur
 levelyour
 lex
 lexpect
@@ -8758,6 +8804,7 @@ margini
 maria's
 marino's
 mario's
+mariposa
 marito
 mark's
 markedwrong
@@ -9035,6 +9082,7 @@ miracolo
 miracolosamente
 miracoloso
 mirandasection
+mirchi
 misattuned
 misattunement
 misbehav
@@ -9112,6 +9160,7 @@ modo
 modom
 moduletask
 moduletest
+moe
 mogic
 mogistrote's
 moglie
@@ -9158,6 +9207,7 @@ monorch
 monosillabi
 monostery
 monqge
+monsieur
 montagna
 montagnard
 month's
@@ -9324,6 +9374,7 @@ mybirthday
 mybrotherandispendall'ourfreetimein
 mybrotherisn'tinterested
 myco
+mycologia
 mydadandioften
 mydadlikesoutdoor
 myextraapartment
@@ -9370,6 +9421,7 @@ nacque
 nadella
 naee
 nafez
+nagar
 nah
 nake
 nakulapita
@@ -9385,6 +9437,8 @@ nancial
 nang
 nani
 nant
+nappe
+naranja
 nari
 naropa
 narrativa
@@ -9458,6 +9512,7 @@ necessari
 necessariamente
 necessario
 necessory
+nederlandse
 neeb
 needanyhelpthismorning
 needmuch
@@ -9764,6 +9819,7 @@ notverytall
 notyet
 noune
 nountr
+nouveau
 nov
 nove
 novelidea
@@ -10486,6 +10542,7 @@ overtheflu
 overthere
 overtoyou
 overviewing
+overweightness
 ovidio
 ovoid
 ovoided
@@ -10635,7 +10692,9 @@ partyparty
 parzialmente
 pasanno
 pascere
+pascual
 pasolini
+pasqua
 passa
 passaee
 passaggi
@@ -10713,6 +10772,7 @@ paura
 pav
 pavimenti
 pavimento
+pax
 payalottodothat
 payaveryhightaxoncars
 paym
@@ -10820,6 +10880,7 @@ performancesince
 perhap
 pericolo
 pericoloso
+periculo
 periferia
 periferica
 periodbuilding
@@ -10882,6 +10943,7 @@ pff
 pft
 pg
 pgwers
+phagein
 phagia
 phai
 phantomlike
@@ -10952,6 +11014,7 @@ piis
 pij
 pil
 pilot's
+pimienta
 pineandsecond
 piness
 ping
@@ -11069,6 +11132,7 @@ pointment
 pointments
 poire
 poires
+poisson
 poivre
 poj
 polacco
@@ -11518,6 +11582,7 @@ punti
 puntigliosi
 punto
 punya
+pupper
 pur
 pura
 purificato
@@ -11538,6 +11603,7 @@ pwslpws
 pyq
 pyrotechnical
 qa
+qahwah
 qant
 qaug
 qbo
@@ -11729,6 +11795,7 @@ ranklin
 ranomafana
 ranquility
 ransit
+rao
 raphe
 rapimento
 rapporti
@@ -11745,10 +11812,12 @@ rashlv
 rassicurarmi
 rat's
 ratchathani
+ratching
 ratesfor
 ratna
 ravikant
 ravindanath
+ravissant
 rc
 rccp
 rch
@@ -12357,6 +12426,7 @@ rto
 rts
 rttleton
 rty
+rua
 ruben
 rudimentale
 ruill
@@ -12415,6 +12485,8 @@ sakya
 sakyadhita
 sal
 sala
+salade
+salarium
 salata
 salesnextweek
 saleswith
@@ -12454,6 +12526,7 @@ sandowndinosaur
 saneadjectives
 sanghamitta
 sangue
+sanitaire
 sanno
 sans
 sanzen
@@ -12527,6 +12600,7 @@ scambiamo
 scambiare
 scambiava
 scambio
+scammings
 scampo
 scann
 scappano
@@ -12954,6 +13028,7 @@ sheis
 shelikestowearitreallyshort
 shemeets
 shemeetsthispatientshe's
+shen
 sheng
 shenggen
 shepherd's
@@ -13050,6 +13125,7 @@ sicuramente
 sicurezza
 siddhatta
 siddhattha
+sideburned
 sider
 siderable
 sidered
@@ -13111,6 +13187,7 @@ sinuosa
 sion
 sions
 siort
+sipads
 sirocco
 sise
 sisea
@@ -13227,6 +13304,8 @@ socialpractice
 society's
 socio
 socioemotional
+sociologie
+socltill
 socrates's
 socs
 soddisfa
@@ -13345,6 +13424,7 @@ sonuttara
 soonfound
 sooo
 soooo
+sopa
 sophical
 sopper
 soppiness
@@ -13575,6 +13655,7 @@ sprigiona
 springwatch
 sprofondare
 sprovveduto
+spruiking
 spsiified
 spud
 spunti
@@ -14059,6 +14140,7 @@ taglio
 tah
 tai
 taiko
+tailieuduhoc
 tailieutienganh
 taillez
 tain
@@ -14082,6 +14164,7 @@ talmente
 talvolta
 tamalpais
 tamangs
+tambien
 taminants
 tanahashi
 tance
@@ -14091,6 +14174,7 @@ taneously
 tangibile
 tanh
 tanha
+tanjung
 tankdeckel
 tanked
 tannenbaum
@@ -14828,6 +14912,7 @@ tices
 ticing
 ticipants
 ticke
+tictac
 ticular
 ticularly
 tiddely
@@ -15089,6 +15174,7 @@ touristpractices
 touristrelationships
 touristsites
 tournament's
+toussaint
 towardcairo
 towardstheriverandyou'llseeanintersection
 towatch
@@ -15117,6 +15203,7 @@ tradi
 tradisce
 tradiscono
 traditioinal
+traditionnelle
 tradito
 tradizionale
 tradotta
@@ -15500,6 +15587,7 @@ unction
 uncutthe
 und
 unde
+undecisive
 undeni
 undenstand
 underacknowledged
@@ -15932,6 +16020,7 @@ vitraditional
 vittorini
 viva
 vivace
+vivants
 vive
 vivere
 vivido
@@ -15941,6 +16030,7 @@ vivo
 vivono
 viz
 vl
+vlaams
 vlp
 vmethods
 vn
@@ -16001,6 +16091,7 @@ voulez
 voung
 vour
 vous
+voyelles
 vp
 vrce
 vre
@@ -16124,6 +16215,8 @@ webinarscustom
 webmd
 wecan'tplay
 wecouldn't
+wedenesdæg
+weder
 wedid
 wednes
 wednesda
@@ -16577,6 +16670,7 @@ xxxxxxxx
 xy
 xyz
 y'
+yaj
 yana
 yangoon
 yankin
@@ -16742,6 +16836,8 @@ zenhabits
 zenship
 zeppe
 zhiyi
+zhoushu
+zhǔ
 ziag
 zij
 zillion
@@ -16768,9 +16864,11 @@ zst
 zuag
 zuboff
 zucker
+zuiver
 zuj
 zukunft
 zwei
+zygare
 zzarella
 zzz
 zzzz

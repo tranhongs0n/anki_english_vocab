@@ -12,7 +12,6 @@ from concurrent.futures import ThreadPoolExecutor
 
 # --- CONFIGURATION ---
 load_dotenv()
-GEMINI_MODEL = "8c46e95b1a07cecc"
 ANKI_CONNECT_URL = "http://127.0.0.1:8765"
 SEARCH_DECK = "English"              
 TARGET_DECK = "English::00_Learning" 
@@ -23,7 +22,11 @@ FIELD_MEANING = "Reference"
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROCESSED_WORDS_FILE = os.path.join(SCRIPT_DIR, "processed_words.txt")
 GIBBERISH_FILE = os.path.join(SCRIPT_DIR, "gibberish.txt")
-LOCAL_API_URL = "http://127.0.0.1:8000/api/generate"
+
+# LLM Provider Configuration
+LLM_API_URL = "https://api.xah.io/v1/chat/completions"
+LLM_API_KEY = os.getenv("LLM_API_KEY") or os.getenv("CKEY_API_KEY")
+LLM_MODEL = "gpt-5.4-mini"
 
 thread_local = threading.local()
 
@@ -182,20 +185,30 @@ def add_notes_to_anki(flashcard_data_list, ram_cache):
             log_error(f"Anki Import Error: {e}")
 
 def generate_flashcard_data(target_word):
-    system_instruction = "You are a speed-optimized vocabulary extractor. Output raw JSON only. Do not wrap in markdown blocks. Ensure all strings are properly quoted with double quotes."
-    prompt = f"{system_instruction}\n\nTarget word: {target_word}\nGenerate morphologically and etymologically related words. Provide General American IPA and Vietnamese meaning. Format strictly as a JSON array of arrays: [['word', 'ipa', 'meaning'], ...]"
+    prompt = f'Related words for "{target_word}": US IPA, Vietnamese meaning. Format: [["word", "ipa", "meaning"], ...]. Raw JSON only, no markdown.'
+    
+    headers = {
+        "Authorization": f"Bearer {LLM_API_KEY}",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "model": LLM_MODEL,
+        "messages": [
+            {"role": "user", "content": prompt}
+        ]
+    }
     
     try:
         response = get_session().post(
-            LOCAL_API_URL,
-            data={
-                "prompt": prompt,
-                "model": GEMINI_MODEL,
-                "temporary": True
-            }
+            LLM_API_URL,
+            headers=headers,
+            json=payload
         )
         response.raise_for_status()
-        raw_content = response.json()["text"].strip()
+        raw_content = response.json()["choices"][0]["message"]["content"].strip()
+        
+        # Strip any reasoning block if returned anyway
+        raw_content = re.sub(r'<think>.*?</think>', '', raw_content, flags=re.DOTALL).strip()
         
         start_index = raw_content.find('[')
         end_index = raw_content.rfind(']')
@@ -273,8 +286,8 @@ def get_all_words_to_process():
 
 def worker(word, ram_cache, processed_words, counter, total_count):
     try:
-        # Slight jitter to stagger thread requests
-        time.sleep(random.uniform(0.1, 1.5))
+        # Short sleep to stagger thread start slightly
+        time.sleep(random.uniform(0.05, 0.2))
         
         # Increment counter thread-safely
         with processed_lock:
@@ -312,8 +325,8 @@ def batch_process():
         
     counter = [0]
     
-    log_info("Starting multi-threaded execution (3 threads concurrently)...")
-    with ThreadPoolExecutor(max_workers=3) as executor:
+    log_info("Starting multi-threaded execution (10 threads concurrently)...")
+    with ThreadPoolExecutor(max_workers=10) as executor:
         futures = [
             executor.submit(worker, word, ram_cache, processed_words, counter, total_to_do)
             for word in to_do

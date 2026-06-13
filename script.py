@@ -10,7 +10,6 @@ from dotenv import load_dotenv
 
 # --- CONFIGURATION ---
 load_dotenv()
-GEMINI_MODEL = "8c46e95b1a07cecc"
 ANKI_CONNECT_URL = "http://127.0.0.1:8765"
 SEARCH_DECK = "English"              
 TARGET_DECK = "English::00_Learning" 
@@ -22,9 +21,19 @@ POLL_INTERVAL = 0.2
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROCESSED_WORDS_FILE = os.path.join(SCRIPT_DIR, "processed_words.txt")
 GIBBERISH_FILE = os.path.join(SCRIPT_DIR, "gibberish.txt")
-LOCAL_API_URL = "http://127.0.0.1:8000/api/generate"
 
-session = requests.Session() 
+# LLM Provider Configuration
+LLM_API_URL = "https://api.xah.io/v1/chat/completions"
+LLM_API_KEY = os.getenv("LLM_API_KEY") or os.getenv("CKEY_API_KEY")
+LLM_MODEL = "gpt-5.4-mini"
+
+thread_local = threading.local()
+
+def get_session():
+    if not hasattr(thread_local, "session"):
+        thread_local.session = requests.Session()
+    return thread_local.session
+
 ram_cache_lock = threading.Lock()
 
 # --- UTILS ---
@@ -56,7 +65,7 @@ def try_repair_json(content, depth=0):
 def invoke(action, **params):
     requestJson = {'action': action, 'version': 6, 'params': params}
     try:
-        response = session.post(ANKI_CONNECT_URL, json=requestJson).json()
+        response = get_session().post(ANKI_CONNECT_URL, json=requestJson).json()
         if not isinstance(response, dict) or 'error' not in response or 'result' not in response:
             raise Exception('Invalid response from AnkiConnect.')
         if response['error'] is not None:
@@ -171,21 +180,30 @@ def add_notes_to_anki(flashcard_data_list, ram_cache):
         except Exception as e:
             log_error(f"Anki Import Error: {e}")
 def generate_flashcard_data(target_word):
-    system_instruction = "You are a speed-optimized vocabulary extractor. Output raw JSON only. Do not wrap in markdown blocks. Ensure all strings are properly quoted with double quotes."
-    prompt = f"{system_instruction}\n\nTarget word: {target_word}\nGenerate morphologically and etymologically related words. Provide General American IPA and Vietnamese meaning. Format strictly as a JSON array of arrays: [['word', 'ipa', 'meaning'], ...]"
+    prompt = f'Related words for "{target_word}": US IPA, Vietnamese meaning. Format: [["word", "ipa", "meaning"], ...]. Raw JSON only, no markdown.'
+    
+    headers = {
+        "Authorization": f"Bearer {LLM_API_KEY}",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "model": LLM_MODEL,
+        "messages": [
+            {"role": "user", "content": prompt}
+        ]
+    }
     
     try:
-        response = session.post(
-            LOCAL_API_URL,
-            data={
-                "prompt": prompt,
-                "model": GEMINI_MODEL,
-                "temporary": True
-            }
+        response = get_session().post(
+            LLM_API_URL,
+            headers=headers,
+            json=payload
         )
         response.raise_for_status()
+        raw_content = response.json()["choices"][0]["message"]["content"].strip()
         
-        raw_content = response.json()["text"].strip()
+        # Strip any reasoning block if returned anyway
+        raw_content = re.sub(r'<think>.*?</think>', '', raw_content, flags=re.DOTALL).strip()
         
         # Robust JSON extraction: Find the first '[' and last ']'
         start_index = raw_content.find('[')
