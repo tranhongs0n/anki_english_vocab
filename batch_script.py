@@ -24,9 +24,9 @@ PROCESSED_WORDS_FILE = os.path.join(SCRIPT_DIR, "processed_words.txt")
 GIBBERISH_FILE = os.path.join(SCRIPT_DIR, "gibberish.txt")
 
 # LLM Provider Configuration
-LLM_API_URL = "https://api.xah.io/v1/chat/completions"
+LLM_API_URL = os.getenv("LLM_API_URL") or "https://api.xah.io/v1/chat/completions"
 LLM_API_KEY = os.getenv("LLM_API_KEY") or os.getenv("CKEY_API_KEY")
-LLM_MODEL = "gpt-5.4-mini"
+LLM_MODEL = os.getenv("LLM_MODEL") or "gpt-5.4-mini"
 
 thread_local = threading.local()
 
@@ -177,7 +177,7 @@ def add_notes_to_anki(flashcard_data_list, ram_cache):
 
             if success_count > 0:
                 log_info(f"Imported {success_count} words successfully:")
-                print(f"    ↳ {successful_words_list}")
+                print(f"    -> {successful_words_list}")
             else:
                 log_info("No new words imported. (Notes rejected as duplicates)")
 
@@ -187,29 +187,52 @@ def add_notes_to_anki(flashcard_data_list, ram_cache):
 def generate_flashcard_data(target_word):
     prompt = f'Related words for "{target_word}": US IPA, Vietnamese meaning. Format: [["word", "ipa", "meaning"], ...]. Raw JSON only, no markdown.'
     
-    headers = {
-        "Authorization": f"Bearer {LLM_API_KEY}",
-        "Content-Type": "application/json"
-    }
-    payload = {
-        "model": LLM_MODEL,
-        "messages": [
-            {"role": "user", "content": prompt}
-        ]
-    }
-    
-    try:
-        response = get_session().post(
-            LLM_API_URL,
-            headers=headers,
-            json=payload
-        )
-        response.raise_for_status()
-        raw_content = response.json()["choices"][0]["message"]["content"].strip()
+    if "api/generate" in LLM_API_URL:
+        # Local API format
+        try:
+            response = get_session().post(
+                LLM_API_URL,
+                data={
+                    "prompt": prompt,
+                    "model": LLM_MODEL if LLM_MODEL != "gpt-5.4-mini" else "fbb127bbb056c959",
+                    "temporary": True
+                }
+            )
+            response.raise_for_status()
+            raw_content = response.json()["text"].strip()
+        except Exception as e:
+            log_error(f"Local LLM API Error: {e}")
+            return []
+    else:
+        # OpenAI compatibility format
+        headers = {
+            "Authorization": f"Bearer {LLM_API_KEY}",
+            "Content-Type": "application/json"
+        }
+        payload = {
+            "model": LLM_MODEL,
+            "messages": [
+                {"role": "user", "content": prompt}
+            ]
+        }
         
+        try:
+            response = get_session().post(
+                LLM_API_URL,
+                headers=headers,
+                json=payload
+            )
+            response.raise_for_status()
+            raw_content = response.json()["choices"][0]["message"]["content"].strip()
+        except Exception as e:
+            log_error(f"LLM API Error: {e}")
+            return []
+
+    try:
         # Strip any reasoning block if returned anyway
         raw_content = re.sub(r'<think>.*?</think>', '', raw_content, flags=re.DOTALL).strip()
         
+        # Robust JSON extraction: Find the first '[' and last ']'
         start_index = raw_content.find('[')
         end_index = raw_content.rfind(']')
         
@@ -238,8 +261,7 @@ def generate_flashcard_data(target_word):
             
         return formatted_data
     except Exception as e:
-        if not isinstance(e, json.JSONDecodeError):
-            log_error(f"LLM API Error: {e}")
+        log_error(f"Response processing error: {e}")
         return []
 
 def process_target_word(target_word, ram_cache):
