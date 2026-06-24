@@ -144,7 +144,7 @@ async function init() {
   document.getElementById('grade-good').addEventListener('click', () => gradeCard(3));
   document.getElementById('grade-easy').addEventListener('click', () => gradeCard(4));
   
-  quickSearchBtn.addEventListener('click', openImageCrawler);
+  if (quickSearchBtn) quickSearchBtn.addEventListener('click', openImageCrawler);
   closeCrawlerBtn.addEventListener('click', () => crawlerModal.classList.add('hidden'));
   crawlerSearchBtn.addEventListener('click', performCrawlerSearch);
   crawlerSearchInput.addEventListener('keydown', (e) => {
@@ -395,7 +395,7 @@ function renderActiveCard() {
   gradingActions.classList.add('hidden');
   
   const word = getVocabWord();
-  vocabWordDisplay.textContent = word || 'No word found';
+  if (vocabWordDisplay) vocabWordDisplay.textContent = word || 'No word found';
   
   if (!crawlerModal.classList.contains('hidden') && word) {
     crawlerSearchInput.value = word;
