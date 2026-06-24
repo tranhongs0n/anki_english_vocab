@@ -594,3 +594,21 @@ kbd {
 .setting-group input[type="password"]:focus {
   border-color: var(--accent);
 }
+
+.nav-link {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  transition: all 0.2s ease;
+  margin-left: 10px;
+}
+
+.nav-link:hover {
+  color: var(--text-main);
+  border-color: var(--accent);
+  background: rgba(94, 114, 228, 0.1);
+}

@@ -183,6 +183,40 @@ app.get('/api/proxy', async (req, res) => {
   }
 });
 
+// Endpoint to serve media files directly from Anki via retrieveMediaFile
+app.get('/media/:filename', async (req, res) => {
+  const filename = req.params.filename;
+  try {
+    const response = await axios.post('http://127.0.0.1:8765', {
+      action: 'retrieveMediaFile',
+      version: 6,
+      params: { filename }
+    }, { timeout: 15000 });
+
+    const base64Data = response.data.result;
+    if (!base64Data) {
+      return res.status(404).send('File not found');
+    }
+
+    const buffer = Buffer.from(base64Data, 'base64');
+    const ext = path.extname(filename).toLowerCase();
+    let contentType = 'application/octet-stream';
+    if (ext === '.jpg' || ext === '.jpeg') contentType = 'image/jpeg';
+    else if (ext === '.png') contentType = 'image/png';
+    else if (ext === '.gif') contentType = 'image/gif';
+    else if (ext === '.svg') contentType = 'image/svg+xml';
+    else if (ext === '.mp3') contentType = 'audio/mpeg';
+    else if (ext === '.wav') contentType = 'audio/wav';
+    else if (ext === '.ogg') contentType = 'audio/ogg';
+
+    res.setHeader('Content-Type', contentType);
+    res.send(buffer);
+  } catch (err) {
+    console.error('Error serving media file:', filename, err.message);
+    res.status(500).send('Error retrieving media file');
+  }
+});
+
 // Proxy endpoint to AnkiConnect to bypass CORS issues
 app.post('/api/ankiconnect', express.json({ limit: '50mb' }), async (req, res) => {
   try {

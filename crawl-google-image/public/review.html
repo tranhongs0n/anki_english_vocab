@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anki Web Review & Image Finder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="index.css">
+  <link rel="stylesheet" href="review.css">
+</head>
+<body>
+  <div class="app-container review-layout">
+    <header class="app-header">
+      <div class="logo-area">
+        <h1>Anki Reviewer</h1>
+        <span id="anki-status" class="badge badge-offline">Anki Offline</span>
+        <a href="index.html" class="nav-link">🔍 Image Finder</a>
+      </div>
+      <div class="stats-area">
+        <span class="stat-badge stat-new">New: <span id="count-new">0</span></span>
+        <span class="stat-badge stat-due">Due: <span id="count-due">0</span></span>
+      </div>
+      <button id="settings-toggle" class="settings-btn">⚙️ Settings</button>
+    </header>
+
+    <main class="review-main">
+      <!-- Card Panel -->
+      <section class="card-pane">
+        <div id="no-cards-msg" class="no-cards-message">
+          <p>No cards due today! Select another deck or enjoy your day. 🎉</p>
+        </div>
+
+        <div id="card-display" class="card-display-box hidden">
+          <div class="card-header-info">
+            <span id="vocab-word-display" class="vocab-word-badge">vocab</span>
+            <button id="quick-search-btn" class="quick-search-btn" title="Search images for this word">🔍 Find Image</button>
+          </div>
+          
+          <div class="card-content">
+            <div id="card-question" class="card-side question-side"></div>
+            <hr id="card-divider" class="card-divider hidden">
+            <div id="card-answer" class="card-side answer-side hidden"></div>
+          </div>
+
+          <div class="card-actions">
+            <!-- Show Answer Button -->
+            <button id="show-answer-btn" class="btn btn-primary show-answer-btn">Show Answer</button>
+
+            <!-- Grading Buttons -->
+            <div id="grading-actions" class="grading-actions hidden">
+              <button id="grade-again" class="btn btn-grade btn-again">Again <kbd>1</kbd></button>
+              <button id="grade-hard" class="btn btn-grade btn-hard">Hard <kbd>2</kbd></button>
+              <button id="grade-good" class="btn btn-grade btn-good">Good <kbd>3</kbd></button>
+              <button id="grade-easy" class="btn btn-grade btn-easy">Easy <kbd>4</kbd></button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Crawler Sidebar Panel -->
+      <aside class="crawler-pane">
+        <div class="crawler-header">
+          <h3>Quick Image Finder</h3>
+          <button id="close-crawler-btn" class="close-crawler-btn">&times;</button>
+        </div>
+        <div class="crawler-search">
+          <input type="text" id="crawler-search-input" placeholder="Search images..." autocomplete="off">
+          <button id="crawler-search-btn" class="btn btn-primary">Search</button>
+        </div>
+        
+        <div id="crawler-loading" class="loading-spinner hidden">
+          <div class="spinner"></div>
+          <p>Fetching images...</p>
+        </div>
+        
+        <div id="crawler-status" class="crawler-status-info">Search images for current word or type above.</div>
+        <div id="crawler-grid" class="image-grid crawler-grid"></div>
+      </aside>
+    </main>
+
+    <div class="shortcut-help">
+      <div class="shortcut-item"><kbd>Space</kbd> <span>Show Answer</span></div>
+      <div class="shortcut-item"><kbd>1</kbd>-<kbd>4</kbd> <span>Grade Card</span></div>
+      <div class="shortcut-item"><kbd>F</kbd> or <kbd>S</kbd> <span>Find Image</span></div>
+      <div class="shortcut-item"><kbd>,</kbd> <span>Settings</span></div>
+    </div>
+  </div>
+
+  <!-- Settings Drawer -->
+  <div id="settings-drawer" class="settings-drawer hidden">
+    <div class="drawer-header">
+      <h2>Anki Review Settings</h2>
+      <button id="settings-close" class="close-btn">&times;</button>
+    </div>
+    <div class="drawer-body">
+      <div class="setting-group">
+        <label for="anki-deck">Target Deck</label>
+        <select id="anki-deck">
+          <option value="">-- Select Deck --</option>
+        </select>
+      </div>
+      <div class="setting-group">
+        <label for="anki-model">Note Type</label>
+        <select id="anki-model">
+          <option value="">-- Select Note Type --</option>
+        </select>
+      </div>
+      <div class="setting-group">
+        <label for="anki-vocab-field">Word Field (Search Term)</label>
+        <select id="anki-vocab-field">
+          <option value="">-- Select Field --</option>
+        </select>
+      </div>
+      <div class="setting-group">
+        <label for="anki-image-field">Image Field (Target)</label>
+        <select id="anki-image-field">
+          <option value="">-- Select Field --</option>
+        </select>
+      </div>
+
+      <div class="setting-group-separator"></div>
+      <div class="setting-section-title">Google Search (Optional)</div>
+
+      <div class="setting-group">
+        <label for="google-key">API Key</label>
+        <input type="password" id="google-key" placeholder="Paste Google API Key..." autocomplete="off">
+      </div>
+      <div class="setting-group">
+        <label for="google-cx">Search Engine ID (CX)</label>
+        <input type="text" id="google-cx" placeholder="Paste Search Engine ID..." autocomplete="off">
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden">Image synced!</div>
+  
+  <script src="review.js"></script>
+</body>
+</html>

@@ -1,0 +1,374 @@
+/* review.css - Styling for the integrated Anki Reviewer */
+
+.review-layout {
+  max-width: 1400px !important; /* Larger container for split pane */
+}
+
+.nav-link {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  transition: all 0.2s ease;
+  margin-left: 10px;
+}
+
+.nav-link:hover {
+  color: var(--text-main);
+  border-color: var(--accent);
+  background: rgba(94, 114, 228, 0.1);
+}
+
+.stats-area {
+  display: flex;
+  gap: 12px;
+}
+
+.stat-badge {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+.stat-badge.stat-new {
+  background: rgba(94, 114, 228, 0.15);
+  color: #7c90ff;
+  border-color: rgba(94, 114, 228, 0.3);
+}
+
+.stat-badge.stat-due {
+  background: rgba(45, 206, 137, 0.15);
+  color: var(--success);
+  border-color: rgba(45, 206, 137, 0.3);
+}
+
+/* Main Review Grid Split View */
+.review-main {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  flex-grow: 1;
+  min-height: 550px;
+  position: relative;
+}
+
+@media (min-width: 900px) {
+  .review-main {
+    grid-template-columns: 1.4fr 1fr; /* Split screen */
+  }
+  
+  .crawler-pane {
+    display: flex !important; /* Always visible on large screens */
+  }
+}
+
+/* Card Pane styling */
+.card-pane {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.no-cards-message {
+  text-align: center;
+  padding: 40px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  font-size: 18px;
+  width: 100%;
+  max-width: 600px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.card-display-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  width: 100%;
+  max-width: 700px;
+  min-height: 420px;
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.card-header-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 12px;
+  margin-bottom: 20px;
+}
+
+.vocab-word-badge {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.quick-search-btn {
+  background: rgba(94, 114, 228, 0.1);
+  color: var(--accent);
+  border: 1px solid rgba(94, 114, 228, 0.3);
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.quick-search-btn:hover {
+  background: var(--accent);
+  color: white;
+  box-shadow: 0 0 10px var(--accent-glow);
+}
+
+/* Card Question and Answer Display */
+.card-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 20px;
+  font-size: 20px;
+  line-height: 1.6;
+}
+
+.card-side {
+  width: 100%;
+  word-wrap: break-word;
+}
+
+/* Override styling inside Anki's raw card HTML to look good in dark mode */
+.card-side img {
+  max-width: 100%;
+  max-height: 250px;
+  border-radius: 6px;
+  margin: 12px auto;
+  display: block;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  object-fit: contain;
+}
+
+.card-divider {
+  width: 80%;
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: 20px 0;
+}
+
+/* Card review action buttons */
+.card-actions {
+  margin-top: 20px;
+  border-top: 1px solid var(--border);
+  padding-top: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.show-answer-btn {
+  width: 100%;
+  max-width: 300px;
+  padding: 14px;
+  font-size: 16px;
+}
+
+.grading-actions {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  width: 100%;
+}
+
+.btn-grade {
+  padding: 12px 6px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transition: transform 0.1s ease, filter 0.2s ease;
+}
+
+.btn-grade kbd {
+  font-size: 10px;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 1px 4px;
+  border-radius: 3px;
+  opacity: 0.8;
+}
+
+.btn-grade:hover {
+  filter: brightness(1.15);
+  transform: translateY(-1px);
+}
+
+.btn-grade:active {
+  transform: translateY(0);
+}
+
+.btn-again {
+  background: #f5365c; /* Red */
+  box-shadow: 0 4px 12px rgba(245, 54, 92, 0.2);
+}
+
+.btn-hard {
+  background: #fb6340; /* Orange */
+  box-shadow: 0 4px 12px rgba(251, 99, 64, 0.2);
+}
+
+.btn-good {
+  background: #2dce89; /* Green */
+  box-shadow: 0 4px 12px rgba(45, 206, 137, 0.2);
+}
+
+.btn-easy {
+  background: #11cdef; /* Blue */
+  box-shadow: 0 4px 12px rgba(17, 205, 239, 0.2);
+}
+
+/* Crawler Panel Sidebar styling */
+.crawler-pane {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  max-height: 80vh;
+  overflow: hidden;
+}
+
+/* Handle mobile screen drawer behavior */
+@media (max-width: 899px) {
+  .crawler-pane {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 70vh;
+    max-height: 500px;
+    z-index: 100;
+    border-radius: var(--radius) var(--radius) 0 0;
+    border-bottom: 0;
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .crawler-pane.open {
+    transform: translateY(0);
+  }
+}
+
+.crawler-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 12px;
+  margin-bottom: 14px;
+}
+
+.crawler-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.close-crawler-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 24px;
+  cursor: pointer;
+  display: none; /* Only for mobile */
+}
+
+@media (max-width: 899px) {
+  .close-crawler-btn {
+    display: block;
+  }
+}
+
+.crawler-search {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.crawler-search input {
+  flex-grow: 1;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: var(--text-main);
+  font-size: 14px;
+}
+
+.crawler-search input:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.crawler-status-info {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 10px;
+}
+
+/* Image result grid inside crawler sidebar */
+.crawler-grid {
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)) !important;
+  gap: 8px !important;
+  overflow-y: auto;
+  flex-grow: 1;
+  padding-right: 4px;
+}
+
+.crawler-grid .image-card {
+  border-radius: 6px !important;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: border-color 0.2s ease;
+}
+
+.crawler-grid .image-card img {
+  height: 90px !important;
+}
+
+.crawler-grid .image-card:hover {
+  border-color: var(--accent);
+  transform: none !important;
+}
+
+.crawler-grid .image-card.syncing {
+  opacity: 0.5;
+  border-color: var(--success);
+}
