@@ -32,6 +32,8 @@ const crawlerIframe = document.getElementById('crawler-iframe');
 const closeCrawlerBtn = document.getElementById('close-crawler-btn');
 
 const toast = document.getElementById('toast');
+const moveLaterBtn = document.getElementById('move-later-btn');
+const moveOtherBtn = document.getElementById('move-other-btn');
 
 // Global review state
 let dueQueue = []; // array of { cardId, type: 'due' }
@@ -146,6 +148,8 @@ async function init() {
   
   if (quickSearchBtn) quickSearchBtn.addEventListener('click', openImageCrawler);
   closeCrawlerBtn.addEventListener('click', closeImageCrawler);
+  if (moveLaterBtn) moveLaterBtn.addEventListener('click', () => moveCurrentCard('English::98_Later'));
+  if (moveOtherBtn) moveOtherBtn.addEventListener('click', () => moveCurrentCard('English::99_Other'));
 }
 
 // Drawer Open/Close
@@ -479,6 +483,49 @@ async function gradeCard(ease) {
   }
 }
 
+async function moveCurrentCard(targetDeck) {
+  if (!currentCardInfo) {
+    showToast("No active card to move!");
+    return;
+  }
+
+  const cardId = currentCardInfo.cardId;
+  const word = getVocabWord();
+
+  const confirmMove = confirm(`Are you sure you want to move "${word}" to deck "${targetDeck}"?`);
+  if (!confirmMove) return;
+
+  try {
+    // Ensure the target deck exists first
+    await invokeAnkiConnect('createDeck', { deck: targetDeck });
+
+    // Change deck for the card
+    await invokeAnkiConnect('changeDeck', {
+      cards: [cardId],
+      deck: targetDeck
+    });
+
+    showToast(`Moved "${word}" to "${targetDeck}"! 🎉`);
+
+    // Remove from active review queue
+    activeQueue.splice(currentCardIndex, 1);
+    updateStatsDisplay();
+
+    // Load next card
+    if (activeQueue.length > 0) {
+      if (currentCardIndex >= activeQueue.length) {
+        currentCardIndex = 0;
+      }
+      loadActiveCard();
+    } else {
+      currentCardIndex = -1;
+      loadActiveCard();
+    }
+  } catch (err) {
+    showToast(`Error moving card: ${err.message || err}`);
+  }
+}
+
 function openImageCrawler() {
   const word = getVocabWord();
   if (!word) {
@@ -674,6 +721,18 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'f' || e.key === 'F' || e.key === 's' || e.key === 'S') {
     e.preventDefault();
     openImageCrawler();
+    return;
+  }
+
+  // Move card shortcuts (L or O keys)
+  if (e.key === 'l' || e.key === 'L') {
+    e.preventDefault();
+    moveCurrentCard('English::98_Later');
+    return;
+  }
+  if (e.key === 'o' || e.key === 'O') {
+    e.preventDefault();
+    moveCurrentCard('English::99_Other');
     return;
   }
 });
