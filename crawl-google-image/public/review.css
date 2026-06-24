@@ -174,11 +174,7 @@
 
 /* Card review action buttons */
 .card-actions {
-  margin-top: 12px;
-  border-top: 1px solid var(--border);
-  padding-top: 12px;
-  display: flex;
-  justify-content: center;
+  display: none !important;
 }
 
 .show-answer-btn {
