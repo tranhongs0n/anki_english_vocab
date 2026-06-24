@@ -36,9 +36,7 @@ const moveLaterBtn = document.getElementById('move-later-btn');
 const moveOtherBtn = document.getElementById('move-other-btn');
 
 // Global review state
-let dueQueue = []; // array of { cardId, type: 'due' }
-let newQueue = []; // array of { cardId, type: 'new' }
-let activeQueue = []; // merged queue of current session
+let activeQueue = [];      // [{ cardId, type }] sorted by Anki due order
 let currentCardIndex = -1;
 let currentCardInfo = null;
 let typeAnswerField = null;
@@ -150,6 +148,14 @@ async function init() {
   closeCrawlerBtn.addEventListener('click', closeImageCrawler);
   if (moveLaterBtn) moveLaterBtn.addEventListener('click', () => moveCurrentCard('English::98_Later'));
   if (moveOtherBtn) moveOtherBtn.addEventListener('click', () => moveCurrentCard('English::99_Other'));
+
+  // Browser modal
+  document.getElementById('close-browser-btn').addEventListener('click', closeCardBrowser);
+  document.getElementById('browser-search-btn').addEventListener('click', runBrowserSearch);
+  document.getElementById('browser-search-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); runBrowserSearch(); }
+    if (e.key === 'Escape') { e.preventDefault(); closeCardBrowser(); }
+  });
 }
 
 // Drawer Open/Close
@@ -222,7 +228,7 @@ async function loadFieldsForModel(modelName) {
   }
 }
 
-// Load current review cards list
+// Load only NEW cards, shuffled randomly
 async function loadReviewQueue() {
   if (!isAnkiConnected) return;
   const deck = deckSelect.value;
@@ -233,28 +239,24 @@ async function loadReviewQueue() {
     return;
   }
 
-  showToast("Loading cards...");
+  showToast('Loading new cards...');
 
   try {
-    // Fetch due and new card IDs
-    const dueIds = await invokeAnkiConnect('findCards', { query: `deck:"${deck}" is:due -is:suspended` });
     const newIds = await invokeAnkiConnect('findCards', { query: `deck:"${deck}" is:new -is:suspended` });
 
-    // Filter dueIds to only include cards that are currently due using areDue
-    let filteredDueIds = dueIds;
-    if (dueIds.length > 0) {
-      const areDueResults = await invokeAnkiConnect('areDue', { cards: dueIds });
-      filteredDueIds = dueIds.filter((id, idx) => areDueResults[idx]);
+    if (!newIds || newIds.length === 0) {
+      activeQueue = [];
+      currentCardIndex = -1;
+      updateStatsDisplay();
+      loadActiveCard();
+      return;
     }
 
-    dueQueue = filteredDueIds.map(id => ({ cardId: id, type: 'due' }));
-    newQueue = newIds.map(id => ({ cardId: id, type: 'new' }));
-    
-    // Sort and interleave: show all dues first, then news.
-    // In Anki, cards are usually served in order.
-    activeQueue = [...dueQueue, ...newQueue];
-    currentCardIndex = activeQueue.length > 0 ? 0 : -1;
-    
+    // Shuffle for random order
+    const shuffled = [...newIds].sort(() => Math.random() - 0.5);
+    activeQueue = shuffled.map(id => ({ cardId: id, type: 'new' }));
+    currentCardIndex = 0;
+
     updateStatsDisplay();
     loadActiveCard();
   } catch (err) {
@@ -263,18 +265,16 @@ async function loadReviewQueue() {
 }
 
 function updateStatsDisplay() {
-  const dues = activeQueue.filter(c => c.type === 'due').length;
-  const news = activeQueue.filter(c => c.type === 'new').length;
-  if (countDue) countDue.textContent = dues;
-  if (countNew) countNew.textContent = news;
+  if (countDue) countDue.textContent = 0;
+  if (countNew) countNew.textContent = activeQueue.length;
 }
 
-// Load details of current active card
+// Load details of the current card from our local queue
 async function loadActiveCard() {
   if (currentCardIndex === -1 || activeQueue.length === 0) {
     cardDisplay.classList.add('hidden');
     noCardsMsg.classList.remove('hidden');
-    noCardsMsg.innerHTML = '<p>No cards due today! Select another deck or enjoy your day. 🎉</p>';
+    noCardsMsg.innerHTML = '<p>No cards due today! 🎉</p>';
     currentCardInfo = null;
     return;
   }
@@ -283,23 +283,16 @@ async function loadActiveCard() {
   noCardsMsg.classList.add('hidden');
 
   try {
-    const cardData = activeQueue[currentCardIndex];
-    const info = await invokeAnkiConnect('cardsInfo', { cards: [cardData.cardId] });
-    
+    const { cardId } = activeQueue[currentCardIndex];
+    const info = await invokeAnkiConnect('cardsInfo', { cards: [cardId] });
     if (info && info.length > 0 && info[0].fields) {
       currentCardInfo = info[0];
       renderActiveCard();
     } else {
+      // Card vanished (deleted/suspended externally) — skip it
       activeQueue.splice(currentCardIndex, 1);
-      if (activeQueue.length > 0) {
-        if (currentCardIndex >= activeQueue.length) {
-          currentCardIndex = 0;
-        }
-        loadActiveCard();
-      } else {
-        currentCardIndex = -1;
-        loadActiveCard();
-      }
+      if (currentCardIndex >= activeQueue.length) currentCardIndex = Math.max(0, activeQueue.length - 1);
+      loadActiveCard();
     }
   } catch (err) {
     showToast(`Error loading card: ${err.message}`);
@@ -340,20 +333,20 @@ function preprocessAnkiAnswerHtml(html) {
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = correctValue;
     const cleanCorrectVal = tempDiv.textContent.trim();
-    
+
     let diffHtml;
     if (typedAnswerValue.toLowerCase() === cleanCorrectVal.toLowerCase()) {
-      diffHtml = `<div class="type-compare-box correct"><span class="type-val-correct">${typedAnswerValue}</span></div>`;
+      diffHtml = `<span style="color:#2dce89;font-weight:600">${typedAnswerValue}</span>`;
     } else {
-      diffHtml = `<div class="type-compare-box incorrect"><span class="type-val-incorrect">${typedAnswerValue || '[empty]'}</span> &rarr; <span class="type-val-correct">${cleanCorrectVal}</span></div>`;
+      diffHtml = `<span style="color:#f5365c;text-decoration:line-through;font-weight:600">${typedAnswerValue || '[empty]'}</span> → <span style="color:#2dce89;font-weight:600">${cleanCorrectVal}</span>`;
     }
-    
+
     let hasPlaceholder = false;
     processed = processed.replace(/(?:\[\[|\{\{)type:([^\]}]+)(?:\]\]|\}\})/g, () => {
       hasPlaceholder = true;
       return diffHtml;
     });
-    
+
     if (!hasPlaceholder) {
       processed = diffHtml + processed;
     }
@@ -447,52 +440,65 @@ function showAnswer() {
   gradingActions.classList.remove('hidden');
 }
 
-// Answer card grading and advance
+// Show small ✔/✖ icon at top-right after grading
+function showFeedbackFlash(ease) {
+  const icon = ease >= 3 ? '✔' : '✖';
+  const color = ease >= 3 ? '#2dce89' : '#f5365c';
+  // Remove any existing
+  const existing = document.querySelector('.feedback-flash');
+  if (existing) existing.remove();
+  const el = document.createElement('div');
+  el.className = 'feedback-flash';
+  el.textContent = icon;
+  el.style.color = color;
+  document.body.appendChild(el);
+  setTimeout(() => { el.classList.add('fade-out'); }, 800);
+  setTimeout(() => el.remove(), 1100);
+}
+
+// Grade card and advance queue
 async function gradeCard(ease) {
-  if (!currentCardInfo || currentCardIndex === -1 || !activeQueue[currentCardIndex]) return;
-  
+  if (!currentCardInfo || currentCardIndex === -1) return;
+
   const cardId = activeQueue[currentCardIndex].cardId;
-  const word = getVocabWord();
-  
+  showFeedbackFlash(ease);
+
   try {
-    // Call answerCards
-    await invokeAnkiConnect('answerCards', {
-      answers: [{ cardId, ease }]
-    });
-    
-    // Remove from active queue
+    await invokeAnkiConnect('answerCards', { answers: [{ cardId, ease }] });
+
     const cardData = activeQueue[currentCardIndex];
     activeQueue.splice(currentCardIndex, 1);
-    
-    // If user failed the card (Again), push to the end of review queue so they see it again this session
-    if (ease === 1) {
-      activeQueue.push(cardData);
-      showToast(`Review failed. Word "${word}" sent to back of queue.`);
-    } else {
-      showToast(`Card answered!`);
-    }
-    
+
+    // Ease 1 (Again) — re-queue at end so user sees it again this session
+    if (ease === 1) activeQueue.push(cardData);
+
+    if (currentCardIndex >= activeQueue.length) currentCardIndex = 0;
     updateStatsDisplay();
-    
-    // Load next card
-    if (activeQueue.length > 0) {
-      // Don't increment index, because we removed the element at current index (it shifted left)
-      if (currentCardIndex >= activeQueue.length) {
-        currentCardIndex = 0;
-      }
-      loadActiveCard();
-    } else {
-      currentCardIndex = -1;
-      loadActiveCard();
-    }
+    loadActiveCard();
   } catch (err) {
     showToast(`Error answering card: ${err.message}`);
   }
 }
 
+async function buryCurrentCard() {
+  if (!currentCardInfo) return;
+  const cardId = currentCardInfo.cardId;
+  try {
+    await invokeAnkiConnect('suspend', { cards: [cardId] });
+    showToast('Card suspended');
+    activeQueue.splice(currentCardIndex, 1);
+    if (currentCardIndex >= activeQueue.length) currentCardIndex = 0;
+    updateStatsDisplay();
+    loadActiveCard();
+  } catch (err) {
+    showToast(`Error suspending card: ${err.message}`);
+  }
+}
+
+
 async function moveCurrentCard(targetDeck) {
   if (!currentCardInfo) {
-    showToast("No active card to move!");
+    showToast('No active card to move!');
     return;
   }
 
@@ -503,31 +509,13 @@ async function moveCurrentCard(targetDeck) {
   if (!confirmMove) return;
 
   try {
-    // Ensure the target deck exists first
     await invokeAnkiConnect('createDeck', { deck: targetDeck });
-
-    // Change deck for the card
-    await invokeAnkiConnect('changeDeck', {
-      cards: [cardId],
-      deck: targetDeck
-    });
-
+    await invokeAnkiConnect('changeDeck', { cards: [cardId], deck: targetDeck });
     showToast(`Moved "${word}" to "${targetDeck}"! 🎉`);
-
-    // Remove from active review queue
     activeQueue.splice(currentCardIndex, 1);
+    if (currentCardIndex >= activeQueue.length) currentCardIndex = 0;
     updateStatsDisplay();
-
-    // Load next card
-    if (activeQueue.length > 0) {
-      if (currentCardIndex >= activeQueue.length) {
-        currentCardIndex = 0;
-      }
-      loadActiveCard();
-    } else {
-      currentCardIndex = -1;
-      loadActiveCard();
-    }
+    loadActiveCard();
   } catch (err) {
     showToast(`Error moving card: ${err.message || err}`);
   }
@@ -605,6 +593,7 @@ async function linkImageToCurrentCard(imgObj, cardElement = null) {
   }
   
   const noteId = currentCardInfo.note;
+  const cardId = currentCardInfo.cardId;
   const imageField = imageFieldSelect.value || localStorage.getItem('anki_image_field');
   const word = getVocabWord();
 
@@ -643,17 +632,15 @@ async function linkImageToCurrentCard(imgObj, cardElement = null) {
 
     if (cardElement) cardElement.classList.remove('syncing');
     showToast(`Linked image to "${word}" successfully! 🎉`);
-    
     closeImageCrawler();
 
-    // Refresh active card immediately to show the newly linked image
-    const updatedInfo = await invokeAnkiConnect('cardsInfo', { cards: [currentCardInfo.cardId] });
-    if (updatedInfo && updatedInfo.length > 0) {
-      currentCardInfo = updatedInfo[0];
+    // Refresh active card via cardsInfo (consistent with queue-based approach)
+    const refreshed = await invokeAnkiConnect('cardsInfo', { cards: [cardId] });
+    if (refreshed && refreshed.length > 0 && refreshed[0].fields) {
+      currentCardInfo = refreshed[0];
       renderActiveCard();
-      
-      // If answer was shown when we linked the image, keep answer shown
-      if (gradingActions.classList.contains('hidden') === false) {
+      // If answer was already visible, keep it shown
+      if (!gradingActions.classList.contains('hidden')) {
         showAnswer();
       }
     }
@@ -684,20 +671,18 @@ document.addEventListener('keydown', (e) => {
     return;
   }
 
-  // Escape closes drawer
+  // Escape closes drawer + modals
   if (e.key === 'Escape') {
     e.preventDefault();
     toggleSettingsDrawer(false);
     crawlerModal.classList.add('hidden');
+    closeCardBrowser();
     return;
   }
-
-  // Spacebar to show answer
+  // Space / Enter: show answer
   if (e.key === ' ' || e.key === 'Enter') {
     e.preventDefault();
-    if (showAnswerBtn.classList.contains('hidden')) {
-      // Already showing answer, do nothing (user must press 1-4)
-    } else {
+    if (!showAnswerBtn.classList.contains('hidden')) {
       showAnswer();
     }
     return;
@@ -731,7 +716,12 @@ document.addEventListener('keydown', (e) => {
     return;
   }
 
-  // Move card shortcuts (L or O keys)
+  // Move card shortcuts
+  if (e.key === 'n' || e.key === 'N') {
+    e.preventDefault();
+    moveCurrentCard('English::01_Name');
+    return;
+  }
   if (e.key === 'l' || e.key === 'L') {
     e.preventDefault();
     moveCurrentCard('English::98_Later');
@@ -742,7 +732,116 @@ document.addEventListener('keydown', (e) => {
     moveCurrentCard('English::99_Other');
     return;
   }
-});
+  // = : suspend/bury card
+  if (e.key === '=') {
+    e.preventDefault();
+    buryCurrentCard();
+    return;
+  }
+  // B : open Anki card browser with search prompt
+  if (e.key === 'b' || e.key === 'B') {
+    e.preventDefault();
+    openCardBrowser();
+    return;
+  }
+  });
+
+async function openCardBrowser() {
+  const currentWord = getVocabWord();
+  const modal = document.getElementById('browser-modal');
+  const input = document.getElementById('browser-search-input');
+  const tbody = document.getElementById('browser-tbody');
+  const empty = document.getElementById('browser-empty');
+  const status = document.getElementById('browser-status');
+
+  // Reset state
+  tbody.innerHTML = '';
+  empty.classList.add('hidden');
+  status.classList.add('hidden');
+  input.value = currentWord;
+
+  modal.classList.remove('hidden');
+  setTimeout(() => { input.focus(); input.select(); }, 80);
+
+  // Auto-search on open
+  if (currentWord) runBrowserSearch();
+}
+
+function closeCardBrowser() {
+  document.getElementById('browser-modal').classList.add('hidden');
+}
+
+async function runBrowserSearch() {
+  const input = document.getElementById('browser-search-input');
+  const tbody = document.getElementById('browser-tbody');
+  const empty = document.getElementById('browser-empty');
+  const status = document.getElementById('browser-status');
+  const query = input.value.trim();
+  if (!query) return;
+
+  tbody.innerHTML = '';
+  empty.classList.add('hidden');
+  status.textContent = 'Searching...';
+  status.classList.remove('hidden');
+
+  try {
+    const noteIds = await invokeAnkiConnect('findNotes', { query });
+
+    if (!noteIds || noteIds.length === 0) {
+      status.classList.add('hidden');
+      empty.classList.remove('hidden');
+      return;
+    }
+
+    status.textContent = `Loading ${noteIds.length} card(s)...`;
+
+    // Batch fetch note info
+    const notes = await invokeAnkiConnect('notesInfo', { notes: noteIds });
+
+    // Fetch card types for status badge
+    const allCardIds = notes.flatMap(n => n.cards || []);
+    let cardTypeMap = {};
+    if (allCardIds.length > 0) {
+      const cardsData = await invokeAnkiConnect('cardsInfo', { cards: allCardIds });
+      cardsData.forEach(c => { cardTypeMap[c.cardId] = c.type; });
+    }
+
+    const vocabField  = vocabFieldSelect.value  || localStorage.getItem('anki_vocab_field')  || 'Word';
+    const meaningField = localStorage.getItem('anki_meaning_field') || 'Reference';
+
+    notes.forEach(note => {
+      const word    = stripHtml(note.fields[vocabField]?.value   || Object.values(note.fields)[0]?.value || '');
+      const meaning = stripHtml(note.fields[meaningField]?.value || Object.values(note.fields)[1]?.value || '');
+      const deck    = note.cards?.length ? (note.deckName || '—') : '—';
+
+      // Determine card status from first card
+      const firstCardType = note.cards?.length ? cardTypeMap[note.cards[0]] : undefined;
+      let badgeClass = 'new', badgeLabel = 'New';
+      if (firstCardType === 1)      { badgeClass = 'review'; badgeLabel = 'Learn'; }
+      else if (firstCardType === 2) { badgeClass = 'due';    badgeLabel = 'Review'; }
+      else if (firstCardType === 3) { badgeClass = 'due';    badgeLabel = 'Due'; }
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td title="${word}">${word}</td>
+        <td title="${meaning}">${meaning || '<span style="opacity:0.4">—</span>'}</td>
+        <td title="${deck}" style="color:var(--text-muted);font-size:11px">${deck}</td>
+        <td><span class="browser-badge ${badgeClass}">${badgeLabel}</span></td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    status.textContent = `${notes.length} result${notes.length !== 1 ? 's' : ''} for "${query}"`;
+  } catch (err) {
+    status.textContent = `Error: ${err.message}`;
+  }
+}
+
+function stripHtml(html) {
+  const d = document.createElement('div');
+  d.innerHTML = html;
+  return d.textContent.trim();
+}
 
 // Run
 window.addEventListener('DOMContentLoaded', init);

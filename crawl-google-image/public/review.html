@@ -43,7 +43,36 @@
 
     </main>
 
-    <!-- Crawler Modal Backdrop -->
+  <!-- Card Browser Modal -->
+  <div id="browser-modal" class="modal-backdrop hidden">
+    <div class="browser-modal-content">
+      <div class="browser-header">
+        <h3>Card Browser</h3>
+        <button id="close-browser-btn" class="close-crawler-btn">&times;</button>
+      </div>
+      <div class="browser-search-bar">
+        <input type="text" id="browser-search-input" placeholder="Search cards..." autocomplete="off" spellcheck="false">
+        <button id="browser-search-btn" class="btn btn-primary" style="padding:8px 18px;font-size:13px;">Search</button>
+      </div>
+      <div id="browser-status" class="browser-status hidden"></div>
+      <div class="browser-table-wrap">
+        <table id="browser-table" class="browser-table">
+          <thead>
+            <tr>
+              <th>Word</th>
+              <th>Meaning</th>
+              <th>Deck</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="browser-tbody"></tbody>
+        </table>
+        <div id="browser-empty" class="browser-empty hidden">No cards found.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Crawler Modal Backdrop -->
     <div id="crawler-modal" class="modal-backdrop hidden">
       <div class="crawler-modal-content">
         <div class="crawler-header">
@@ -58,9 +87,11 @@
       <div class="shortcut-item"><kbd>Space</kbd> <span>Show Answer</span></div>
       <div class="shortcut-item"><kbd>1</kbd>-<kbd>4</kbd> <span>Grade Card</span></div>
       <div class="shortcut-item"><kbd>F</kbd> or <kbd>S</kbd> <span>Find Image</span></div>
-      <div class="shortcut-item"><kbd>L</kbd> <span>Move Later</span></div>
-      <div class="shortcut-item"><kbd>O</kbd> <span>Move Other</span></div>
-      <div class="shortcut-item"><kbd>,</kbd> <span>Settings</span></div>
+      <div class="shortcut-item"><kbd>B</kbd> <span>Browse</span></div>
+      <div class="shortcut-item"><kbd>N</kbd> <span>→ Name</span></div>
+      <div class="shortcut-item"><kbd>L</kbd> <span>→ Later</span></div>
+      <div class="shortcut-item"><kbd>O</kbd> <span>→ Other</span></div>
+      <div class="shortcut-item"><kbd>=</kbd> <span>Suspend</span></div>
     </div>
   </div>
 

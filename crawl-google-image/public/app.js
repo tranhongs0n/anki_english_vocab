@@ -595,6 +595,14 @@ async function linkImageToAnkiCard() {
 
     hidePromptModal();
     showToast(`Linked image to "${vocabWord}"${rescheduleMsg}! 🎉`);
+
+    // If inside reviewer iframe: close the crawler and refresh parent's card view
+    if (isReviewerIframe()) {
+      setTimeout(() => {
+        window.parent.closeImageCrawler();
+        window.parent.loadActiveCard();
+      }, 800); // short delay so toast is visible first
+    }
   } catch (err) {
     console.error(err);
     setModalStatus(`Error: ${err.message || err}`, "error");
@@ -706,23 +714,21 @@ document.addEventListener('keydown', (e) => {
       selectImage(selectedIndex + columns);
       break;
 
-    // Copy to Clipboard
+    // Enter: in iframe mode, show word prompt; standalone, copy to clipboard
     case 'Enter':
     case 'c':
     case 'C':
       e.preventDefault();
-      if (linkImageIfIframe(selectedIndex)) {
+      if (isReviewerIframe()) {
+        showPromptModal(selectedIndex);
         break;
       }
       triggerCopy(selectedIndex);
       break;
 
-    // Spacebar to link image to existing card
+    // Spacebar: show link-to-card prompt (both iframe and standalone)
     case ' ':
       e.preventDefault();
-      if (linkImageIfIframe(selectedIndex)) {
-        break;
-      }
       showPromptModal(selectedIndex);
       break;
 
