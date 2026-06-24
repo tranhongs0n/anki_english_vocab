@@ -240,7 +240,14 @@ async function loadReviewQueue() {
     const dueIds = await invokeAnkiConnect('findCards', { query: `deck:"${deck}" is:due -is:suspended` });
     const newIds = await invokeAnkiConnect('findCards', { query: `deck:"${deck}" is:new -is:suspended` });
 
-    dueQueue = dueIds.map(id => ({ cardId: id, type: 'due' }));
+    // Filter dueIds to only include cards that are currently due using areDue
+    let filteredDueIds = dueIds;
+    if (dueIds.length > 0) {
+      const areDueResults = await invokeAnkiConnect('areDue', { cards: dueIds });
+      filteredDueIds = dueIds.filter((id, idx) => areDueResults[idx]);
+    }
+
+    dueQueue = filteredDueIds.map(id => ({ cardId: id, type: 'due' }));
     newQueue = newIds.map(id => ({ cardId: id, type: 'new' }));
     
     // Sort and interleave: show all dues first, then news.
