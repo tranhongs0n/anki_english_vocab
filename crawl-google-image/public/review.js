@@ -386,6 +386,7 @@ function renderActiveCard() {
 
   const qHtml = preprocessAnkiHtml(currentCardInfo.question);
   cardQuestion.innerHTML = qHtml;
+  cardQuestion.classList.remove('hidden');
   
   cardAnswer.innerHTML = '';
   cardAnswer.classList.add('hidden');
@@ -427,8 +428,9 @@ function showAnswer() {
   const aHtml = preprocessAnkiAnswerHtml(currentCardInfo.answer);
   cardAnswer.innerHTML = aHtml;
   
+  cardQuestion.classList.add('hidden');
   cardAnswer.classList.remove('hidden');
-  cardDivider.classList.remove('hidden');
+  cardDivider.classList.add('hidden');
   
   showAnswerBtn.classList.add('hidden');
   gradingActions.classList.remove('hidden');
