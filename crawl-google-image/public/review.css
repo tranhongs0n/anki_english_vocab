@@ -76,27 +76,25 @@
 .no-cards-message {
   text-align: center;
   padding: 40px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  background: transparent;
+  border: none;
   color: var(--text-muted);
   font-size: 18px;
   width: 100%;
   max-width: 600px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  box-shadow: none;
 }
 
 .card-display-box {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  background: transparent;
+  border: none;
   width: 100%;
   max-width: 700px;
   min-height: 320px;
   display: flex;
   flex-direction: column;
   padding: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  box-shadow: none;
   transition: all 0.3s ease;
 }
 
