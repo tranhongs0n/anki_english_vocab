@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vocab Image Finder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="index.css">
+</head>
+<body>
+  <div class="app-container">
+    <header class="app-header">
+      <div class="logo-area">
+        <h1>Vocab Image Finder</h1>
+        <span class="badge">Mouse-Free</span>
+        <span id="anki-status" class="badge badge-offline">Anki Offline</span>
+      </div>
+      <div class="search-box">
+        <input type="text" id="search-input" placeholder="Type vocabulary and press Enter..." autocomplete="off" autofocus>
+        <span class="search-hint">Press <kbd>/</kbd> to focus</span>
+      </div>
+      <button id="settings-toggle" class="settings-btn" title="Press , to open settings">⚙️ Settings</button>
+    </header>
+
+    <div class="shortcut-help">
+      <div class="shortcut-item"><kbd>⇅</kbd> <kbd>⇆</kbd> or <kbd>H</kbd> <kbd>J</kbd> <kbd>K</kbd> <kbd>L</kbd> <span>Navigate</span></div>
+      <div class="shortcut-item"><kbd>Enter</kbd> or <kbd>C</kbd> <span>Copy Image</span></div>
+      <div class="shortcut-item"><kbd>Space</kbd> <span>Link to existing Card</span></div>
+      <div class="shortcut-item"><kbd>A</kbd> <span>Add to Anki</span></div>
+      <div class="shortcut-item"><kbd>/</kbd> <span>Search</span></div>
+      <div class="shortcut-item"><kbd>,</kbd> <span>Settings</span></div>
+      <div class="shortcut-item"><kbd>Esc</kbd> <span>Cancel</span></div>
+    </div>
+
+    <main class="results-container">
+      <div id="loading" class="loading-spinner hidden">
+        <div class="spinner"></div>
+        <p>Fetching images...</p>
+      </div>
+      
+      <div id="info-message" class="info-message">
+        <p>Type vocabulary above to find images for your flashcards.</p>
+      </div>
+
+      <div id="image-grid" class="image-grid"></div>
+    </main>
+  </div>
+
+  <div id="settings-drawer" class="settings-drawer hidden">
+    <div class="drawer-header">
+      <h2>Anki Settings</h2>
+      <button id="settings-close" class="close-btn" title="Press Esc to close">&times;</button>
+    </div>
+    <div class="drawer-body">
+      <div class="setting-group">
+        <label for="anki-deck">Target Deck</label>
+        <select id="anki-deck">
+          <option value="">-- Select Deck --</option>
+        </select>
+      </div>
+      <div class="setting-group">
+        <label for="anki-model">Note Type</label>
+        <select id="anki-model">
+          <option value="">-- Select Note Type --</option>
+        </select>
+      </div>
+      <div class="setting-group">
+        <label for="anki-vocab-field">Word Field</label>
+        <select id="anki-vocab-field">
+          <option value="">-- Select Field --</option>
+        </select>
+      </div>
+      <div class="setting-group">
+        <label for="anki-image-field">Image Field</label>
+        <select id="anki-image-field">
+          <option value="">-- Select Field --</option>
+        </select>
+      </div>
+
+      <div class="setting-group-separator"></div>
+      <div class="setting-section-title">Google Search (Optional)</div>
+
+      <div class="setting-group">
+        <label for="google-key">API Key</label>
+        <input type="password" id="google-key" placeholder="Paste Google API Key..." autocomplete="off">
+      </div>
+      <div class="setting-group">
+        <label for="google-cx">Search Engine ID (CX)</label>
+        <input type="text" id="google-cx" placeholder="Paste Search Engine ID..." autocomplete="off">
+      </div>
+
+      <div class="info-note">
+        <p>If Google keys are set, it queries Google Images. Otherwise, it falls back to Bing Images scraping (no key required).</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Linking Modal -->
+  <div id="prompt-modal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Link Image to Card</h3>
+        <button id="modal-close" class="close-btn" title="Press Esc to close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-preview">
+          <img id="modal-image-preview" src="" alt="Preview">
+        </div>
+        <div class="setting-group">
+          <label for="modal-vocab-input">Vocabulary Word</label>
+          <input type="text" id="modal-vocab-input" placeholder="Type vocabulary word and press Enter..." autocomplete="off">
+        </div>
+        <div id="modal-status" class="modal-status hidden"></div>
+      </div>
+      <div class="modal-actions">
+        <button id="modal-cancel-btn" class="btn btn-secondary" title="Press Esc">Cancel</button>
+        <button id="modal-confirm-btn" class="btn btn-primary" title="Press Enter">Link Card</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden">Image copied to clipboard!</div>
+  <script src="app.js"></script>
+</body>
+</html>

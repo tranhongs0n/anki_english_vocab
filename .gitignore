@@ -1,0 +1,25 @@
+# Virtual environments
+**/venv/
+**/.venv/
+venv/
+.venv/
+
+# Node dependencies
+**/node_modules/
+node_modules/
+
+# Environment files
+**/.env
+**/.env.local
+.env
+.env.local
+
+# OS/IDE files
+.DS_Store
+.vscode/
+**/.vscode/
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd

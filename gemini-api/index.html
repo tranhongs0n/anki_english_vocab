@@ -1,0 +1,1647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini WebAPI Playground</title>
+    <!-- Google Fonts: Inter & Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        /* Modern Glassmorphic UI Variables */
+        :root {
+            --bg-color: #080b11;
+            --sidebar-bg: rgba(13, 17, 28, 0.7);
+            --card-bg: rgba(20, 26, 43, 0.45);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --accent-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            --accent-glow: rgba(168, 85, 247, 0.3);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --user-bubble-bg: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            --model-bubble-bg: rgba(30, 41, 59, 0.7);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(at 10% 10%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+                radial-gradient(at 90% 90%, rgba(168, 85, 247, 0.15) 0px, transparent 50%);
+            color: var(--text-primary);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+        }
+
+        /* App Layout */
+        .app-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: 320px;
+            background: var(--sidebar-bg);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid var(--card-border);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+
+        .sidebar-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--card-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .sidebar-header h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .btn-new-chat {
+            background: var(--accent-gradient);
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px var(--accent-glow);
+        }
+
+        .btn-new-chat:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px var(--accent-glow);
+        }
+
+        .chats-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        /* Chat item styling */
+        .chat-item {
+            padding: 12px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            group: hover;
+        }
+
+        .chat-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .chat-item.active {
+            background: rgba(99, 102, 241, 0.15);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .chat-item-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            overflow: hidden;
+            width: 85%;
+        }
+
+        .chat-item-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chat-item-date {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .btn-delete-chat {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            opacity: 0;
+            transition: all 0.2s ease;
+        }
+
+        .chat-item:hover .btn-delete-chat {
+            opacity: 1;
+        }
+
+        .btn-delete-chat:hover {
+            color: var(--danger-color);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        /* Main Workspace Area */
+        .workspace {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Top Bar Styling */
+        .topbar {
+            height: 70px;
+            border-bottom: 1px solid var(--card-border);
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(8, 11, 17, 0.5);
+            backdrop-filter: blur(10px);
+            z-index: 10;
+        }
+
+        .topbar-tabs {
+            display: flex;
+            gap: 8px;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 10px 16px;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .tab-btn.active {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+        }
+
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .model-selector-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .model-select {
+            background: rgba(13, 17, 28, 0.8);
+            border: 1px solid var(--card-border);
+            color: var(--text-primary);
+            padding: 8px 12px;
+            border-radius: 8px;
+            outline: none;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .model-select:focus {
+            border-color: #6366f1;
+        }
+
+        .status-pill {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger-color);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 100px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .status-pill.authenticated {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-color);
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: currentColor;
+            display: inline-block;
+        }
+
+        /* Tab Content Panels */
+        .panel {
+            display: none;
+            flex: 1;
+            overflow: hidden;
+            flex-direction: column;
+        }
+
+        .panel.active {
+            display: flex;
+        }
+
+        /* Chat Panel Components */
+        .chat-feed {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            scroll-behavior: smooth;
+        }
+
+        .message-row {
+            display: flex;
+            flex-direction: column;
+            max-width: 80%;
+        }
+
+        .message-row.user {
+            align-self: flex-end;
+            align-items: flex-end;
+        }
+
+        .message-row.model {
+            align-self: flex-start;
+            align-items: flex-start;
+        }
+
+        .message-bubble {
+            padding: 16px 20px;
+            border-radius: 18px;
+            font-size: 15px;
+            line-height: 1.6;
+            word-break: break-word;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .message-row.user .message-bubble {
+            background: var(--user-bubble-bg);
+            border-bottom-right-radius: 4px;
+            color: white;
+        }
+
+        .message-row.model .message-bubble {
+            background: var(--model-bubble-bg);
+            border: 1px solid var(--card-border);
+            border-bottom-left-radius: 4px;
+            color: var(--text-primary);
+        }
+
+        .thinking-section {
+            background: rgba(255, 255, 255, 0.02);
+            border-left: 2px solid #a855f7;
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-style: italic;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            width: 100%;
+        }
+
+        .message-meta {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            padding: 0 4px;
+        }
+
+        /* Code Block formatting */
+        pre {
+            background: #0d1117;
+            padding: 14px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 10px 0;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        code {
+            font-family: 'Fira Code', monospace;
+            font-size: 13px;
+        }
+
+        .image-attachments-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+            width: 100%;
+        }
+
+        .attached-image-card {
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--card-border);
+            aspect-ratio: 1;
+            position: relative;
+        }
+
+        .attached-image-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .attached-image-card img:hover {
+            transform: scale(1.05);
+        }
+
+        /* Input area styling */
+        .chat-input-container {
+            padding: 24px;
+            border-top: 1px solid var(--card-border);
+            background: rgba(8, 11, 17, 0.8);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .file-previews {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+        }
+
+        .preview-thumbnail {
+            position: relative;
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--card-border);
+        }
+
+        .preview-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .preview-thumbnail .remove-btn {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: rgba(239, 68, 68, 0.8);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            cursor: pointer;
+        }
+
+        .chat-input-row {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .textarea-wrapper {
+            flex: 1;
+            background: rgba(13, 17, 28, 0.8);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 8px 12px;
+            display: flex;
+            align-items: flex-end;
+            transition: all 0.3s ease;
+        }
+
+        .textarea-wrapper:focus-within {
+            border-color: #6366f1;
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.15);
+        }
+
+        .chat-textarea {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            resize: none;
+            outline: none;
+            height: 38px;
+            max-height: 200px;
+            font-size: 14px;
+            line-height: 1.5;
+            padding: 8px 0;
+        }
+
+        .btn-attach {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-attach:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .btn-send {
+            background: var(--accent-gradient);
+            border: none;
+            color: white;
+            width: 46px;
+            height: 46px;
+            border-radius: 100px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px var(--accent-glow);
+            flex-shrink: 0;
+        }
+
+        .btn-send:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px var(--accent-glow);
+        }
+
+        .btn-send:disabled {
+            background: var(--text-muted);
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Session Config Panel Styling */
+        .config-container {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 32px;
+            border-radius: 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(20px);
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .config-container h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .form-input {
+            background: rgba(13, 17, 28, 0.8);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            padding: 12px;
+            color: var(--text-primary);
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            border-color: #6366f1;
+        }
+
+        .btn-submit {
+            background: var(--accent-gradient);
+            border: none;
+            color: white;
+            padding: 14px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px var(--accent-glow);
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px var(--accent-glow);
+        }
+
+        /* Deep Research Panel Styling */
+        .research-container {
+            max-width: 800px;
+            margin: 40px auto;
+            width: 90%;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 40px;
+        }
+
+        .research-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 24px;
+            backdrop-filter: blur(10px);
+        }
+
+        .research-plan-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .research-step {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .research-step.pending::before {
+            content: "○";
+            color: var(--text-muted);
+            font-weight: bold;
+        }
+
+        .research-step.active::before {
+            content: "●";
+            color: #a855f7;
+            animation: pulse 1.5s infinite;
+        }
+
+        .research-step.done::before {
+            content: "✓";
+            color: var(--success-color);
+            font-weight: bold;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.5; }
+        }
+
+        /* Markdown Rendering inside bubbles */
+        .markdown-content h1, .markdown-content h2, .markdown-content h3 {
+            margin: 12px 0 6px 0;
+            font-family: 'Outfit', sans-serif;
+        }
+        .markdown-content p {
+            margin-bottom: 8px;
+        }
+        .markdown-content ul, .markdown-content ol {
+            margin-left: 20px;
+            margin-bottom: 8px;
+        }
+
+        /* Scrollbar styles */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 100px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h1>Gemini WebAPI</h1>
+                <button class="btn-new-chat" id="btn-new-chat">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                    New Chat
+                </button>
+            </div>
+            <div class="chats-list" id="chats-list">
+                <!-- Chat items loaded dynamically -->
+            </div>
+        </div>
+
+        <!-- Main Workspace -->
+        <div class="workspace">
+            <!-- Top Bar -->
+            <div class="topbar">
+                <div class="topbar-tabs">
+                    <button class="tab-btn active" data-tab="chat-panel">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        Chat
+                    </button>
+                    <button class="tab-btn" data-tab="research-panel">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        Deep Research
+                    </button>
+                    <button class="tab-btn" data-tab="config-panel">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                        Session Config
+                    </button>
+                </div>
+
+                <div class="topbar-actions">
+                    <div class="model-selector-wrapper">
+                        <select class="model-select" id="model-select">
+                            <!-- Prepopulated with standard choices -->
+                            <option value="unspecified">Default Model</option>
+                            <option value="gemini-3-flash">Gemini 3 Flash</option>
+                            <option value="gemini-3-flash-thinking">Gemini 3 Flash Thinking</option>
+                            <option value="gemini-3-pro">Gemini 3 Pro</option>
+                            <option value="gemini-3-pro-advanced">Gemini 3 Pro Advanced</option>
+                        </select>
+                    </div>
+
+                    <div class="status-pill" id="status-pill">
+                        <span class="status-indicator"></span>
+                        <span id="status-text">Disconnected</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel 1: Chat Panel -->
+            <div class="panel active" id="chat-panel">
+                <div class="chat-feed" id="chat-feed">
+                    <div class="message-row model">
+                        <div class="message-bubble">
+                            Hi! I am Gemini, loaded via the reverse-engineered web API. Authenticate in the "Session Config" tab or use the environment keys to start.
+                        </div>
+                        <div class="message-meta">System</div>
+                    </div>
+                </div>
+
+                <!-- Input area -->
+                <div class="chat-input-container">
+                    <div class="file-previews" id="file-previews"></div>
+                    <div class="chat-input-row">
+                        <button class="btn-attach" id="btn-attach" title="Attach file">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                        </button>
+                        <input type="file" id="file-input" style="display: none;" multiple accept="image/*">
+                        
+                        <div class="textarea-wrapper">
+                            <textarea class="chat-textarea" id="chat-textarea" placeholder="Type a message... (Shift + Enter for new line)"></textarea>
+                        </div>
+
+                        <button class="btn-send" id="btn-send">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel 2: Deep Research Panel -->
+            <div class="panel" id="research-panel">
+                <div class="research-container">
+                    <div class="research-card">
+                        <h3 style="margin-bottom:12px;">Start Autonomous Deep Research</h3>
+                        <p style="color:var(--text-secondary); font-size:14px; margin-bottom:20px;">
+                            Input a complex research query. Gemini will generate a plan, search the web, study articles, and assemble a comprehensive report.
+                        </p>
+                        
+                        <div class="form-group" style="margin-bottom:16px;">
+                            <label>Research Topic</label>
+                            <input class="form-input" id="research-prompt" placeholder="E.g., Deep dive analysis of the battery density trends in solid state batteries 2025-2030">
+                        </div>
+
+                        <button class="btn-submit" id="btn-start-research" style="width:100%;">Create Research Plan</button>
+                    </div>
+
+                    <!-- Research plan visualizer -->
+                    <div class="research-card" id="research-plan-card" style="display: none;">
+                        <h3 id="research-plan-title">Research Plan</h3>
+                        <div style="font-size:12px; color:var(--text-muted); margin-top:4px;" id="research-plan-eta"></div>
+                        
+                        <div class="research-plan-steps" id="research-plan-steps">
+                            <!-- Steps rendered dynamically -->
+                        </div>
+
+                        <button class="btn-submit" id="btn-execute-research" style="width:100%; margin-top:20px;">Execute Research</button>
+                    </div>
+
+                    <!-- Research result view -->
+                    <div class="research-card" id="research-result-card" style="display: none;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                            <h3>Research Report</h3>
+                            <button class="btn-new-chat" id="btn-download-report" style="background:rgba(255,255,255,0.05); color:var(--text-primary); box-shadow:none;">Download Markdown</button>
+                        </div>
+                        <div class="markdown-content" id="research-report-content" style="font-size:14px; line-height:1.7; overflow-y:auto; max-height:500px; padding:12px; background:rgba(0,0,0,0.2); border-radius:8px; border:1px solid var(--card-border);">
+                            <!-- Report content -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel 3: Session Config -->
+            <div class="panel" id="config-panel">
+                <div class="config-container">
+                    <h2>Authentication Settings</h2>
+                    <p style="color: var(--text-secondary); font-size: 14px;">
+                        Provide the cookies from your logged-in session on <a href="https://gemini.google.com" target="_blank" style="color: #6366f1;">gemini.google.com</a>.
+                    </p>
+                    
+                    <div class="form-group">
+                        <label for="cookie-psid">__Secure-1PSID</label>
+                        <input type="password" class="form-input" id="cookie-psid" placeholder="Enter __Secure-1PSID cookie value">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cookie-psidts">__Secure-1PSIDTS (Optional but recommended)</label>
+                        <input type="password" class="form-input" id="cookie-psidts" placeholder="Enter __Secure-1PSIDTS cookie value">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="proxy-url">Proxy URL (Optional)</label>
+                        <input class="form-input" id="proxy-url" placeholder="e.g., http://127.0.0.1:7890">
+                    </div>
+
+                    <button class="btn-submit" id="btn-save-config">Initialize & Authenticate Session</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State variables
+        let sessionId = localStorage.getItem('gemini_session_id') || '';
+        let activeChatId = '';
+        let uploadedFiles = [];
+        let modelsList = [];
+        
+        // DOM Elements
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const panels = document.querySelectorAll('.panel');
+        const chatsList = document.getElementById('chats-list');
+        const chatFeed = document.getElementById('chat-feed');
+        const btnNewChat = document.getElementById('btn-new-chat');
+        const chatTextarea = document.getElementById('chat-textarea');
+        const btnSend = document.getElementById('btn-send');
+        const btnAttach = document.getElementById('btn-attach');
+        const fileInput = document.getElementById('file-input');
+        const filePreviews = document.getElementById('file-previews');
+        const statusPill = document.getElementById('status-pill');
+        const statusText = document.getElementById('status-text');
+        const modelSelect = document.getElementById('model-select');
+        
+        // Cookie Inputs
+        const cookiePsid = document.getElementById('cookie-psid');
+        const cookiePsidts = document.getElementById('cookie-psidts');
+        const proxyUrl = document.getElementById('proxy-url');
+        const btnSaveConfig = document.getElementById('btn-save-config');
+
+        // Deep Research Elements
+        const researchPrompt = document.getElementById('research-prompt');
+        const btnStartResearch = document.getElementById('btn-start-research');
+        const researchPlanCard = document.getElementById('research-plan-card');
+        const researchPlanTitle = document.getElementById('research-plan-title');
+        const researchPlanEta = document.getElementById('research-plan-eta');
+        const researchPlanSteps = document.getElementById('research-plan-steps');
+        const btnExecuteResearch = document.getElementById('btn-execute-research');
+        const researchResultCard = document.getElementById('research-result-card');
+        const researchReportContent = document.getElementById('research-report-content');
+        const btnDownloadReport = document.getElementById('btn-download-report');
+
+        // Init setup
+        checkSessionStatus();
+
+        // Tabs switcher
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                tabBtns.forEach(b => b.classList.remove('active'));
+                panels.forEach(p => p.classList.remove('active'));
+                
+                btn.classList.add('active');
+                const targetPanel = document.getElementById(btn.getAttribute('data-tab'));
+                targetPanel.classList.add('active');
+            });
+        });
+
+        // Resize textarea automatically
+        chatTextarea.addEventListener('input', () => {
+            chatTextarea.style.height = 'auto';
+            chatTextarea.style.height = (chatTextarea.scrollHeight) + 'px';
+        });
+
+        // ------------------ API METHODS ------------------
+
+        async function checkSessionStatus() {
+            try {
+                const headers = {};
+                if (sessionId) {
+                    headers['X-Session-ID'] = sessionId;
+                }
+                const res = await fetch('/api/session/status', { headers });
+                const data = await res.json();
+                
+                if (data.status === 'authenticated') {
+                    sessionId = data.session_id;
+                    localStorage.setItem('gemini_session_id', sessionId);
+                    updateStatus(true, data.account_status);
+                    loadChats();
+                    loadModels();
+                } else {
+                    updateStatus(false, 'Disconnected');
+                }
+            } catch (e) {
+                console.error(e);
+                updateStatus(false, 'Server Offline');
+            }
+        }
+
+        function updateStatus(authenticated, statusName) {
+            if (authenticated) {
+                statusPill.classList.add('authenticated');
+                statusText.textContent = statusName || 'Active';
+            } else {
+                statusPill.classList.remove('authenticated');
+                statusText.textContent = statusName || 'Disconnected';
+            }
+        }
+
+        async function loadModels() {
+            try {
+                const res = await fetch('/api/models', {
+                    headers: { 'X-Session-ID': sessionId }
+                });
+                const data = await res.json();
+                modelSelect.innerHTML = '<option value="unspecified">Default Model</option>';
+                
+                const addOptions = (models) => {
+                    models.forEach(m => {
+                        const opt = document.createElement('option');
+                        opt.value = m.value;
+                        opt.textContent = m.name;
+                        modelSelect.appendChild(opt);
+                    });
+                };
+                
+                if (data.registered && data.registered.length > 0) {
+                    addOptions(data.registered);
+                } else {
+                    addOptions(data.predefined);
+                }
+            } catch(e) {
+                console.error("Failed to load models", e);
+            }
+        }
+
+        async function loadChats() {
+            try {
+                const res = await fetch('/api/chats', {
+                    headers: { 'X-Session-ID': sessionId }
+                });
+                if (!res.ok) return;
+                const chats = await res.json();
+                chatsList.innerHTML = '';
+                
+                chats.forEach(chat => {
+                    const item = document.createElement('div');
+                    item.className = `chat-item ${chat.cid === activeChatId ? 'active' : ''}`;
+                    item.setAttribute('data-cid', chat.cid);
+                    
+                    const dateStr = new Date(chat.timestamp * 1000).toLocaleString();
+                    
+                    item.innerHTML = `
+                        <div class="chat-item-info">
+                            <div class="chat-item-title">${escapeHtml(chat.title || 'Untitled Chat')}</div>
+                            <div class="chat-item-date">${dateStr}</div>
+                        </div>
+                        <button class="btn-delete-chat" title="Delete chat">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                        </button>
+                    `;
+                    
+                    // Click to select
+                    item.addEventListener('click', (e) => {
+                        if (e.target.closest('.btn-delete-chat')) return;
+                        selectChat(chat.cid);
+                    });
+                    
+                    // Click to delete
+                    item.querySelector('.btn-delete-chat').addEventListener('click', async () => {
+                        if (confirm('Delete this conversation?')) {
+                            await deleteChat(chat.cid);
+                        }
+                    });
+                    
+                    chatsList.appendChild(item);
+                });
+            } catch (e) {
+                console.error("Failed to load chats list", e);
+            }
+        }
+
+        async function selectChat(cid) {
+            activeChatId = cid;
+            document.querySelectorAll('.chat-item').forEach(item => {
+                if (item.getAttribute('data-cid') === cid) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+            
+            // Fetch and render history
+            chatFeed.innerHTML = '<div style="text-align:center; padding: 20px; color: var(--text-secondary);">Loading messages...</div>';
+            try {
+                const res = await fetch(`/api/chats/${cid}`, {
+                    headers: { 'X-Session-ID': sessionId }
+                });
+                const data = await res.json();
+                chatFeed.innerHTML = '';
+                
+                if (data.turns && data.turns.length > 0) {
+                    // Reverse to show oldest first in UI
+                    data.turns.reverse().forEach(turn => {
+                        appendMessage(turn.role, turn.text, turn.model_output);
+                    });
+                } else {
+                    chatFeed.innerHTML = '<div style="text-align:center; padding: 20px; color: var(--text-secondary);">No messages yet.</div>';
+                }
+            } catch (e) {
+                chatFeed.innerHTML = `<div style="text-align:center; padding: 20px; color: var(--danger-color);">Failed to load chat history: ${e}</div>`;
+            }
+        }
+
+        async function deleteChat(cid) {
+            try {
+                const res = await fetch(`/api/chats/${cid}`, {
+                    method: 'DELETE',
+                    headers: { 'X-Session-ID': sessionId }
+                });
+                if (res.ok) {
+                    if (activeChatId === cid) {
+                        activeChatId = '';
+                        chatFeed.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-secondary);">Select a chat or start a new one.</div>';
+                    }
+                    loadChats();
+                }
+            } catch (e) {
+                alert('Failed to delete chat: ' + e);
+            }
+        }
+
+        // Save Custom Auth Session
+        btnSaveConfig.addEventListener('click', async () => {
+            const psid = cookiePsid.value.trim();
+            const psidts = cookiePsidts.value.trim();
+            const proxy = proxyUrl.value.trim();
+            
+            if (!psid) {
+                alert('__Secure-1PSID is required.');
+                return;
+            }
+            
+            btnSaveConfig.disabled = true;
+            btnSaveConfig.textContent = 'Initializing session...';
+            
+            try {
+                const res = await fetch('/api/session/init', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        secure_1psid: psid,
+                        secure_1psidts: psidts,
+                        proxy: proxy || null
+                    })
+                });
+                
+                const data = await res.json();
+                if (res.ok) {
+                    sessionId = data.session_id;
+                    localStorage.setItem('gemini_session_id', sessionId);
+                    alert('Authenticated successfully! Account status: ' + data.account_status);
+                    updateStatus(true, data.account_status);
+                    // Switch to chat panel
+                    document.querySelector('[data-tab="chat-panel"]').click();
+                    loadChats();
+                    loadModels();
+                } else {
+                    alert('Auth failed: ' + (data.detail || 'Unknown error'));
+                }
+            } catch (e) {
+                alert('Error connecting to API server: ' + e);
+            } finally {
+                btnSaveConfig.disabled = false;
+                btnSaveConfig.textContent = 'Initialize & Authenticate Session';
+            }
+        });
+
+        // New Chat initiation
+        btnNewChat.addEventListener('click', () => {
+            activeChatId = '';
+            document.querySelectorAll('.chat-item').forEach(i => i.classList.remove('active'));
+            chatFeed.innerHTML = `
+                <div class="message-row model">
+                    <div class="message-bubble">
+                        New conversation session started. Send a message to generate a Chat ID.
+                    </div>
+                    <div class="message-meta">System</div>
+                </div>
+            `;
+            chatTextarea.focus();
+        });
+
+        // Attach File support
+        btnAttach.addEventListener('click', () => fileInput.click());
+        
+        fileInput.addEventListener('change', () => {
+            const files = Array.from(fileInput.files);
+            files.forEach(file => {
+                if (uploadedFiles.length >= 5) {
+                    alert('Max 5 files attached.');
+                    return;
+                }
+                uploadedFiles.push(file);
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const thumb = document.createElement('div');
+                    thumb.className = 'preview-thumbnail';
+                    thumb.innerHTML = `
+                        <img src="${e.target.result}">
+                        <button class="remove-btn">&times;</button>
+                    `;
+                    
+                    thumb.querySelector('.remove-btn').addEventListener('click', () => {
+                        const index = uploadedFiles.indexOf(file);
+                        if (index > -1) {
+                            uploadedFiles.splice(index, 1);
+                        }
+                        thumb.remove();
+                    });
+                    
+                    filePreviews.appendChild(thumb);
+                };
+                reader.readAsDataURL(file);
+            });
+            fileInput.value = ''; // clear input
+        });
+
+        // Send Message
+        btnSend.addEventListener('click', handleSendMessage);
+        
+        chatTextarea.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSendMessage();
+            }
+        });
+
+        async function handleSendMessage() {
+            const prompt = chatTextarea.value.trim();
+            if (!prompt && uploadedFiles.length === 0) return;
+            if (!sessionId) {
+                alert('Please authenticate in Session Config tab first.');
+                return;
+            }
+            
+            // Add user message to UI
+            appendMessage('user', prompt, null, uploadedFiles);
+            chatTextarea.value = '';
+            chatTextarea.style.height = 'auto';
+            
+            const selectedModel = modelSelect.value;
+            
+            // Clear attachments preview
+            const attachmentsList = [...uploadedFiles];
+            uploadedFiles = [];
+            filePreviews.innerHTML = '';
+            
+            btnSend.disabled = true;
+            
+            // Add a temporary loading model message
+            const modelMsgRow = document.createElement('div');
+            modelMsgRow.className = 'message-row model';
+            modelMsgRow.innerHTML = `
+                <div class="message-bubble">
+                    <span class="thinking-dots">Gemini is thinking...</span>
+                </div>
+                <div class="message-meta">Model</div>
+            `;
+            chatFeed.appendChild(modelMsgRow);
+            chatFeed.scrollTop = chatFeed.scrollHeight;
+
+            try {
+                // If it is a new chat, we must use /api/generate first to get a chat ID, or let it auto-create.
+                // Wait! If there is no activeChatId, we use /api/generate (with files if present), which returns a ModelOutput.
+                // Once we get the ModelOutput, it contains the chat_id in its metadata.
+                // Then we set activeChatId = output.metadata[0], and we can subsequent messages using chat session streams!
+                if (!activeChatId) {
+                    const formData = new FormData();
+                    formData.append('prompt', prompt);
+                    formData.append('model', selectedModel);
+                    attachmentsList.forEach(file => {
+                        formData.append('files', file);
+                    });
+                    
+                    // We stream the initial generation if no files are uploaded, or do simple POST.
+                    // Wait, let's stream using /api/generate/stream!
+                    const response = await fetch('/api/generate/stream', {
+                        method: 'POST',
+                        headers: {
+                            'X-Session-ID': sessionId
+                        },
+                        body: formData
+                    });
+                    
+                    if (!response.ok) {
+                        const errText = await response.text();
+                        throw new Error(errText || 'Failed to generate content');
+                    }
+                    
+                    // Let's replace the modelMsgRow text bubble with a streaming text renderer
+                    const bubble = modelMsgRow.querySelector('.message-bubble');
+                    bubble.innerHTML = '';
+                    
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder('utf-8');
+                    let buffer = '';
+                    let fullText = '';
+                    let fullThoughts = '';
+                    let thoughtsElement = null;
+                    let textElement = null;
+                    
+                    while (true) {
+                        const { value, done } = await reader.read();
+                        if (done) break;
+                        buffer += decoder.decode(value, { stream: true });
+                        const lines = buffer.split('\n');
+                        buffer = lines.pop();
+                        
+                        for (const line of lines) {
+                            if (line.startsWith('data: ')) {
+                                const dataStr = line.slice(6).trim();
+                                if (!dataStr) continue;
+                                try {
+                                    const data = JSON.parse(dataStr);
+                                    if (data.done) {
+                                        // Done
+                                    } else if (data.error) {
+                                        throw new Error(data.error);
+                                    } else {
+                                        // Thoughts (if any)
+                                        if (data.thoughts_delta) {
+                                            if (!thoughtsElement) {
+                                                thoughtsElement = document.createElement('div');
+                                                thoughtsElement.className = 'thinking-section';
+                                                bubble.prepend(thoughtsElement);
+                                            }
+                                            fullThoughts += data.thoughts_delta;
+                                            thoughtsElement.innerHTML = `<strong>Thinking Process:</strong><br>${escapeHtml(fullThoughts)}`;
+                                        }
+                                        // Text delta
+                                        if (data.text_delta) {
+                                            if (!textElement) {
+                                                textElement = document.createElement('div');
+                                                bubble.appendChild(textElement);
+                                            }
+                                            fullText += data.text_delta;
+                                            textElement.innerHTML = formatMarkdown(fullText);
+                                        }
+                                        chatFeed.scrollTop = chatFeed.scrollHeight;
+                                    }
+                                } catch (e) {
+                                    console.error(e);
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Reload chat list and select latest chat
+                    await loadChats();
+                    // Let's fetch the latest chats list, and pick the first one's ID
+                    const listRes = await fetch('/api/chats', {
+                        headers: { 'X-Session-ID': sessionId }
+                    });
+                    const chats = await listRes.json();
+                    if (chats && chats.length > 0) {
+                        // The newly created chat will have the matching title/prompt
+                        activeChatId = chats[0].cid;
+                        selectChat(activeChatId);
+                    }
+                    
+                } else {
+                    // Send message to existing chat stream
+                    const response = await fetch(`/api/chats/${activeChatId}/send_stream`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Session-ID': sessionId
+                        },
+                        body: JSON.stringify({
+                            prompt: prompt,
+                            model: selectedModel
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        const errText = await response.text();
+                        throw new Error(errText || 'Failed to send message');
+                    }
+                    
+                    const bubble = modelMsgRow.querySelector('.message-bubble');
+                    bubble.innerHTML = '';
+                    
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder('utf-8');
+                    let buffer = '';
+                    let fullText = '';
+                    let fullThoughts = '';
+                    let thoughtsElement = null;
+                    let textElement = null;
+                    
+                    while (true) {
+                        const { value, done } = await reader.read();
+                        if (done) break;
+                        buffer += decoder.decode(value, { stream: true });
+                        const lines = buffer.split('\n');
+                        buffer = lines.pop();
+                        
+                        for (const line of lines) {
+                            if (line.startsWith('data: ')) {
+                                const dataStr = line.slice(6).trim();
+                                if (!dataStr) continue;
+                                try {
+                                    const data = JSON.parse(dataStr);
+                                    if (data.done) {
+                                        // Done
+                                    } else if (data.error) {
+                                        throw new Error(data.error);
+                                    } else {
+                                        if (data.thoughts_delta) {
+                                            if (!thoughtsElement) {
+                                                thoughtsElement = document.createElement('div');
+                                                thoughtsElement.className = 'thinking-section';
+                                                bubble.prepend(thoughtsElement);
+                                            }
+                                            fullThoughts += data.thoughts_delta;
+                                            thoughtsElement.innerHTML = `<strong>Thinking Process:</strong><br>${escapeHtml(fullThoughts)}`;
+                                        }
+                                        if (data.text_delta) {
+                                            if (!textElement) {
+                                                textElement = document.createElement('div');
+                                                bubble.appendChild(textElement);
+                                            }
+                                            fullText += data.text_delta;
+                                            textElement.innerHTML = formatMarkdown(fullText);
+                                        }
+                                        chatFeed.scrollTop = chatFeed.scrollHeight;
+                                    }
+                                } catch (e) {
+                                    console.error(e);
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Refresh chat item modification date in sidebar
+                    loadChats();
+                }
+            } catch (e) {
+                modelMsgRow.querySelector('.message-bubble').innerHTML = `<span style="color:var(--danger-color)">Error: ${e.message}</span>`;
+            } finally {
+                btnSend.disabled = false;
+                chatTextarea.focus();
+            }
+        }
+
+        // ------------------ DEEP RESEARCH WORKFLOW ------------------
+
+        let activeResearchCid = '';
+        let researchPlan = null;
+        let researchPollTimer = null;
+
+        btnStartResearch.addEventListener('click', async () => {
+            const prompt = researchPrompt.value.trim();
+            if (!prompt) return;
+            if (!sessionId) {
+                alert('Please authenticate in Session Config tab first.');
+                return;
+            }
+            
+            btnStartResearch.disabled = true;
+            btnStartResearch.textContent = 'Generating Research Plan...';
+            researchPlanCard.style.display = 'none';
+            researchResultCard.style.display = 'none';
+            
+            try {
+                const res = await fetch('/api/research/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Session-ID': sessionId
+                    },
+                    body: JSON.stringify({
+                        prompt,
+                        model: modelSelect.value
+                    })
+                });
+                
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.detail || 'Plan generation failed');
+                }
+                
+                researchPlan = await res.json();
+                activeResearchCid = researchPlan.cid;
+                
+                // Render Plan
+                researchPlanTitle.textContent = `Research Plan: ${researchPlan.title || 'Untitled'}`;
+                researchPlanEta.textContent = `Estimated Time: ${researchPlan.eta_text || 'Unknown'}`;
+                researchPlanSteps.innerHTML = '';
+                
+                researchPlan.steps.forEach((step, idx) => {
+                    const stepDiv = document.createElement('div');
+                    stepDiv.className = 'research-step pending';
+                    stepDiv.textContent = `${idx + 1}. ${step}`;
+                    researchPlanSteps.appendChild(stepDiv);
+                });
+                
+                researchPlanCard.style.display = 'block';
+            } catch(e) {
+                alert('Deep Research Plan Error: ' + e.message);
+            } finally {
+                btnStartResearch.disabled = false;
+                btnStartResearch.textContent = 'Create Research Plan';
+            }
+        });
+
+        btnExecuteResearch.addEventListener('click', async () => {
+            if (!researchPlan) return;
+            
+            btnExecuteResearch.disabled = true;
+            btnExecuteResearch.textContent = 'Executing Autonomous Research...';
+            
+            // Set all steps to active
+            document.querySelectorAll('.research-step').forEach(el => {
+                el.className = 'research-step active';
+            });
+            
+            try {
+                const res = await fetch('/api/research/start', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Session-ID': sessionId
+                    },
+                    body: JSON.stringify({
+                        cid: researchPlan.cid,
+                        title: researchPlan.title,
+                        eta_text: researchPlan.eta_text,
+                        steps: researchPlan.steps,
+                        model: modelSelect.value
+                    })
+                });
+                
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.detail || 'Start failed');
+                }
+                
+                // Start polling status
+                pollResearchStatus(researchPlan.cid);
+            } catch(e) {
+                alert('Failed to execute research: ' + e.message);
+                btnExecuteResearch.disabled = false;
+                btnExecuteResearch.textContent = 'Execute Research';
+            }
+        });
+
+        function pollResearchStatus(cid) {
+            if (researchPollTimer) clearInterval(researchPollTimer);
+            
+            researchPollTimer = setInterval(async () => {
+                try {
+                    const res = await fetch(`/api/research/status/${cid}`, {
+                        headers: { 'X-Session-ID': sessionId }
+                    });
+                    const data = await res.json();
+                    
+                    if (data.status === 'done') {
+                        clearInterval(researchPollTimer);
+                        // Mark steps as done
+                        document.querySelectorAll('.research-step').forEach(el => {
+                            el.className = 'research-step done';
+                        });
+                        
+                        // Fetch final report
+                        fetchResearchReport(cid);
+                    }
+                } catch(e) {
+                    console.error("Error polling research status", e);
+                }
+            }, 5000); // check every 5 seconds
+        }
+
+        async function fetchResearchReport(cid) {
+            try {
+                const res = await fetch(`/api/research/get/${cid}`, {
+                    headers: { 'X-Session-ID': sessionId }
+                });
+                if (!res.ok) {
+                    throw new Error('Failed to download final report.');
+                }
+                const data = await res.json();
+                
+                researchReportContent.innerHTML = formatMarkdown(data.text);
+                researchResultCard.style.display = 'block';
+                
+                // Set up markdown download button
+                btnDownloadReport.onclick = () => {
+                    const blob = new Blob([data.text], { type: 'text/markdown;charset=utf-8;' });
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.setAttribute('download', `${researchPlan.title.toLowerCase().replace(/\s+/g, '_')}_report.md`);
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                };
+                
+                // Scroll down to results
+                researchResultCard.scrollIntoView({ behavior: 'smooth' });
+            } catch(e) {
+                alert(e.message);
+            } finally {
+                btnExecuteResearch.disabled = false;
+                btnExecuteResearch.textContent = 'Execute Research';
+            }
+        }
+
+        // ------------------ UTILS & FORMATTING ------------------
+
+        function appendMessage(role, text, modelOutput = null, attachments = []) {
+            const row = document.createElement('div');
+            row.className = `message-row ${role}`;
+            
+            let bubbleHtml = `<div class="message-bubble">`;
+            
+            // Render thoughts (thinking block)
+            if (modelOutput && modelOutput.thoughts) {
+                bubbleHtml += `<div class="thinking-section"><strong>Thinking Process:</strong><br>${escapeHtml(modelOutput.thoughts)}</div>`;
+            }
+            
+            // Render text
+            bubbleHtml += `<div>${formatMarkdown(text || '')}</div>`;
+            
+            // Render image attachments (input files)
+            if (attachments && attachments.length > 0) {
+                bubbleHtml += `<div class="image-attachments-grid">`;
+                attachments.forEach(file => {
+                    const fileUrl = URL.createObjectURL(file);
+                    bubbleHtml += `<div class="attached-image-card"><img src="${fileUrl}"></div>`;
+                });
+                bubbleHtml += `</div>`;
+            }
+            
+            // Render images returned by the model
+            if (modelOutput && modelOutput.images && modelOutput.images.length > 0) {
+                bubbleHtml += `<div class="image-attachments-grid">`;
+                modelOutput.images.forEach(img => {
+                    bubbleHtml += `<div class="attached-image-card" title="${escapeHtml(img.title)}"><img src="${img.url}"></div>`;
+                });
+                bubbleHtml += `</div>`;
+            }
+            
+            bubbleHtml += `</div>`;
+            row.innerHTML = bubbleHtml + `<div class="message-meta">${role === 'user' ? 'User' : 'Model'}</div>`;
+            
+            chatFeed.appendChild(row);
+            chatFeed.scrollTop = chatFeed.scrollHeight;
+        }
+
+        function escapeHtml(unsafe) {
+            return unsafe
+                 .replace(/&/g, "&amp;")
+                 .replace(/</g, "&lt;")
+                 .replace(/>/g, "&gt;")
+                 .replace(/"/g, "&quot;")
+                 .replace(/'/g, "&#039;");
+        }
+
+        function formatMarkdown(text) {
+            if (!text) return "";
+            
+            // Escape HTML tags to prevent XSS except formatting
+            let escaped = escapeHtml(text);
+            
+            // Bold
+            escaped = escaped.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            
+            // Italic
+            escaped = escaped.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            
+            // Code Blocks
+            escaped = escaped.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
+            
+            // Inline Code
+            escaped = escaped.replace(/`([^`]+)`/g, '<code>$1</code>');
+            
+            // Paragraphs & newlines
+            escaped = escaped.split('\n').map(line => {
+                if (line.trim().startsWith('-')) {
+                    return `<li>${line.substring(1).trim()}</li>`;
+                }
+                return line ? `<p>${line}</p>` : '';
+            }).join('');
+            
+            // Wrap consecutive <li> elements in <ul>
+            escaped = escaped.replace(/(<li>.*?<\/li>)+/g, '<ul>$&</ul>');
+            
+            return `<div class="markdown-content">${escaped}</div>`;
+        }
+    </script>
+</body>
+</html>
