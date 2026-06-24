@@ -381,9 +381,10 @@
   width: 100%;
   max-width: 320px;
   margin: 16px auto;
-  background: var(--bg-input);
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
   padding: 10px 16px;
   color: var(--text-main);
   font-size: 16px;
@@ -392,8 +393,7 @@
 }
 
 .type-answer-input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(94, 114, 228, 0.25);
+  border-bottom-color: var(--accent);
   outline: none;
 }
 
