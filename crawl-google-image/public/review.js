@@ -80,7 +80,7 @@ async function invokeAnkiConnect(action, params = {}) {
 // Check connection and load settings on boot
 async function init() {
   // Bind settings drawer events
-  settingsToggle.addEventListener('click', () => toggleSettingsDrawer(true));
+  if (settingsToggle) settingsToggle.addEventListener('click', () => toggleSettingsDrawer(true));
   settingsClose.addEventListener('click', () => toggleSettingsDrawer(false));
   
   deckSelect.addEventListener('change', () => {
@@ -117,8 +117,10 @@ async function init() {
   try {
     await invokeAnkiConnect('version');
     isAnkiConnected = true;
-    statusBadge.textContent = 'Anki Online';
-    statusBadge.className = 'badge badge-online';
+    if (statusBadge) {
+      statusBadge.textContent = 'Anki Online';
+      statusBadge.className = 'badge badge-online';
+    }
     
     // Populate deck lists
     await populateSettingsOptions();
@@ -127,8 +129,10 @@ async function init() {
     await loadReviewQueue();
   } catch (err) {
     isAnkiConnected = false;
-    statusBadge.textContent = 'Anki Offline';
-    statusBadge.className = 'badge badge-offline';
+    if (statusBadge) {
+      statusBadge.textContent = 'Anki Offline';
+      statusBadge.className = 'badge badge-offline';
+    }
     showToast("Cannot connect to Desktop Anki. Open it first!");
   }
 
@@ -250,8 +254,8 @@ async function loadReviewQueue() {
 function updateStatsDisplay() {
   const dues = activeQueue.filter(c => c.type === 'due').length;
   const news = activeQueue.filter(c => c.type === 'new').length;
-  countDue.textContent = dues;
-  countNew.textContent = news;
+  if (countDue) countDue.textContent = dues;
+  if (countNew) countNew.textContent = news;
 }
 
 // Load details of current active card
