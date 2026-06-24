@@ -91,7 +91,7 @@ goto end_arg
 
 :run_all_services
 echo Starting Gemini API Server...
-start "Gemini API Server" /min cmd /c "cd /d "%~dp0gemini-api" && python -m uvicorn app:app --host 127.0.0.1 --port 8000"
+start "Gemini API Server" /min cmd /c "cd /d "%~dp0gemini-api" && set PYTHONPATH=src && python -m uvicorn app:app --host 127.0.0.1 --port 8000"
 
 echo Starting Google Image Crawler...
 start "Google Image Crawler" /min cmd /c "cd /d "%~dp0crawl-google-image" && npm start"
