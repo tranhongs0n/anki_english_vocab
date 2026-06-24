@@ -23,8 +23,8 @@ FIELD_IPA = "IPA"
 FIELD_MEANING = "Reference" 
 POLL_INTERVAL = 0.2  
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-PROCESSED_WORDS_FILE = os.path.join(SCRIPT_DIR, "processed_words.txt")
-GIBBERISH_FILE = os.path.join(SCRIPT_DIR, "gibberish.txt")
+PROCESSED_WORDS_FILE = os.path.join(SCRIPT_DIR, "data", "processed_words.txt")
+GIBBERISH_FILE = os.path.join(SCRIPT_DIR, "data", "gibberish.txt")
 
 # LLM Provider Configuration
 LLM_API_URL = os.getenv("LLM_API_URL") or "https://api.xah.io/v1/chat/completions"
