@@ -43,6 +43,8 @@ let newQueue = []; // array of { cardId, type: 'new' }
 let activeQueue = []; // merged queue of current session
 let currentCardIndex = -1;
 let currentCardInfo = null;
+let typeAnswerField = null;
+let typedAnswerValue = '';
 let isAnkiConnected = false;
 let toastTimeout;
 
@@ -302,20 +304,55 @@ async function loadActiveCard() {
 function preprocessAnkiHtml(html) {
   if (!html) return '';
   
-  // Replace relative local image src references (e.g. src="image.png") with /media/image.png
-  let processed = html.replace(/src="([^"]+)"/g, (match, src) => {
+  let processed = html.replace(/(?:\[\[|\{\{)type:([^\]}]+)(?:\]\]|\}\})/g, (match, fieldName) => {
+    typeAnswerField = fieldName.trim();
+    return `<input type="text" id="type-answer-input" class="type-answer-input" autocomplete="off" placeholder="Type answer and press Enter...">`;
+  });
+
+  processed = processed.replace(/src="([^"]+)"/g, (match, src) => {
     if (!src.startsWith('http') && !src.startsWith('data:')) {
       return `src="/media/${encodeURIComponent(src)}"`;
     }
     return match;
   });
 
-  // Replace audio tags like [sound:pronunciation_us_benevolent.mp3]
   processed = processed.replace(/\[sound:([^\]]+)\]/g, (match, filename) => {
     return `<audio src="/media/${encodeURIComponent(filename)}" autoplay controls style="margin: 8px 0; display: inline-block;"></audio>`;
   });
 
   return processed;
+}
+
+function preprocessAnkiAnswerHtml(html) {
+  if (!html) return '';
+  
+  let processed = html;
+  
+  if (typeAnswerField) {
+    const correctValue = (currentCardInfo && currentCardInfo.fields[typeAnswerField] ? currentCardInfo.fields[typeAnswerField].value : '').trim();
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = correctValue;
+    const cleanCorrectVal = tempDiv.textContent.trim();
+    
+    let diffHtml = '';
+    if (typedAnswerValue.toLowerCase() === cleanCorrectVal.toLowerCase()) {
+      diffHtml = `<div class="type-compare-box correct"><span class="type-label">Typed:</span> <span class="type-val-correct">${typedAnswerValue}</span> (Correct!)</div>`;
+    } else {
+      diffHtml = `<div class="type-compare-box incorrect"><span class="type-label">Typed:</span> <span class="type-val-incorrect">${typedAnswerValue || '[empty]'}</span> &rarr; <span class="type-val-correct">${cleanCorrectVal}</span></div>`;
+    }
+    
+    let hasPlaceholder = false;
+    processed = processed.replace(/(?:\[\[|\{\{)type:([^\]}]+)(?:\]\]|\}\})/g, () => {
+      hasPlaceholder = true;
+      return diffHtml;
+    });
+    
+    if (!hasPlaceholder) {
+      processed = diffHtml + processed;
+    }
+  }
+  
+  return preprocessAnkiHtml(processed);
 }
 
 // Extract word for search
@@ -344,26 +381,37 @@ function getVocabWord() {
 function renderActiveCard() {
   if (!currentCardInfo) return;
 
+  typeAnswerField = null;
+  typedAnswerValue = '';
+
   const qHtml = preprocessAnkiHtml(currentCardInfo.question);
   cardQuestion.innerHTML = qHtml;
   
-  // Hide Answer and Divider
   cardAnswer.innerHTML = '';
   cardAnswer.classList.add('hidden');
   cardDivider.classList.add('hidden');
   
-  // Toggle buttons
   showAnswerBtn.classList.remove('hidden');
   gradingActions.classList.add('hidden');
   
-  // Update Word Badge
   const word = getVocabWord();
   vocabWordDisplay.textContent = word || 'No word found';
   
-  // Auto trigger search in background if search sidebar is open and word changes
   if (crawlerPane.classList.contains('open') && word) {
     crawlerSearchInput.value = word;
     performCrawlerSearch();
+  }
+
+  const typeInput = document.getElementById('type-answer-input');
+  if (typeInput) {
+    typeInput.focus();
+    typeInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        typedAnswerValue = typeInput.value.trim();
+        showAnswer();
+      }
+    });
   }
 }
 
@@ -371,7 +419,12 @@ function renderActiveCard() {
 function showAnswer() {
   if (!currentCardInfo) return;
   
-  const aHtml = preprocessAnkiHtml(currentCardInfo.answer);
+  const typeInput = document.getElementById('type-answer-input');
+  if (typeInput && !typedAnswerValue) {
+    typedAnswerValue = typeInput.value.trim();
+  }
+
+  const aHtml = preprocessAnkiAnswerHtml(currentCardInfo.answer);
   cardAnswer.innerHTML = aHtml;
   
   cardAnswer.classList.remove('hidden');
