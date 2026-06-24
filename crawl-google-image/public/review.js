@@ -341,11 +341,11 @@ function preprocessAnkiAnswerHtml(html) {
     tempDiv.innerHTML = correctValue;
     const cleanCorrectVal = tempDiv.textContent.trim();
     
-    let diffHtml = '';
+    let diffHtml;
     if (typedAnswerValue.toLowerCase() === cleanCorrectVal.toLowerCase()) {
-      diffHtml = `<div class="type-compare-box correct"><span class="type-label">Typed:</span> <span class="type-val-correct">${typedAnswerValue}</span> (Correct!)</div>`;
+      diffHtml = `<div class="type-compare-box correct"><span class="type-val-correct">${typedAnswerValue}</span></div>`;
     } else {
-      diffHtml = `<div class="type-compare-box incorrect"><span class="type-label">Typed:</span> <span class="type-val-incorrect">${typedAnswerValue || '[empty]'}</span> &rarr; <span class="type-val-correct">${cleanCorrectVal}</span></div>`;
+      diffHtml = `<div class="type-compare-box incorrect"><span class="type-val-incorrect">${typedAnswerValue || '[empty]'}</span> &rarr; <span class="type-val-correct">${cleanCorrectVal}</span></div>`;
     }
     
     let hasPlaceholder = false;
