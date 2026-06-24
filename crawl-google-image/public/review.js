@@ -27,7 +27,7 @@ const countNew = document.getElementById('count-new');
 const countDue = document.getElementById('count-due');
 
 // Crawler elements
-const crawlerPane = document.querySelector('.crawler-pane');
+const crawlerModal = document.getElementById('crawler-modal');
 const closeCrawlerBtn = document.getElementById('close-crawler-btn');
 const crawlerSearchInput = document.getElementById('crawler-search-input');
 const crawlerSearchBtn = document.getElementById('crawler-search-btn');
@@ -145,7 +145,7 @@ async function init() {
   document.getElementById('grade-easy').addEventListener('click', () => gradeCard(4));
   
   quickSearchBtn.addEventListener('click', openImageCrawler);
-  closeCrawlerBtn.addEventListener('click', () => crawlerPane.classList.remove('open'));
+  closeCrawlerBtn.addEventListener('click', () => crawlerModal.classList.add('hidden'));
   crawlerSearchBtn.addEventListener('click', performCrawlerSearch);
   crawlerSearchInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') performCrawlerSearch();
@@ -397,7 +397,7 @@ function renderActiveCard() {
   const word = getVocabWord();
   vocabWordDisplay.textContent = word || 'No word found';
   
-  if (crawlerPane.classList.contains('open') && word) {
+  if (!crawlerModal.classList.contains('hidden') && word) {
     crawlerSearchInput.value = word;
     performCrawlerSearch();
   }
@@ -436,9 +436,9 @@ function showAnswer() {
 
 // Answer card grading and advance
 async function gradeCard(ease) {
-  if (!currentCardInfo) return;
+  if (!currentCardInfo || currentCardIndex === -1 || !activeQueue[currentCardIndex]) return;
   
-  const cardId = currentCardInfo.cardId;
+  const cardId = activeQueue[currentCardIndex].cardId;
   const word = getVocabWord();
   
   try {
@@ -486,7 +486,7 @@ function openImageCrawler() {
   }
   
   crawlerSearchInput.value = word;
-  crawlerPane.classList.add('open');
+  crawlerModal.classList.remove('hidden');
   performCrawlerSearch();
 }
 
@@ -678,7 +678,7 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     e.preventDefault();
     toggleSettingsDrawer(false);
-    crawlerPane.classList.remove('open');
+    crawlerModal.classList.add('hidden');
     return;
   }
 
