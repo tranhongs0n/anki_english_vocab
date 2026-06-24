@@ -17,6 +17,19 @@ let images = [];
 let selectedIndex = -1;
 let toastTimeout;
 
+// Reviewer iframe integration helpers
+function isReviewerIframe() {
+  return window.parent && typeof window.parent.linkImageToCurrentCard === 'function';
+}
+
+function linkImageIfIframe(index) {
+  if (isReviewerIframe() && index >= 0 && index < images.length) {
+    window.parent.linkImageToCurrentCard(images[index]);
+    return true;
+  }
+  return false;
+}
+
 // Toast Notification helper
 function showToast(message, duration = 3000) {
   clearTimeout(toastTimeout);
@@ -96,6 +109,9 @@ function renderGrid() {
     });
     
     card.addEventListener('dblclick', () => {
+      if (linkImageIfIframe(idx)) {
+        return;
+      }
       triggerCopy(idx);
     });
 
@@ -259,6 +275,21 @@ async function checkAnkiStatus() {
     isAnkiConnected = false;
     statusBadge.textContent = 'Anki Offline';
     statusBadge.className = 'badge badge-offline';
+  }
+
+  // Check URL params for search query
+  const urlParams = new URLSearchParams(window.location.search);
+  const query = urlParams.get('q') || urlParams.get('vocab');
+  if (query) {
+    searchInput.value = query;
+    performSearch();
+  }
+
+  // If running inside reviewer iframe, add class and hide navigation link
+  if (isReviewerIframe()) {
+    document.body.classList.add('is-iframe');
+    const navLink = document.querySelector('.nav-link');
+    if (navLink) navLink.style.display = 'none';
   }
 }
 
@@ -680,12 +711,18 @@ document.addEventListener('keydown', (e) => {
     case 'c':
     case 'C':
       e.preventDefault();
+      if (linkImageIfIframe(selectedIndex)) {
+        break;
+      }
       triggerCopy(selectedIndex);
       break;
 
     // Spacebar to link image to existing card
     case ' ':
       e.preventDefault();
+      if (linkImageIfIframe(selectedIndex)) {
+        break;
+      }
       showPromptModal(selectedIndex);
       break;
 
@@ -693,6 +730,9 @@ document.addEventListener('keydown', (e) => {
     case 'a':
     case 'A':
       e.preventDefault();
+      if (linkImageIfIframe(selectedIndex)) {
+        break;
+      }
       addNoteToAnki(selectedIndex);
       break;
 
@@ -703,10 +743,15 @@ document.addEventListener('keydown', (e) => {
       searchInput.select();
       break;
 
-    // Escape hides settings
+    // Escape hides settings or closes iframe modal
     case 'Escape':
       e.preventDefault();
-      toggleSettingsDrawer(false);
+      const drawer = document.getElementById('settings-drawer');
+      if (drawer && drawer.classList.contains('open')) {
+        toggleSettingsDrawer(false);
+      } else if (isReviewerIframe()) {
+        window.parent.closeImageCrawler();
+      }
       break;
 
     default:

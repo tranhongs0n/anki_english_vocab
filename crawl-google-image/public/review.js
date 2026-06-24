@@ -28,12 +28,8 @@ const countDue = document.getElementById('count-due');
 
 // Crawler elements
 const crawlerModal = document.getElementById('crawler-modal');
+const crawlerIframe = document.getElementById('crawler-iframe');
 const closeCrawlerBtn = document.getElementById('close-crawler-btn');
-const crawlerSearchInput = document.getElementById('crawler-search-input');
-const crawlerSearchBtn = document.getElementById('crawler-search-btn');
-const crawlerLoading = document.getElementById('crawler-loading');
-const crawlerStatus = document.getElementById('crawler-status');
-const crawlerGrid = document.getElementById('crawler-grid');
 
 const toast = document.getElementById('toast');
 
@@ -145,11 +141,7 @@ async function init() {
   document.getElementById('grade-easy').addEventListener('click', () => gradeCard(4));
   
   if (quickSearchBtn) quickSearchBtn.addEventListener('click', openImageCrawler);
-  closeCrawlerBtn.addEventListener('click', () => crawlerModal.classList.add('hidden'));
-  crawlerSearchBtn.addEventListener('click', performCrawlerSearch);
-  crawlerSearchInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') performCrawlerSearch();
-  });
+  closeCrawlerBtn.addEventListener('click', closeImageCrawler);
 }
 
 // Drawer Open/Close
@@ -399,8 +391,12 @@ function renderActiveCard() {
   if (vocabWordDisplay) vocabWordDisplay.textContent = word || 'No word found';
   
   if (!crawlerModal.classList.contains('hidden') && word) {
-    crawlerSearchInput.value = word;
-    performCrawlerSearch();
+    crawlerIframe.src = `/index.html?q=${encodeURIComponent(word)}`;
+    setTimeout(() => {
+      try {
+        crawlerIframe.focus();
+      } catch(e) {}
+    }, 150);
   }
 
   const typeInput = document.getElementById('type-answer-input');
@@ -479,7 +475,6 @@ async function gradeCard(ease) {
   }
 }
 
-// Open Crawler Sidebar
 function openImageCrawler() {
   const word = getVocabWord();
   if (!word) {
@@ -487,67 +482,20 @@ function openImageCrawler() {
     return;
   }
   
-  crawlerSearchInput.value = word;
+  crawlerIframe.src = `/index.html?q=${encodeURIComponent(word)}`;
   crawlerModal.classList.remove('hidden');
-  performCrawlerSearch();
+  
+  setTimeout(() => {
+    try {
+      crawlerIframe.focus();
+    } catch(e) {}
+  }, 150);
 }
 
-// Google / Bing Search image
-async function performCrawlerSearch() {
-  const query = crawlerSearchInput.value.trim();
-  if (!query) return;
-
-  crawlerLoading.classList.remove('hidden');
-  crawlerStatus.textContent = `Searching for "${query}"...`;
-  crawlerGrid.innerHTML = '';
-
-  try {
-    const googleKey = localStorage.getItem('google_key') || '';
-    const googleCx = localStorage.getItem('google_cx') || '';
-    
-    const response = await fetch(`/api/search?q=${encodeURIComponent(query)}&googleKey=${encodeURIComponent(googleKey)}&googleCx=${encodeURIComponent(googleCx)}`);
-    const data = await response.json();
-
-    crawlerLoading.classList.add('hidden');
-
-    if (data.results && data.results.length > 0) {
-      crawlerStatus.textContent = `Found ${data.results.length} images. Tap one to link to card.`;
-      renderCrawlerGrid(data.results);
-    } else {
-      crawlerStatus.textContent = 'No images found.';
-    }
-  } catch (err) {
-    console.error(err);
-    crawlerLoading.classList.add('hidden');
-    crawlerStatus.textContent = 'Error fetching search results.';
-  }
-}
-
-function renderCrawlerGrid(images) {
-  images.forEach((img, idx) => {
-    const card = document.createElement('div');
-    card.className = 'image-card';
-    card.dataset.index = idx;
-
-    const imageEl = document.createElement('img');
-    imageEl.src = img.thumb;
-    imageEl.alt = img.title;
-    imageEl.loading = 'lazy';
-
-    const meta = document.createElement('div');
-    meta.className = 'meta';
-    meta.textContent = img.source;
-
-    card.appendChild(imageEl);
-    card.appendChild(meta);
-
-    // Tap to associate with current card note
-    card.addEventListener('click', () => {
-      linkImageToCurrentCard(img, card);
-    });
-
-    crawlerGrid.appendChild(card);
-  });
+function closeImageCrawler() {
+  crawlerModal.classList.add('hidden');
+  crawlerIframe.src = '';
+  window.focus();
 }
 
 // Convert image from url (via proxy) to base64
@@ -592,7 +540,7 @@ function fetchAndConvertToBase64(url, fallbackUrl = null) {
 }
 
 // Link clicked image to current active card note
-async function linkImageToCurrentCard(imgObj, cardElement) {
+async function linkImageToCurrentCard(imgObj, cardElement = null) {
   if (!currentCardInfo) {
     showToast("No active card to link image to!");
     return;
@@ -609,7 +557,7 @@ async function linkImageToCurrentCard(imgObj, cardElement) {
   }
 
   // Visual feedback: add syncing class
-  cardElement.classList.add('syncing');
+  if (cardElement) cardElement.classList.add('syncing');
   showToast(`Uploading image to Anki for "${word}"...`);
 
   try {
@@ -635,9 +583,11 @@ async function linkImageToCurrentCard(imgObj, cardElement) {
       }
     });
 
-    cardElement.classList.remove('syncing');
+    if (cardElement) cardElement.classList.remove('syncing');
     showToast(`Linked image to "${word}" successfully! 🎉`);
     
+    closeImageCrawler();
+
     // Refresh active card immediately to show the newly linked image
     const updatedInfo = await invokeAnkiConnect('cardsInfo', { cards: [currentCardInfo.cardId] });
     if (updatedInfo && updatedInfo.length > 0) {
@@ -650,7 +600,7 @@ async function linkImageToCurrentCard(imgObj, cardElement) {
       }
     }
   } catch (err) {
-    cardElement.classList.remove('syncing');
+    if (cardElement) cardElement.classList.remove('syncing');
     console.error(err);
     showToast(`Sync failed: ${err.message || err}`);
   }

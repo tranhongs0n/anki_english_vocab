@@ -63,18 +63,7 @@
           <h3>Quick Image Finder</h3>
           <button id="close-crawler-btn" class="close-crawler-btn">&times;</button>
         </div>
-        <div class="crawler-search">
-          <input type="text" id="crawler-search-input" placeholder="Search images..." autocomplete="off">
-          <button id="crawler-search-btn" class="btn btn-primary">Search</button>
-        </div>
-        
-        <div id="crawler-loading" class="loading-spinner hidden">
-          <div class="spinner"></div>
-          <p>Fetching images...</p>
-        </div>
-        
-        <div id="crawler-status" class="crawler-status-info">Search images for current word or type above.</div>
-        <div id="crawler-grid" class="image-grid crawler-grid"></div>
+        <iframe id="crawler-iframe" src="" style="width: 100%; height: calc(100% - 50px); border: none; border-radius: 6px;"></iframe>
       </div>
     </div>
 
