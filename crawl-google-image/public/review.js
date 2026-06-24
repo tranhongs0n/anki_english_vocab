@@ -654,17 +654,20 @@ document.addEventListener('keydown', (e) => {
     if (e.key === '1') {
       e.preventDefault();
       gradeCard(1);
+      return;
     } else if (e.key === '2') {
       e.preventDefault();
       gradeCard(2);
+      return;
     } else if (e.key === '3') {
       e.preventDefault();
       gradeCard(3);
+      return;
     } else if (e.key === '4') {
       e.preventDefault();
       gradeCard(4);
+      return;
     }
-    return;
   }
 
   // Find image keyboard trigger (f or s keys)
