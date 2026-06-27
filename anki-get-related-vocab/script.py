@@ -10,6 +10,7 @@ import subprocess
 from datetime import datetime
 from dotenv import load_dotenv
 from collections import defaultdict
+from http.server import HTTPServer, BaseHTTPRequestHandler
 
 load_dotenv()
 ANKI_CONNECT_URL = os.getenv("ANKI_CONNECT_URL") or "http://127.0.0.1:8765"
@@ -268,6 +269,50 @@ def process_target_word(target_word, ram_cache):
     if new_flashcards:
         add_notes_to_anki(new_flashcards, ram_cache)
 
+def make_handler(processed_session_words, ram_cache):
+    class WordHandler(BaseHTTPRequestHandler):
+        def do_OPTIONS(self):
+            self.send_response(200)
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Access-Control-Allow-Methods', 'POST, OPTIONS')
+            self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+            self.end_headers()
+
+        def do_POST(self):
+            if self.path == '/api/word':
+                content_length = int(self.headers.get('Content-Length', 0))
+                post_data = self.rfile.read(content_length)
+                try:
+                    data = json.loads(post_data.decode('utf-8'))
+                    word = data.get('word')
+                    if word:
+                        clean_word = word.strip().lower()
+                        with processed_lock:
+                            if clean_word and clean_word not in processed_session_words:
+                                processed_session_words.add(clean_word)
+                                save_processed_word(clean_word)
+                                threading.Thread(target=process_target_word, args=(clean_word, ram_cache)).start()
+                                log_info(f"Web Review received: '{clean_word}'")
+                        
+                        self.send_response(200)
+                        self.send_header('Access-Control-Allow-Origin', '*')
+                        self.send_header('Content-Type', 'application/json')
+                        self.end_headers()
+                        self.wfile.write(json.dumps({"status": "success"}).encode('utf-8'))
+                        return
+                except Exception as e:
+                    log_error(f"Web Review API error: {e}")
+            
+            self.send_response(400)
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(b"Bad Request")
+            
+        def log_message(self, format, *args):
+            pass
+
+    return WordHandler
+
 def background_monitor():
     processed_session_words = load_processed_words()
     if invoke('version') is None:
@@ -275,6 +320,16 @@ def background_monitor():
         return
     ram_cache = build_ram_cache()
     log_info(f"Cached {len(ram_cache)} existing words.")
+
+    try:
+        handler_class = make_handler(processed_session_words, ram_cache)
+        httpd = HTTPServer(('127.0.0.1', 8005), handler_class)
+        server_thread = threading.Thread(target=httpd.serve_forever, daemon=True)
+        server_thread.start()
+        log_info("Web review API listening on http://127.0.0.1:8005/api/word")
+    except Exception as e:
+        log_error(f"Could not start Web review API server: {e}")
+
     log_info("Monitoring Anki...")
     try:
         while True:
@@ -286,10 +341,11 @@ def background_monitor():
                         raw_word = fields[FIELD_WORD]['value']
                         decoded_word = html.unescape(raw_word)
                         clean_word = re.sub(r'<[^>]+>', '', decoded_word).strip().lower()
-                        if clean_word and clean_word not in processed_session_words:
-                            processed_session_words.add(clean_word)
-                            save_processed_word(clean_word)
-                            threading.Thread(target=process_target_word, args=(clean_word, ram_cache)).start()
+                        with processed_lock:
+                            if clean_word and clean_word not in processed_session_words:
+                                processed_session_words.add(clean_word)
+                                save_processed_word(clean_word)
+                                threading.Thread(target=process_target_word, args=(clean_word, ram_cache)).start()
             except Exception as e:
                 if "Gui review is not currently active" not in str(e):
                     pass

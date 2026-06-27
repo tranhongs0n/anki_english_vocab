@@ -359,6 +359,7 @@ aiuti
 aiuto
 aixmnd
 ajacket
+ajahn
 ajph
 ajw
 ak
@@ -3421,6 +3422,7 @@ deserte
 deserto
 deshung
 desi
+desicated
 desidera
 desiderare
 desiderato
@@ -8338,6 +8340,7 @@ lettrici
 lettura
 leur
 levelyour
+levittcv
 lex
 lexpect
 leycysisqycl
@@ -13104,6 +13107,7 @@ showoff
 showsa
 showsthe
 showtimes
+shrankb
 shravakayana
 shravasti
 shrdent
@@ -14070,6 +14074,7 @@ sustamable
 sutta
 suttas
 suzanna
+suzuki
 svampire
 svanisce
 svantaggio

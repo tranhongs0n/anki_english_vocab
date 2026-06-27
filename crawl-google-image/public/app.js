@@ -46,6 +46,14 @@ function hideToast() {
   toast.classList.add('hidden');
 }
 
+// Expose a function to search from parent window
+window.triggerSearch = function(query) {
+  if (searchInput) {
+    searchInput.value = query;
+    performSearch();
+  }
+};
+
 // Perform Image Search
 async function performSearch() {
   const query = searchInput.value.trim();
@@ -59,9 +67,8 @@ async function performSearch() {
   selectedIndex = -1;
 
   try {
-    const googleKey = localStorage.getItem('google_key') || '';
-    const googleCx = localStorage.getItem('google_cx') || '';
-    const response = await fetch(`/api/search?q=${encodeURIComponent(query)}&googleKey=${encodeURIComponent(googleKey)}&googleCx=${encodeURIComponent(googleCx)}`);
+    const quickMode = localStorage.getItem('quick_search') !== 'false';
+    const response = await fetch(`/api/search?q=${encodeURIComponent(query)}&googleKey=${encodeURIComponent(googleKey)}&googleCx=${encodeURIComponent(googleCx)}&quick=${quickMode}`);
     const data = await response.json();
 
     loading.classList.add('hidden');
@@ -301,9 +308,19 @@ const imageFieldSelect = document.getElementById('anki-image-field');
 const googleKeyInput = document.getElementById('google-key');
 const googleCxInput = document.getElementById('google-cx');
 
+const quickSearchCheckbox = document.getElementById('quick-search');
+
 // Initialize Google keys from localStorage
 googleKeyInput.value = localStorage.getItem('google_key') || '';
 googleCxInput.value = localStorage.getItem('google_cx') || '';
+
+if (quickSearchCheckbox) {
+  const saved = localStorage.getItem('quick_search');
+  quickSearchCheckbox.checked = saved !== 'false'; // defaults to true
+  quickSearchCheckbox.addEventListener('change', () => {
+    localStorage.setItem('quick_search', quickSearchCheckbox.checked);
+  });
+}
 
 async function loadAnkiSettingsOptions() {
   try {

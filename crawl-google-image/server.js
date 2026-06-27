@@ -15,6 +15,7 @@ app.get('/api/search', async (req, res) => {
   const query = req.query.q;
   const googleKey = req.query.googleKey;
   const googleCx = req.query.googleCx;
+  const quick = req.query.quick === 'true';
 
   if (!query) {
     return res.status(400).json({ error: 'Query parameter "q" is required' });
@@ -24,8 +25,8 @@ app.get('/api/search', async (req, res) => {
   if (googleKey && googleCx) {
     try {
       const url = `https://www.googleapis.com/customsearch/v1`;
-      // Fetch 3 pages of results (30 images) in parallel
-      const startIndices = [1, 11, 21];
+      // Fetch results (30 images, or 10 if quick mode) in parallel
+      const startIndices = quick ? [1] : [1, 11, 21];
       const requests = startIndices.map(start => 
         axios.get(url, {
           params: {
@@ -79,9 +80,9 @@ app.get('/api/search', async (req, res) => {
   }
 
   // Otherwise, fallback to Bing Images scraping
-  // Fetch multiple queries in parallel to bypass pagination limitations and get ~80-100 unique images
+  // Fetch multiple queries in parallel to bypass pagination limitations and get ~80-100 unique images (or 1 if quick mode)
   try {
-    const queries = [query, `${query} photo`, `${query} material`].slice(0, 3);
+    const queries = quick ? [query] : [query, `${query} photo`, `${query} material`].slice(0, 3);
     const scrapeRequests = queries.map(async (q) => {
       const url = `https://www.bing.com/images/search?q=${encodeURIComponent(q)}`;
       try {

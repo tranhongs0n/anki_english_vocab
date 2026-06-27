@@ -7,6 +7,7 @@ const vocabFieldSelect = document.getElementById('anki-vocab-field');
 const imageFieldSelect = document.getElementById('anki-image-field');
 const googleKeyInput = document.getElementById('google-key');
 const googleCxInput = document.getElementById('google-cx');
+const quickSearchCheckbox = document.getElementById('quick-search');
 
 const settingsDrawer = document.getElementById('settings-drawer');
 const settingsToggle = document.getElementById('settings-toggle');
@@ -108,9 +109,17 @@ async function init() {
   googleKeyInput.addEventListener('input', () => localStorage.setItem('google_key', googleKeyInput.value.trim()));
   googleCxInput.addEventListener('input', () => localStorage.setItem('google_cx', googleCxInput.value.trim()));
   
+  if (quickSearchCheckbox) {
+    quickSearchCheckbox.addEventListener('change', () => localStorage.setItem('quick_search', quickSearchCheckbox.checked));
+  }
+
   // Set saved API values
   googleKeyInput.value = localStorage.getItem('google_key') || '';
   googleCxInput.value = localStorage.getItem('google_cx') || '';
+  if (quickSearchCheckbox) {
+    const saved = localStorage.getItem('quick_search');
+    quickSearchCheckbox.checked = saved !== 'false'; // defaults to true
+  }
 
   // Anki check
   const statusBadge = document.getElementById('anki-status');
@@ -156,6 +165,9 @@ async function init() {
     if (e.key === 'Enter') { e.preventDefault(); runBrowserSearch(); }
     if (e.key === 'Escape') { e.preventDefault(); closeCardBrowser(); }
   });
+
+  // Preload the image search iframe so it loads only once
+  crawlerIframe.src = '/index.html';
 }
 
 // Drawer Open/Close
@@ -398,6 +410,18 @@ function renderActiveCard() {
   const word = getVocabWord();
   if (vocabWordDisplay) vocabWordDisplay.textContent = word || 'No word found';
   
+  if (word) {
+    fetch('http://localhost:8005/api/word', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ word: word })
+    }).catch(err => {
+      console.warn("Could not notify python monitor:", err);
+    });
+  }
+  
   if (!crawlerModal.classList.contains('hidden') && word) {
     crawlerIframe.src = `/index.html?q=${encodeURIComponent(word)}`;
     setTimeout(() => {
@@ -528,8 +552,14 @@ function openImageCrawler() {
     return;
   }
   
-  crawlerIframe.src = `/index.html?q=${encodeURIComponent(word)}`;
   crawlerModal.classList.remove('hidden');
+
+  // Trigger search using exposed JS callback if iframe is loaded, otherwise set src
+  if (crawlerIframe.contentWindow && typeof crawlerIframe.contentWindow.triggerSearch === 'function') {
+    crawlerIframe.contentWindow.triggerSearch(word);
+  } else {
+    crawlerIframe.src = `/index.html?q=${encodeURIComponent(word)}`;
+  }
   
   setTimeout(() => {
     try {
@@ -540,7 +570,6 @@ function openImageCrawler() {
 
 function closeImageCrawler() {
   crawlerModal.classList.add('hidden');
-  crawlerIframe.src = '';
   window.focus();
 }
 
