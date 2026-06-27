@@ -673,6 +673,17 @@ async function linkImageToCurrentCard(imgObj, cardElement = null) {
   }
 }
 
+async function syncAnki() {
+  showToast("Syncing Anki...");
+  try {
+    await invokeAnkiConnect('sync');
+    showToast("Anki synced successfully!");
+  } catch (err) {
+    showToast("Anki sync failed!");
+    console.error(err);
+  }
+}
+
 // Keyboard shortcuts handlers
 document.addEventListener('keydown', (e) => {
   const activeElement = document.activeElement;
@@ -752,6 +763,12 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'o' || e.key === 'O') {
     e.preventDefault();
     moveCurrentCard('English::99_Other');
+    return;
+  }
+  // M : Sync Anki
+  if (e.key === 'm' || e.key === 'M') {
+    e.preventDefault();
+    syncAnki();
     return;
   }
   // = : suspend/bury card

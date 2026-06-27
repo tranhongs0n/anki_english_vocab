@@ -391,21 +391,26 @@ kbd {
 
 /* Crawler modal iframe wrapper */
 .crawler-modal-content {
-  width: 95%;
-  max-width: 900px;
-  height: 90%;
+  width: 95vw;
+  max-width: none;
+  height: 95vh;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 12px;
-  padding: 20px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.crawler-header {
+  display: none !important;
 }
 
 .crawler-modal-content iframe {
   width: 100%;
-  height: calc(100% - 50px);
+  height: 100%;
   border: none;
   background: var(--bg-main);
-  border-radius: 8px;
+  border-radius: 12px;
 }
 
 /* Card Browser Table */
