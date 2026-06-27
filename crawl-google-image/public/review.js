@@ -5,8 +5,6 @@ const deckSelect = document.getElementById('anki-deck');
 const modelSelect = document.getElementById('anki-model');
 const vocabFieldSelect = document.getElementById('anki-vocab-field');
 const imageFieldSelect = document.getElementById('anki-image-field');
-const googleKeyInput = document.getElementById('google-key');
-const googleCxInput = document.getElementById('google-cx');
 const quickSearchCheckbox = document.getElementById('quick-search');
 
 const settingsDrawer = document.getElementById('settings-drawer');
@@ -106,16 +104,11 @@ async function init() {
   });
   imageFieldSelect.addEventListener('change', () => localStorage.setItem('anki_image_field', imageFieldSelect.value));
   
-  googleKeyInput.addEventListener('input', () => localStorage.setItem('google_key', googleKeyInput.value.trim()));
-  googleCxInput.addEventListener('input', () => localStorage.setItem('google_cx', googleCxInput.value.trim()));
-  
   if (quickSearchCheckbox) {
     quickSearchCheckbox.addEventListener('change', () => localStorage.setItem('quick_search', quickSearchCheckbox.checked));
   }
 
   // Set saved API values
-  googleKeyInput.value = localStorage.getItem('google_key') || '';
-  googleCxInput.value = localStorage.getItem('google_cx') || '';
   if (quickSearchCheckbox) {
     const saved = localStorage.getItem('quick_search');
     quickSearchCheckbox.checked = saved !== 'false'; // defaults to true

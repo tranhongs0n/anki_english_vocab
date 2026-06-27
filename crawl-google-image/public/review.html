@@ -4,11 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Anki Web Review & Image Finder</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="index.css">
-  <link rel="stylesheet" href="review.css">
 </head>
 <body>
   <div class="app-container review-layout">
@@ -40,39 +36,38 @@
           </div>
         </div>
       </section>
-
     </main>
 
-  <!-- Card Browser Modal -->
-  <div id="browser-modal" class="modal-backdrop hidden">
-    <div class="browser-modal-content">
-      <div class="browser-header">
-        <h3>Card Browser</h3>
-        <button id="close-browser-btn" class="close-crawler-btn">&times;</button>
-      </div>
-      <div class="browser-search-bar">
-        <input type="text" id="browser-search-input" placeholder="Search cards..." autocomplete="off" spellcheck="false">
-        <button id="browser-search-btn" class="btn btn-primary" style="padding:8px 18px;font-size:13px;">Search</button>
-      </div>
-      <div id="browser-status" class="browser-status hidden"></div>
-      <div class="browser-table-wrap">
-        <table id="browser-table" class="browser-table">
-          <thead>
-            <tr>
-              <th>Word</th>
-              <th>Meaning</th>
-              <th>Deck</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="browser-tbody"></tbody>
-        </table>
-        <div id="browser-empty" class="browser-empty hidden">No cards found.</div>
+    <!-- Card Browser Modal -->
+    <div id="browser-modal" class="modal-backdrop hidden">
+      <div class="browser-modal-content">
+        <div class="browser-header">
+          <h3>Card Browser</h3>
+          <button id="close-browser-btn" class="close-crawler-btn">&times;</button>
+        </div>
+        <div class="browser-search-bar">
+          <input type="text" id="browser-search-input" placeholder="Search cards..." autocomplete="off" spellcheck="false">
+          <button id="browser-search-btn" class="btn btn-primary">Search</button>
+        </div>
+        <div id="browser-status" class="browser-status hidden"></div>
+        <div class="browser-table-wrap">
+          <table id="browser-table" class="browser-table">
+            <thead>
+              <tr>
+                <th>Word</th>
+                <th>Meaning</th>
+                <th>Deck</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="browser-tbody"></tbody>
+          </table>
+          <div id="browser-empty" class="browser-empty hidden">No cards found.</div>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- Crawler Modal Backdrop -->
+    <!-- Crawler Modal Backdrop -->
     <div id="crawler-modal" class="modal-backdrop hidden">
       <div class="crawler-modal-content">
         <div class="crawler-header">
@@ -93,61 +88,48 @@
       <div class="shortcut-item"><kbd>O</kbd> <span>→ Other</span></div>
       <div class="shortcut-item"><kbd>=</kbd> <span>Suspend</span></div>
     </div>
-  </div>
 
-  <!-- Settings Drawer -->
-  <div id="settings-drawer" class="settings-drawer hidden">
-    <div class="drawer-header">
-      <h2>Anki Review Settings</h2>
-      <button id="settings-close" class="close-btn">&times;</button>
-    </div>
-    <div class="drawer-body">
-      <div class="setting-group">
-        <label for="anki-deck">Target Deck</label>
-        <select id="anki-deck">
-          <option value="">-- Select Deck --</option>
-        </select>
+    <!-- Settings Drawer -->
+    <div id="settings-drawer" class="settings-drawer hidden">
+      <div class="drawer-header">
+        <h2>Anki Review Settings</h2>
+        <button id="settings-close" class="close-btn">&times;</button>
       </div>
-      <div class="setting-group">
-        <label for="anki-model">Note Type</label>
-        <select id="anki-model">
-          <option value="">-- Select Note Type --</option>
-        </select>
-      </div>
-      <div class="setting-group">
-        <label for="anki-vocab-field">Word Field (Search Term)</label>
-        <select id="anki-vocab-field">
-          <option value="">-- Select Field --</option>
-        </select>
-      </div>
-      <div class="setting-group">
-        <label for="anki-image-field">Image Field (Target)</label>
-        <select id="anki-image-field">
-          <option value="">-- Select Field --</option>
-        </select>
-      </div>
-      
-      <div class="setting-group checkbox-row" style="flex-direction:row; align-items:center; display:flex; gap:8px;">
-        <input type="checkbox" id="quick-search" checked style="width:auto; margin:0;">
-        <label for="quick-search" style="cursor:pointer; margin:0;">Fast Search (Fewer images)</label>
-      </div>
-
-      <div class="setting-group-separator"></div>
-      <div class="setting-section-title">Google Search (Optional)</div>
-
-      <div class="setting-group">
-        <label for="google-key">API Key</label>
-        <input type="password" id="google-key" placeholder="Paste Google API Key..." autocomplete="off">
-      </div>
-      <div class="setting-group">
-        <label for="google-cx">Search Engine ID (CX)</label>
-        <input type="text" id="google-cx" placeholder="Paste Search Engine ID..." autocomplete="off">
+      <div class="drawer-body">
+        <div class="setting-group">
+          <label for="anki-deck">Target Deck</label>
+          <select id="anki-deck">
+            <option value="">-- Select Deck --</option>
+          </select>
+        </div>
+        <div class="setting-group">
+          <label for="anki-model">Note Type</label>
+          <select id="anki-model">
+            <option value="">-- Select Note Type --</option>
+          </select>
+        </div>
+        <div class="setting-group">
+          <label for="anki-vocab-field">Word Field (Search Term)</label>
+          <select id="anki-vocab-field">
+            <option value="">-- Select Field --</option>
+          </select>
+        </div>
+        <div class="setting-group">
+          <label for="anki-image-field">Image Field (Target)</label>
+          <select id="anki-image-field">
+            <option value="">-- Select Field --</option>
+          </select>
+        </div>
+        <div class="setting-group checkbox-row">
+          <input type="checkbox" id="quick-search" checked>
+          <label for="quick-search">Fast Search (Fewer images)</label>
+        </div>
       </div>
     </div>
+
+    <div id="toast" class="toast hidden">Image synced!</div>
   </div>
 
-  <div id="toast" class="toast hidden">Image synced!</div>
-  
   <script src="review.js"></script>
 </body>
 </html>

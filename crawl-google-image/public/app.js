@@ -68,7 +68,7 @@ async function performSearch() {
 
   try {
     const quickMode = localStorage.getItem('quick_search') !== 'false';
-    const response = await fetch(`/api/search?q=${encodeURIComponent(query)}&googleKey=${encodeURIComponent(googleKey)}&googleCx=${encodeURIComponent(googleCx)}&quick=${quickMode}`);
+    const response = await fetch(`/api/search?q=${encodeURIComponent(query)}&quick=${quickMode}`);
     const data = await response.json();
 
     loading.classList.add('hidden');
@@ -103,12 +103,7 @@ function renderGrid() {
     imageEl.alt = img.title;
     imageEl.loading = 'lazy';
 
-    const meta = document.createElement('div');
-    meta.className = 'meta';
-    meta.textContent = img.source;
-
     card.appendChild(imageEl);
-    card.appendChild(meta);
 
     // Mouse selection / copy
     card.addEventListener('click', () => {
@@ -167,11 +162,19 @@ async function copyImageByUrl(srcUrl, fallbackUrl = null, fallbackMessage = "") 
 
     img.onload = () => {
       try {
+        let w = img.naturalWidth;
+        let h = img.naturalHeight;
+        const maxDim = 600;
+        if (w > maxDim || h > maxDim) {
+          if (w > h) { h = Math.round(h * (maxDim / w)); w = maxDim; }
+          else { w = Math.round(w * (maxDim / h)); h = maxDim; }
+        }
+        
         const canvas = document.createElement('canvas');
-        canvas.width = img.naturalWidth;
-        canvas.height = img.naturalHeight;
+        canvas.width = w;
+        canvas.height = h;
         const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0);
+        ctx.drawImage(img, 0, 0, w, h);
 
         canvas.toBlob(async (blob) => {
           if (!blob) {
@@ -305,14 +308,8 @@ const deckSelect = document.getElementById('anki-deck');
 const modelSelect = document.getElementById('anki-model');
 const vocabFieldSelect = document.getElementById('anki-vocab-field');
 const imageFieldSelect = document.getElementById('anki-image-field');
-const googleKeyInput = document.getElementById('google-key');
-const googleCxInput = document.getElementById('google-cx');
 
 const quickSearchCheckbox = document.getElementById('quick-search');
-
-// Initialize Google keys from localStorage
-googleKeyInput.value = localStorage.getItem('google_key') || '';
-googleCxInput.value = localStorage.getItem('google_cx') || '';
 
 if (quickSearchCheckbox) {
   const saved = localStorage.getItem('quick_search');
@@ -393,11 +390,19 @@ function fetchAndConvertToBase64(url, fallbackUrl = null) {
 
     img.onload = () => {
       try {
+        let w = img.naturalWidth;
+        let h = img.naturalHeight;
+        const maxDim = 600;
+        if (w > maxDim || h > maxDim) {
+          if (w > h) { h = Math.round(h * (maxDim / w)); w = maxDim; }
+          else { w = Math.round(w * (maxDim / h)); h = maxDim; }
+        }
+        
         const canvas = document.createElement('canvas');
-        canvas.width = img.naturalWidth;
-        canvas.height = img.naturalHeight;
+        canvas.width = w;
+        canvas.height = h;
         const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0);
+        ctx.drawImage(img, 0, 0, w, h);
         const dataUrl = canvas.toDataURL('image/png');
         resolve(dataUrl.split(',')[1]); // raw base64
       } catch (e) {
@@ -499,9 +504,6 @@ modelSelect.addEventListener('change', async () => {
 });
 vocabFieldSelect.addEventListener('change', () => localStorage.setItem('anki_vocab_field', vocabFieldSelect.value));
 imageFieldSelect.addEventListener('change', () => localStorage.setItem('anki_image_field', imageFieldSelect.value));
-
-googleKeyInput.addEventListener('input', () => localStorage.setItem('google_key', googleKeyInput.value.trim()));
-googleCxInput.addEventListener('input', () => localStorage.setItem('google_cx', googleCxInput.value.trim()));
 // Modal Functions
 function showPromptModal(index) {
   if (index < 0 || index >= images.length) return;

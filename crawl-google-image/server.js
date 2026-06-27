@@ -1,7 +1,5 @@
 const express = require('express');
 const cors = require('cors');
-const axios = require('axios');
-const cheerio = require('cheerio');
 const path = require('path');
 
 const app = express();
@@ -13,109 +11,48 @@ app.use(express.static(path.join(__dirname, 'public')));
 // API Endpoint to search images using Bing / Google
 app.get('/api/search', async (req, res) => {
   const query = req.query.q;
-  const googleKey = req.query.googleKey;
-  const googleCx = req.query.googleCx;
   const quick = req.query.quick === 'true';
 
   if (!query) {
     return res.status(400).json({ error: 'Query parameter "q" is required' });
   }
 
-  // If Google keys are provided, use Google Custom Search API
-  if (googleKey && googleCx) {
-    try {
-      const url = `https://www.googleapis.com/customsearch/v1`;
-      // Fetch results (30 images, or 10 if quick mode) in parallel
-      const startIndices = quick ? [1] : [1, 11, 21];
-      const requests = startIndices.map(start => 
-        axios.get(url, {
-          params: {
-            key: googleKey,
-            cx: googleCx,
-            q: query,
-            searchType: 'image',
-            num: 10,
-            start: start
-          },
-          timeout: 10000
-        }).catch(err => {
-          console.error(`Google CSE page start=${start} error:`, err.message);
-          return null; // gracefully ignore failed pages
-        })
-      );
-
-      const responses = await Promise.all(requests);
-      const images = [];
-      const seenUrls = new Set();
-
-      for (const response of responses) {
-        if (!response || !response.data) continue;
-        const items = response.data.items || [];
-        for (const item of items) {
-          if (!item.link || seenUrls.has(item.link)) continue;
-          seenUrls.add(item.link);
-
-          let domain = '';
-          try {
-            domain = new URL(item.image.contextLink).hostname;
-          } catch (e) {}
-
-          images.push({
-            title: item.title || '',
-            url: item.link,
-            thumb: item.image.thumbnailLink,
-            source: domain || 'google'
-          });
-        }
-      }
-
-      if (images.length > 0) {
-        return res.json({ results: images });
-      }
-      console.log('Google search returned no results, falling back to Bing...');
-    } catch (err) {
-      console.error('Google Search error:', err.message);
-      console.log('Falling back to Bing search...');
-    }
-  }
-
-  // Otherwise, fallback to Bing Images scraping
-  // Fetch multiple queries in parallel to bypass pagination limitations and get ~80-100 unique images (or 1 if quick mode)
   try {
     const queries = quick ? [query] : [query, `${query} photo`, `${query} material`].slice(0, 3);
     const scrapeRequests = queries.map(async (q) => {
-      const url = `https://www.bing.com/images/search?q=${encodeURIComponent(q)}`;
+      const url = `https://www.bing.com/images/search?q=${encodeURIComponent(q)}&first=1&count=20`;
       try {
-        const { data } = await axios.get(url, {
+        const response = await fetch(url, {
           headers: {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
             'Accept-Language': 'en-US,en;q=0.9'
           },
-          timeout: 10000
+          signal: AbortSignal.timeout(10000)
         });
-        const $ = cheerio.load(data);
+        const data = await response.text();
+        
         const pageImages = [];
-        $('.iusc').each((i, el) => {
-          const mAttr = $(el).attr('m');
-          if (mAttr) {
-            try {
-              const mData = JSON.parse(mAttr);
-              if (mData.murl) {
-                let domain = '';
-                try {
-                  domain = new URL(mData.murl).hostname;
-                } catch (e) {}
+        const mRegex = /m="({[^"]+})"/g;
+        let match;
+        
+        while ((match = mRegex.exec(data)) !== null) {
+          try {
+            const jsonStr = match[1].replace(/&quot;/g, '"').replace(/&amp;/g, '&');
+            const mData = JSON.parse(jsonStr);
+            
+            if (mData.murl) {
+              let domain = '';
+              try { domain = new URL(mData.murl).hostname; } catch (e) {}
 
-                pageImages.push({
-                  title: mData.title || '',
-                  url: mData.murl,
-                  thumb: mData.turl,
-                  source: domain || mData.pubDomain || 'external'
-                });
-              }
-            } catch (e) {}
-          }
-        });
+              pageImages.push({
+                title: mData.title || '',
+                url: mData.murl,
+                thumb: mData.turl,
+                source: domain || mData.pubDomain || 'external'
+              });
+            }
+          } catch (e) {}
+        }
         return pageImages;
       } catch (err) {
         console.error(`Bing scrape error for subquery "${q}":`, err.message);
@@ -152,32 +89,28 @@ app.get('/api/proxy', async (req, res) => {
 
   try {
     let referer = 'https://duckduckgo.com/';
-    try {
-      referer = new URL(imageUrl).origin;
-    } catch (e) {}
+    try { referer = new URL(imageUrl).origin; } catch (e) {}
 
-    const response = await axios({
-      method: 'get',
-      url: imageUrl,
-      responseType: 'stream',
+    const response = await fetch(imageUrl, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'Referer': referer
       },
-      timeout: 10000
+      signal: AbortSignal.timeout(10000)
     });
 
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET');
     
-    if (response.headers['content-type']) {
-      res.setHeader('Content-Type', response.headers['content-type']);
+    if (response.headers.get('content-type')) {
+      res.setHeader('Content-Type', response.headers.get('content-type'));
     }
-    if (response.headers['content-length']) {
-      res.setHeader('Content-Length', response.headers['content-length']);
+    if (response.headers.get('content-length')) {
+      res.setHeader('Content-Length', response.headers.get('content-length'));
     }
 
-    response.data.pipe(res);
+    const { Readable } = require('stream');
+    Readable.fromWeb(response.body).pipe(res);
   } catch (err) {
     console.error('Proxy error for:', imageUrl, err.message);
     res.status(500).send('Error loading image');
@@ -188,13 +121,20 @@ app.get('/api/proxy', async (req, res) => {
 app.get('/media/:filename', async (req, res) => {
   const filename = req.params.filename;
   try {
-    const response = await axios.post('http://127.0.0.1:8765', {
-      action: 'retrieveMediaFile',
-      version: 6,
-      params: { filename }
-    }, { timeout: 15000 });
-
-    const base64Data = response.data.result;
+    const response = await fetch('http://127.0.0.1:8765', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'retrieveMediaFile',
+        version: 6,
+        params: { filename }
+      }),
+      signal: AbortSignal.timeout(15000)
+    });
+    
+    const data = await response.json();
+    const base64Data = data.result;
+    
     if (!base64Data) {
       return res.status(404).send('File not found');
     }
@@ -221,10 +161,14 @@ app.get('/media/:filename', async (req, res) => {
 // Proxy endpoint to AnkiConnect to bypass CORS issues
 app.post('/api/ankiconnect', express.json({ limit: '50mb' }), async (req, res) => {
   try {
-    const response = await axios.post('http://127.0.0.1:8765', req.body, {
-      timeout: 60000
+    const response = await fetch('http://127.0.0.1:8765', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(req.body),
+      signal: AbortSignal.timeout(60000)
     });
-    res.json(response.data);
+    const data = await response.json();
+    res.json(data);
   } catch (err) {
     console.error('AnkiConnect proxy error:', err.message);
     res.status(500).json({ error: 'AnkiConnect is offline or unreachable' });
