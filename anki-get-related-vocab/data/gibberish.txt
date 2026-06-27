@@ -375,6 +375,7 @@ akros
 akusala
 alaeque
 alargecola
+alay
 alba
 albergo
 alberi
@@ -7171,6 +7172,7 @@ inten
 intendo
 intensa
 intensiv
+intensivelyd
 intenso
 intenzione
 intenzioni
