@@ -9,13 +9,42 @@
 <body>
   <div class="app-container review-layout">
     <main class="review-main">
-      <!-- Card Panel -->
-      <section class="card-pane">
+      <!-- Top Navigation -->
+      <div style="padding: 10px; background: var(--bg-card); display: flex; justify-content: space-between; border-bottom: 1px solid var(--border);">
+        <button id="btn-back-decks" class="btn" style="font-weight: bold; font-size: 14px;">&larr; Decks</button>
+        <div style="font-weight: bold; color: var(--text-muted); padding-top: 4px;">Anki Image Finder Reviewer</div>
+      </div>
+
+      <!-- Decks Screen -->
+      <section id="decks-screen" class="card-pane" style="margin-top: 20px;">
+        <h2 style="margin-bottom: 15px; color: var(--text);">Decks (Missing Images)</h2>
+        <div id="decks-loading" style="color: var(--text-muted);">Loading decks...</div>
+        <table class="browser-table hidden" id="decks-table" style="width: 100%;">
+          <thead>
+            <tr>
+              <th style="text-align: left;">Deck</th>
+              <th style="text-align: center;">Cards (No Image)</th>
+            </tr>
+          </thead>
+          <tbody id="decks-tbody"></tbody>
+        </table>
+      </section>
+
+      <!-- Review Screen -->
+      <section id="review-screen" class="card-pane hidden">
         <div id="no-cards-msg" class="no-cards-message">
           <p>No cards due today! Select another deck or enjoy your day. 🎉</p>
         </div>
 
+        <div class="review-stats" style="text-align: center; margin-top: -10px; margin-bottom: 20px; font-size: 14px;">
+          <span style="color: var(--success); font-weight: bold;" id="count-new">0</span> New | 
+          <span style="color: var(--accent); font-weight: bold;" id="count-due">0</span> Due
+        </div>
+
         <div id="card-display" class="card-display-box hidden">
+          <div class="card-header" style="text-align: center; margin-bottom: 10px;">
+             <h2 id="vocab-word-display" style="color: var(--text-muted); font-size: 16px;"></h2>
+          </div>
           <div class="card-content">
             <div id="card-question" class="card-side question-side"></div>
             <hr id="card-divider" class="card-divider hidden">
@@ -28,10 +57,10 @@
 
             <!-- Grading Buttons -->
             <div id="grading-actions" class="grading-actions hidden">
-              <button id="grade-again" class="btn btn-grade btn-again">Again</button>
-              <button id="grade-hard" class="btn btn-grade btn-hard">Hard</button>
-              <button id="grade-good" class="btn btn-grade btn-good">Good</button>
-              <button id="grade-easy" class="btn btn-grade btn-easy">Easy</button>
+              <button id="grade-again" class="btn btn-grade btn-again">Again (A/1)</button>
+              <button id="grade-hard" class="btn btn-grade btn-hard">Hard (S/2)</button>
+              <button id="grade-good" class="btn btn-grade btn-good">Good (D/3)</button>
+              <button id="grade-easy" class="btn btn-grade btn-easy">Easy (W/4)</button>
             </div>
           </div>
         </div>

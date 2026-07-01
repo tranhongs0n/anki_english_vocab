@@ -330,7 +330,11 @@ input:focus, select:focus {
 }
 
 .card-actions {
-  display: none !important;
+  display: flex !important;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  margin-top: 10px;
 }
 
 .type-answer-input {

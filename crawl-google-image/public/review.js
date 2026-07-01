@@ -30,6 +30,14 @@ const crawlerModal = document.getElementById('crawler-modal');
 const crawlerIframe = document.getElementById('crawler-iframe');
 const closeCrawlerBtn = document.getElementById('close-crawler-btn');
 
+// Decks Screen elements
+const decksScreen = document.getElementById('decks-screen');
+const reviewScreen = document.getElementById('review-screen');
+const btnBackDecks = document.getElementById('btn-back-decks');
+const decksTbody = document.getElementById('decks-tbody');
+const decksLoading = document.getElementById('decks-loading');
+const decksTable = document.getElementById('decks-table');
+
 const toast = document.getElementById('toast');
 const moveLaterBtn = document.getElementById('move-later-btn');
 const moveOtherBtn = document.getElementById('move-other-btn');
@@ -132,7 +140,7 @@ async function init() {
     await populateSettingsOptions();
     
     // Initial queue load
-    await loadReviewQueue();
+    await showDecksScreen();
   } catch (err) {
     isAnkiConnected = false;
     if (statusBadge) {
@@ -163,16 +171,96 @@ async function init() {
     if (e.key === 'Escape') { e.preventDefault(); closeCardBrowser(); }
   });
 
+  if (btnBackDecks) {
+    btnBackDecks.addEventListener('click', () => {
+      showDecksScreen();
+    });
+  }
+
   // Preload the image search iframe so it loads only once
   crawlerIframe.src = '/index.html';
+}
+
+async function showDecksScreen() {
+  decksScreen.classList.remove('hidden');
+  reviewScreen.classList.add('hidden');
+  decksLoading.classList.remove('hidden');
+  decksTable.classList.add('hidden');
+  decksTbody.innerHTML = '';
+
+  try {
+    const decks = await invokeAnkiConnect('deckNames');
+    const imageField = imageFieldSelect.value || localStorage.getItem('anki_image_field');
+    
+    if (!imageField) {
+      decksLoading.textContent = 'Please open Settings ⚙️ and select your Target Image Field first.';
+      return;
+    }
+
+    decksLoading.textContent = 'Analyzing collection... (this may take a few seconds)';
+    
+    // Search across all decks to find cards missing images
+    let queryStr = `-is:suspended (is:new OR is:due) "${imageField}:"`;
+    
+    const newIds = await invokeAnkiConnect('findCards', { query: queryStr });
+    const deckCounts = {};
+    
+    if (newIds && newIds.length > 0) {
+      const cardsData = await invokeAnkiConnect('cardsInfo', { cards: newIds });
+      for (const c of cardsData) {
+        if (!deckCounts[c.deckName]) deckCounts[c.deckName] = 0;
+        deckCounts[c.deckName]++;
+      }
+    }
+    
+    decks.forEach(deckName => {
+      const count = deckCounts[deckName] || 0;
+      if (count === 0) return; // Hide empty decks
+      
+      const tr = document.createElement('tr');
+      tr.style.cursor = 'pointer';
+      tr.addEventListener('click', () => {
+        deckSelect.value = deckName;
+        localStorage.setItem('anki_deck', deckName);
+        decksScreen.classList.add('hidden');
+        reviewScreen.classList.remove('hidden');
+        loadReviewQueue();
+      });
+      
+      tr.innerHTML = `
+        <td style="color: var(--accent); font-weight: bold; padding: 12px 8px;">${deckName}</td>
+        <td style="text-align: center; color: var(--success); font-weight: bold; padding: 12px 8px;">${count}</td>
+      `;
+      // Hover effect via JS since CSS isn't setup for this specifically
+      tr.onmouseenter = () => tr.style.backgroundColor = 'var(--bg-lighter)';
+      tr.onmouseleave = () => tr.style.backgroundColor = 'transparent';
+      decksTbody.appendChild(tr);
+    });
+    
+    if (decksTbody.children.length === 0) {
+      decksTbody.innerHTML = '<tr><td colspan="2" style="text-align: center; padding: 20px;">No cards missing images! 🎉</td></tr>';
+    }
+    
+    decksLoading.classList.add('hidden');
+    decksTable.classList.remove('hidden');
+  } catch (err) {
+    decksLoading.textContent = 'Error loading decks.';
+    console.error(err);
+  }
 }
 
 // Drawer Open/Close
 function toggleSettingsDrawer(open) {
   if (open) {
+    settingsDrawer.classList.add('open');
     settingsDrawer.classList.remove('hidden');
   } else {
-    settingsDrawer.classList.add('hidden');
+    settingsDrawer.classList.remove('open');
+    setTimeout(() => {
+      if (!settingsDrawer.classList.contains('open')) {
+        settingsDrawer.classList.add('hidden');
+      }
+    }, 300);
   }
 }
 
@@ -319,11 +407,13 @@ async function loadActiveCard() {
 
 // Process Anki HTML media paths to absolute URLs served by Express media proxy
 // Replace "[sound:filename.mp3]" with HTML5 audio tags for auto playback
-function preprocessAnkiHtml(html) {
+function preprocessAnkiHtml(html, isQuestion = true) {
   if (!html) return '';
   
   let processed = html.replace(/(?:\[\[|\{\{)type:([^\]}]+)(?:\]\]|\}\})/g, (match, fieldName) => {
-    typeAnswerField = fieldName.trim();
+    if (isQuestion) {
+      typeAnswerField = fieldName.trim();
+    }
     return `<input type="text" id="type-answer-input" class="type-answer-input" autocomplete="off" placeholder="Type answer and press Enter...">`;
   });
 
@@ -370,7 +460,7 @@ function preprocessAnkiAnswerHtml(html) {
     }
   }
   
-  return preprocessAnkiHtml(processed);
+  return preprocessAnkiHtml(processed, false);
 }
 
 // Extract word for search
@@ -420,18 +510,6 @@ function renderActiveCard() {
   const word = getVocabWord();
   if (vocabWordDisplay) vocabWordDisplay.textContent = word || 'No word found';
   
-  if (word) {
-    fetch('http://localhost:8005/api/word', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ word: word })
-    }).catch(err => {
-      console.warn("Could not notify python monitor:", err);
-    });
-  }
-  
   if (!crawlerModal.classList.contains('hidden') && word) {
     if (lastSearchedWord !== word) {
       if (crawlerIframe.contentWindow && typeof crawlerIframe.contentWindow.triggerSearch === 'function') {
@@ -451,13 +529,13 @@ function renderActiveCard() {
   const typeInput = document.getElementById('type-answer-input');
   if (typeInput) {
     typeInput.focus();
-    typeInput.addEventListener('keydown', (e) => {
+    typeInput.onkeydown = (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
         typedAnswerValue = typeInput.value.trim();
         showAnswer();
       }
-    });
+    };
   }
 }
 
@@ -757,21 +835,22 @@ document.addEventListener('keydown', (e) => {
     return;
   }
 
-  // Grading card (1, 2, 3, 4)
+  // Grading card (1, 2, 3, 4 or w, a, s, d)
+  // Maps: a=Again(1), s=Hard(2), d=Good(3), w=Easy(4)
   if (!gradingActions.classList.contains('hidden')) {
-    if (e.key === '1') {
+    if (e.key === '1' || e.key.toLowerCase() === 'a') {
       e.preventDefault();
       gradeCard(1);
       return;
-    } else if (e.key === '2') {
+    } else if (e.key === '2' || e.key.toLowerCase() === 's') {
       e.preventDefault();
       gradeCard(2);
       return;
-    } else if (e.key === '3') {
+    } else if (e.key === '3' || e.key.toLowerCase() === 'd') {
       e.preventDefault();
       gradeCard(3);
       return;
-    } else if (e.key === '4') {
+    } else if (e.key === '4' || e.key.toLowerCase() === 'w') {
       e.preventDefault();
       gradeCard(4);
       return;
@@ -876,9 +955,13 @@ async function runBrowserSearch() {
     // Fetch card types for status badge
     const allCardIds = notes.flatMap(n => n.cards || []);
     let cardTypeMap = {};
+    let deckMap = {};
     if (allCardIds.length > 0) {
       const cardsData = await invokeAnkiConnect('cardsInfo', { cards: allCardIds });
-      cardsData.forEach(c => { cardTypeMap[c.cardId] = c.type; });
+      cardsData.forEach(c => { 
+        cardTypeMap[c.cardId] = c.type; 
+        deckMap[c.cardId] = c.deckName;
+      });
     }
 
     const vocabField  = vocabFieldSelect.value  || localStorage.getItem('anki_vocab_field')  || 'Word';
@@ -887,7 +970,7 @@ async function runBrowserSearch() {
     notes.forEach(note => {
       const word    = stripHtml(note.fields[vocabField]?.value   || Object.values(note.fields)[0]?.value || '');
       const meaning = stripHtml(note.fields[meaningField]?.value || Object.values(note.fields)[1]?.value || '');
-      const deck    = note.cards?.length ? (note.deckName || '—') : '—';
+      const deck    = note.cards?.length ? (deckMap[note.cards[0]] || '—') : '—';
 
       // Determine card status from first card
       const firstCardType = note.cards?.length ? cardTypeMap[note.cards[0]] : undefined;
@@ -897,12 +980,32 @@ async function runBrowserSearch() {
       else if (firstCardType === 3) { badgeClass = 'due';    badgeLabel = 'Due'; }
 
       const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td title="${word}">${word}</td>
-        <td title="${meaning}">${meaning || '<span style="opacity:0.4">—</span>'}</td>
-        <td title="${deck}" style="color:var(--text-muted);font-size:11px">${deck}</td>
-        <td><span class="browser-badge ${badgeClass}">${badgeLabel}</span></td>
-      `;
+      
+      const tdWord = document.createElement('td');
+      tdWord.title = word;
+      tdWord.textContent = word;
+      
+      const tdMeaning = document.createElement('td');
+      tdMeaning.title = meaning;
+      if (meaning) {
+        tdMeaning.textContent = meaning;
+      } else {
+        tdMeaning.innerHTML = '<span style="opacity:0.4">—</span>';
+      }
+
+      const tdDeck = document.createElement('td');
+      tdDeck.title = deck;
+      tdDeck.style.color = 'var(--text-muted)';
+      tdDeck.style.fontSize = '11px';
+      tdDeck.textContent = deck;
+
+      const tdStatus = document.createElement('td');
+      tdStatus.innerHTML = `<span class="browser-badge ${badgeClass}">${badgeLabel}</span>`;
+
+      tr.appendChild(tdWord);
+      tr.appendChild(tdMeaning);
+      tr.appendChild(tdDeck);
+      tr.appendChild(tdStatus);
       tbody.appendChild(tr);
     });
 

@@ -15,6 +15,7 @@ const modalCloseBtn = document.getElementById('modal-close');
 
 let images = [];
 let selectedIndex = -1;
+let modalImageIndex = -1;
 let toastTimeout;
 
 // Reviewer iframe integration helpers
@@ -153,7 +154,7 @@ async function triggerCopy(index) {
 }
 
 // Copy helper with automatic fallback
-async function copyImageByUrl(srcUrl, fallbackUrl = null, fallbackMessage = "") {
+function copyImageByUrl(srcUrl, fallbackUrl = null, fallbackMessage = "") {
   try {
     const proxyUrl = `/api/proxy?url=${encodeURIComponent(srcUrl)}`;
     const img = new Image();
@@ -507,6 +508,7 @@ imageFieldSelect.addEventListener('change', () => localStorage.setItem('anki_ima
 // Modal Functions
 function showPromptModal(index) {
   if (index < 0 || index >= images.length) return;
+  modalImageIndex = index;
   const targetImage = images[index];
   
   modalImagePreview.src = targetImage.thumb;
@@ -580,7 +582,7 @@ async function linkImageToAnkiCard() {
     }
 
     setModalStatus("Uploading image to Anki...", "info");
-    const targetImage = images[selectedIndex];
+    const targetImage = images[modalImageIndex];
     const proxyUrl = `/api/proxy?url=${encodeURIComponent(targetImage.url)}`;
     const base64Data = await fetchAndConvertToBase64(proxyUrl, targetImage.thumb);
 
@@ -632,7 +634,9 @@ async function linkImageToAnkiCard() {
 modalCloseBtn.addEventListener('click', hidePromptModal);
 modalCancelBtn.addEventListener('click', hidePromptModal);
 modalConfirmBtn.addEventListener('click', linkImageToAnkiCard);
-document.querySelector('.modal-backdrop').addEventListener('click', hidePromptModal);
+document.querySelector('.modal-backdrop').addEventListener('click', (e) => {
+  if (e.target.classList.contains('modal-backdrop')) hidePromptModal();
+});
 // Compute dynamic column count in CSS grid
 function getColumnsCount() {
   const cards = Array.from(document.querySelectorAll('.image-card'));
@@ -703,24 +707,24 @@ document.addEventListener('keydown', (e) => {
   switch (e.key) {
     // Left
     case 'ArrowLeft':
-    case 'r':
-    case 'R':
+    case 'a':
+    case 'A':
       e.preventDefault();
       selectImage(selectedIndex - 1);
       break;
 
     // Right
     case 'ArrowRight':
-    case 't':
-    case 'T':
+    case 'd':
+    case 'D':
       e.preventDefault();
       selectImage(selectedIndex + 1);
       break;
 
     // Up
     case 'ArrowUp':
-    case 'f':
-    case 'F':
+    case 'w':
+    case 'W':
       e.preventDefault();
       selectImage(selectedIndex - columns);
       break;
@@ -752,8 +756,8 @@ document.addEventListener('keydown', (e) => {
       break;
 
     // Sync directly to Anki as new note
-    case 'a':
-    case 'A':
+    case 'n':
+    case 'N':
       e.preventDefault();
       if (linkImageIfIframe(selectedIndex)) {
         break;
