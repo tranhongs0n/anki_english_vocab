@@ -20,7 +20,7 @@ app.get('/api/search', async (req, res) => {
   try {
     const queries = quick ? [query] : [query, `${query} photo`, `${query} material`].slice(0, 3);
     const scrapeRequests = queries.map(async (q) => {
-      const url = `https://www.bing.com/images/search?q=${encodeURIComponent(q)}&first=1&count=20`;
+      const url = `https://www.bing.com/images/search?q=${encodeURIComponent(q)}&first=1&count=20&adlt=strict`;
       try {
         const response = await fetch(url, {
           headers: {

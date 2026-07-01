@@ -42,6 +42,7 @@ let typeAnswerField = null;
 let typedAnswerValue = '';
 let isAnkiConnected = false;
 let toastTimeout;
+let lastSearchedWord = '';
 
 // Helper to display Toast
 function showToast(message, duration = 3000) {
@@ -102,7 +103,10 @@ async function init() {
     localStorage.setItem('anki_vocab_field', vocabFieldSelect.value);
     renderActiveCard(); // Reload card representation if word field changes
   });
-  imageFieldSelect.addEventListener('change', () => localStorage.setItem('anki_image_field', imageFieldSelect.value));
+  imageFieldSelect.addEventListener('change', () => {
+    localStorage.setItem('anki_image_field', imageFieldSelect.value);
+    loadReviewQueue();
+  });
   
   if (quickSearchCheckbox) {
     quickSearchCheckbox.addEventListener('change', () => localStorage.setItem('quick_search', quickSearchCheckbox.checked));
@@ -233,7 +237,7 @@ async function loadFieldsForModel(modelName) {
   }
 }
 
-// Load only NEW cards, shuffled randomly
+// Load cards that do not have an image, shuffled randomly
 async function loadReviewQueue() {
   if (!isAnkiConnected) return;
   const deck = deckSelect.value;
@@ -244,10 +248,15 @@ async function loadReviewQueue() {
     return;
   }
 
-  showToast('Loading new cards...');
+  showToast('Loading cards without images...');
 
   try {
-    const newIds = await invokeAnkiConnect('findCards', { query: `deck:"${deck}" is:new -is:suspended` });
+    const imageField = imageFieldSelect.value || localStorage.getItem('anki_image_field');
+    let queryStr = `deck:"${deck}" -is:suspended (is:new OR is:due)`;
+    if (imageField) {
+      queryStr += ` "${imageField}:"`;
+    }
+    const newIds = await invokeAnkiConnect('findCards', { query: queryStr });
 
     if (!newIds || newIds.length === 0) {
       activeQueue = [];
@@ -257,8 +266,12 @@ async function loadReviewQueue() {
       return;
     }
 
-    // Shuffle for random order
-    const shuffled = [...newIds].sort(() => Math.random() - 0.5);
+    // Shuffle for true random order (Fisher-Yates)
+    const shuffled = [...newIds];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
     activeQueue = shuffled.map(id => ({ cardId: id, type: 'new' }));
     currentCardIndex = 0;
 
@@ -365,17 +378,21 @@ function getVocabWord() {
   if (!currentCardInfo || !currentCardInfo.fields) return '';
   const vocabField = vocabFieldSelect.value || localStorage.getItem('anki_vocab_field') || 'Front';
   
+  let rawVal = '';
   if (currentCardInfo.fields[vocabField]) {
-    const rawVal = currentCardInfo.fields[vocabField].value;
+    rawVal = currentCardInfo.fields[vocabField].value;
+  } else {
+    const firstFieldName = Object.keys(currentCardInfo.fields)[0];
+    if (firstFieldName && currentCardInfo.fields[firstFieldName]) {
+      rawVal = currentCardInfo.fields[firstFieldName].value;
+    }
+  }
+
+  if (rawVal) {
+    rawVal = rawVal.replace(/\[sound:[^\]]+\]/gi, '');
+    rawVal = rawVal.replace(/\{\{c\d+::([^}]+)\}\}/gi, '$1');
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = rawVal;
-    return tempDiv.textContent.trim();
-  }
-  
-  const firstFieldName = Object.keys(currentCardInfo.fields)[0];
-  if (firstFieldName && currentCardInfo.fields[firstFieldName]) {
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = currentCardInfo.fields[firstFieldName].value;
     return tempDiv.textContent.trim();
   }
   
@@ -416,7 +433,14 @@ function renderActiveCard() {
   }
   
   if (!crawlerModal.classList.contains('hidden') && word) {
-    crawlerIframe.src = `/index.html?q=${encodeURIComponent(word)}`;
+    if (lastSearchedWord !== word) {
+      if (crawlerIframe.contentWindow && typeof crawlerIframe.contentWindow.triggerSearch === 'function') {
+        crawlerIframe.contentWindow.triggerSearch(word);
+      } else {
+        crawlerIframe.src = `/index.html?q=${encodeURIComponent(word)}`;
+      }
+      lastSearchedWord = word;
+    }
     setTimeout(() => {
       try {
         crawlerIframe.focus();
@@ -545,13 +569,19 @@ function openImageCrawler() {
     return;
   }
   
+  // Show toast so the user knows what word is actually being searched
+  showToast(`Searching for: "${word}"`, 2000);
+  
   crawlerModal.classList.remove('hidden');
 
   // Trigger search using exposed JS callback if iframe is loaded, otherwise set src
-  if (crawlerIframe.contentWindow && typeof crawlerIframe.contentWindow.triggerSearch === 'function') {
-    crawlerIframe.contentWindow.triggerSearch(word);
-  } else {
-    crawlerIframe.src = `/index.html?q=${encodeURIComponent(word)}`;
+  if (lastSearchedWord !== word) {
+    if (crawlerIframe.contentWindow && typeof crawlerIframe.contentWindow.triggerSearch === 'function') {
+      crawlerIframe.contentWindow.triggerSearch(word);
+    } else {
+      crawlerIframe.src = `/index.html?q=${encodeURIComponent(word)}`;
+    }
+    lastSearchedWord = word;
   }
   
   setTimeout(() => {
@@ -712,11 +742,17 @@ document.addEventListener('keydown', (e) => {
     closeCardBrowser();
     return;
   }
-  // Space / Enter: show answer
+  // Space / Enter: show answer or grade
   if (e.key === ' ' || e.key === 'Enter') {
     e.preventDefault();
     if (!showAnswerBtn.classList.contains('hidden')) {
       showAnswer();
+    } else if (!gradingActions.classList.contains('hidden')) {
+      if (e.key === 'Enter') {
+        gradeCard(3);
+      } else if (e.key === ' ') {
+        gradeCard(1);
+      }
     }
     return;
   }

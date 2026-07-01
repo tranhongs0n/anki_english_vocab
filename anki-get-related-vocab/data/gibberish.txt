@@ -3197,6 +3197,7 @@ cultur
 cultura
 culturale
 cumstances
+cung
 cunit
 cuore
 cup's
@@ -3346,6 +3347,7 @@ deedle
 deepak
 deez
 defendnot
+deferl
 defi
 defiador
 defiantnounstr
@@ -5346,6 +5348,7 @@ gamechangers
 gamesorsomething
 gan
 gandavyuha
+gangnam
 gara
 garbate
 gardener's
@@ -5940,6 +5943,7 @@ heod
 heodmoster
 heolth
 heolthy
+heory
 heot
 heovy
 her's
@@ -10288,6 +10292,7 @@ ook
 ool
 oonset
 oooaowee
+oooo
 oooooooohhhhhhhhh
 oos
 oot
@@ -11459,6 +11464,7 @@ progetto
 program's
 programmeis
 progressfor
+progressivly
 prohib
 prohibiled
 prohibitivenoun
@@ -16140,6 +16146,7 @@ wa
 waatang
 waisi
 waisman
+waistland
 waiti
 waitron
 waitzkin
@@ -16848,6 +16855,7 @@ zendos
 zenhabits
 zenship
 zeppe
+zhik
 zhiyi
 zhoushu
 zhǔ
@@ -16889,6 +16897,7 @@ zzzzz
 état
 été
 être
+đại dịch
 刻
 规
 🗣️speakairtrnn	"🗣️speakairtrnnˈɛrtreɪn		tàuhỏasânbay(lỗi)"

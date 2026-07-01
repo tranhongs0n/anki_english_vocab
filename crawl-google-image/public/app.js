@@ -703,32 +703,32 @@ document.addEventListener('keydown', (e) => {
   switch (e.key) {
     // Left
     case 'ArrowLeft':
-    case 'h':
-    case 'H':
+    case 'r':
+    case 'R':
       e.preventDefault();
       selectImage(selectedIndex - 1);
       break;
 
     // Right
     case 'ArrowRight':
-    case 'l':
-    case 'L':
+    case 't':
+    case 'T':
       e.preventDefault();
       selectImage(selectedIndex + 1);
       break;
 
     // Up
     case 'ArrowUp':
-    case 'k':
-    case 'K':
+    case 'f':
+    case 'F':
       e.preventDefault();
       selectImage(selectedIndex - columns);
       break;
 
     // Down
     case 'ArrowDown':
-    case 'j':
-    case 'J':
+    case 's':
+    case 'S':
       e.preventDefault();
       selectImage(selectedIndex + columns);
       break;
