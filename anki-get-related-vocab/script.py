@@ -434,6 +434,17 @@ def run_git_command(args):
     result = subprocess.run(args, capture_output=True, text=True, shell=True)
     return result
 
+def suspend_target_cards():
+    log_info("Suspending cards in '*01_Name*' and '*98_Later*'...")
+    query = 'deck:"*01_Name*" OR deck:"*98_Later*"'
+    card_ids = invoke('findCards', query=query)
+    if card_ids:
+        log_info(f"Suspending {len(card_ids)} cards...")
+        invoke('suspend', cards=card_ids)
+        log_info("Cards suspended successfully.")
+    else:
+        log_info("No cards found to suspend.")
+
 def end_session_process():
     log_info("Starting End Session Process...")
     dump_gibberish()
@@ -445,6 +456,7 @@ def end_session_process():
         log_info("Notes deleted successfully from Anki.")
     else:
         log_info("No notes found to delete.")
+    suspend_target_cards()
     log_info("Syncing Anki...")
     invoke('sync')
     log_info("Anki sync completed.")

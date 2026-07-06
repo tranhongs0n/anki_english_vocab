@@ -545,12 +545,12 @@ async function linkImageToAnkiCard() {
   setModalStatus("Searching card in Anki...", "info");
 
   try {
-    // Search broadly for notes containing the word text inside the deck & model type
-    const query = `deck:"${deck}" note:"${model}" "${vocabWord}"`;
+    // Search broadly for notes containing the word text inside the model type across all decks
+    const query = `note:"${model}" "${vocabWord}"`;
     const noteIds = await invokeAnkiConnect('findNotes', { query });
 
     if (!noteIds || noteIds.length === 0) {
-      setModalStatus(`No matching card found for "${vocabWord}" in deck "${deck}".`, "error");
+      setModalStatus(`No matching card found for "${vocabWord}".`, "error");
       return;
     }
 
