@@ -157,3 +157,6 @@ sage
 tumor
 stammer
 deduce
+falter
+tack
+balky

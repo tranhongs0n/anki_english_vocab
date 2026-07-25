@@ -59,6 +59,14 @@ def main():
 
     print(f"Found {len(models)} note types: {', '.join(models)}")
 
+    valid_folders = {clean_folder_name(m) for m in models}
+    for item in os.listdir(BASE_DIR):
+        item_path = os.path.join(BASE_DIR, item)
+        if os.path.isdir(item_path) and not item.startswith(".") and item != "__pycache__" and item not in valid_folders:
+            import shutil
+            shutil.rmtree(item_path, ignore_errors=True)
+            print(f"Removed obsolete model folder: '{item}'")
+
     for model_name in models:
         folder_name = clean_folder_name(model_name)
         model_dir = os.path.join(BASE_DIR, folder_name)

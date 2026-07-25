@@ -82,7 +82,8 @@
         .controls-bar {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 12px;
+            flex-wrap: wrap;
         }
 
         .control-group {
@@ -146,6 +147,16 @@
             background: #059669;
         }
 
+        .btn-real {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            font-weight: 600;
+        }
+
+        .btn-real:hover {
+            opacity: 0.9;
+        }
+
         /* Main Workspace Layout */
         .workspace {
             display: flex;
@@ -154,33 +165,64 @@
             overflow: hidden;
         }
 
-        /* Sidebar for Sample Data */
+        /* Sidebar for Sample Data & CSS/HTML Editor */
         .sidebar {
-            width: 320px;
+            width: 360px;
             background: var(--bg-secondary);
             border-right: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
             transition: width 0.3s ease;
-            overflow-y: auto;
+            overflow: hidden;
+        }
+
+        .sidebar-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--bg-primary);
+        }
+
+        .sidebar-tab {
+            flex: 1;
+            text-align: center;
+            padding: 12px 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .sidebar-tab.active {
+            color: var(--accent-primary);
+            border-bottom-color: var(--accent-primary);
+            background: var(--bg-secondary);
         }
 
         .sidebar-header {
-            padding: 16px 20px;
+            padding: 12px 16px;
             border-bottom: 1px solid var(--border-color);
             display: flex;
             align-items: center;
             justify-content: space-between;
             font-weight: 600;
-            font-size: 0.95rem;
+            font-size: 0.85rem;
             color: #e2e8f0;
+            background: var(--bg-tertiary);
         }
 
-        .fields-container {
+        .tab-content {
+            flex: 1;
+            overflow-y: auto;
+            display: none;
             padding: 16px;
-            display: flex;
             flex-direction: column;
             gap: 14px;
+        }
+
+        .tab-content.active {
+            display: flex;
         }
 
         .field-item {
@@ -215,19 +257,35 @@
         }
 
         textarea.field-input {
-            min-height: 60px;
+            min-height: 50px;
             resize: vertical;
+        }
+
+        textarea.code-editor {
+            width: 100%;
+            flex: 1;
+            min-height: 400px;
+            background: #0a0c10;
+            color: #a5b4fc;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            resize: none;
+            outline: none;
         }
 
         /* Devices Stage */
         .stage {
             flex: 1;
             background: radial-gradient(circle at 50% 50%, #1e2130 0%, var(--bg-primary) 100%);
-            padding: 32px;
+            padding: 24px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 24px;
+            gap: 20px;
             align-items: center;
         }
 
@@ -237,6 +295,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
         }
 
         .status-pill {
@@ -270,7 +330,7 @@
         .devices-grid {
             display: flex;
             flex-wrap: wrap;
-            gap: 32px;
+            gap: 24px;
             justify-content: center;
             align-items: flex-start;
             width: 100%;
@@ -332,8 +392,8 @@
         }
 
         .device-pc .viewport-wrapper {
-            width: 720px;
-            height: 480px;
+            width: 680px;
+            height: 460px;
             border-radius: 8px;
         }
 
@@ -354,14 +414,13 @@
         }
 
         .device-ipad .viewport-wrapper {
-            width: 640px;
+            width: 620px;
             height: 800px;
             border-radius: 20px;
             border-width: 10px;
             border-color: #3f3f46;
         }
 
-        /* Simulated Status Bars for Phones */
         .status-bar {
             height: 28px;
             background: #111;
@@ -390,7 +449,6 @@
             border-bottom-right-radius: 14px;
         }
 
-        /* iframe container */
         .viewport-frame {
             width: 100%;
             height: calc(100% - 28px);
@@ -430,13 +488,24 @@
             opacity: 1;
         }
 
-        /* Hide elements conditionally based on layout */
         .layout-pc-only .device-android,
         .layout-pc-only .device-iphone,
         .layout-pc-only .device-ipad { display: none; }
         
         .layout-mobile-only .device-pc,
         .layout-mobile-only .device-ipad { display: none; }
+
+        .real-card-nav {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(245, 158, 11, 0.15);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            color: #fbbf24;
+        }
     </style>
 </head>
 <body>
@@ -455,6 +524,16 @@
                     <option value="">Loading Models...</option>
                 </select>
             </div>
+
+            <!-- Real Note Loader -->
+            <div class="real-card-nav" id="realNav" style="display: none;">
+                <span>🃏 Real Note: <strong id="realIdx">1</strong>/<strong id="realTotal">0</strong></span>
+                <button class="btn" style="padding: 2px 6px; color:#fbbf24;" onclick="prevRealNote()">⬅️</button>
+                <button class="btn" style="padding: 2px 6px; color:#fbbf24;" onclick="nextRealNote()">➡️</button>
+            </div>
+            <button class="btn btn-real" onclick="loadRealNotes()">
+                <span>🎲 Load Real Cards</span>
+            </button>
 
             <!-- Card Face Selector -->
             <div class="control-group">
@@ -483,11 +562,8 @@
             </div>
 
             <!-- Push to Anki Button -->
-            <button class="btn btn-primary" onclick="pushToAnki()">
-                <span>🚀 Push to Anki</span>
-            </button>
-            <button class="btn btn-success" onclick="pullFromAnki()">
-                <span>📥 Pull</span>
+            <button class="btn btn-primary" onclick="saveAndPush()">
+                <span>💾 Save & Push to Anki</span>
             </button>
         </div>
     </header>
@@ -495,14 +571,41 @@
     <!-- Main Workspace -->
     <div class="workspace">
         
-        <!-- Left Sidebar: Field Data Editor -->
+        <!-- Left Sidebar: Multi-Tab Editor -->
         <aside class="sidebar">
-            <div class="sidebar-header">
-                <span>📝 Mock Card Data</span>
-                <button class="btn" style="font-size: 0.75rem; padding: 2px 6px;" onclick="resetSampleData()">Reset</button>
+            <div class="sidebar-tabs">
+                <div class="sidebar-tab active" id="tabBtnFields" onclick="switchTab('fields')">📝 Fields Data</div>
+                <div class="sidebar-tab" id="tabBtnCSS" onclick="switchTab('css')">🎨 CSS Code</div>
+                <div class="sidebar-tab" id="tabBtnHTML" onclick="switchTab('html')">📄 HTML Code</div>
             </div>
-            <div class="fields-container" id="fieldsContainer">
-                <!-- Dynamic Field Inputs will be rendered here -->
+
+            <!-- TAB 1: Fields Editor -->
+            <div class="tab-content active" id="tabFields">
+                <div class="sidebar-header" style="margin: -16px -16px 12px -16px;">
+                    <span>Card Field Data</span>
+                    <button class="btn" style="font-size: 0.75rem; padding: 2px 6px;" onclick="resetSampleData()">Reset Sample</button>
+                </div>
+                <div id="fieldsContainer" style="display: flex; flex-direction: column; gap: 14px;"></div>
+            </div>
+
+            <!-- TAB 2: CSS Editor -->
+            <div class="tab-content" id="tabCSS">
+                <div class="sidebar-header" style="margin: -16px -16px 12px -16px;">
+                    <span>Live Styling.css</span>
+                    <span style="font-size: 0.75rem; color:#a5b4fc;">Updates instantly</span>
+                </div>
+                <textarea class="code-editor" id="cssEditor" oninput="onCssInput()"></textarea>
+            </div>
+
+            <!-- TAB 3: HTML Editor -->
+            <div class="tab-content" id="tabHTML">
+                <div class="sidebar-header" style="margin: -16px -16px 12px -16px;">
+                    <span>Front & Back HTML</span>
+                </div>
+                <span class="field-label">Front Template</span>
+                <textarea class="code-editor" style="min-height: 180px;" id="frontEditor" oninput="onHtmlInput()"></textarea>
+                <span class="field-label" style="margin-top: 8px;">Back Template</span>
+                <textarea class="code-editor" style="min-height: 180px;" id="backEditor" oninput="onHtmlInput()"></textarea>
             </div>
         </aside>
 
@@ -510,7 +613,10 @@
         <main class="stage" id="stage">
             <div class="stage-header">
                 <div style="font-size: 0.9rem; color: var(--text-muted);">
-                    Previewing <strong style="color: #fff;" id="currentModelLabel">-</strong> across responsive viewports. Edits in IDE update live.
+                    Previewing <strong style="color: #fff;" id="currentModelLabel">-</strong> across responsive viewports. Type in CSS/HTML tabs or IDE to update live.
+                </div>
+                <div style="font-size: 0.85rem; color: #a5b4fc;">
+                    💡 <em>Tip: For typing cards, type answer in Front box & press Enter!</em>
                 </div>
             </div>
 
@@ -520,7 +626,7 @@
                 <div class="device-card device-pc">
                     <div class="device-header">
                         <span class="device-title">💻 PC / Desktop Mode</span>
-                        <span class="device-badge">720 × 480</span>
+                        <span class="device-badge">Anki Desktop • 680 × 460</span>
                     </div>
                     <div class="viewport-wrapper">
                         <iframe class="viewport-frame" id="frame-pc" sandbox="allow-same-origin allow-scripts"></iframe>
@@ -562,7 +668,7 @@
                 <div class="device-card device-ipad">
                     <div class="device-header">
                         <span class="device-title">📟 iPad Mode</span>
-                        <span class="device-badge">Tablet • 640 × 800</span>
+                        <span class="device-badge">Tablet • 620 × 800</span>
                     </div>
                     <div class="viewport-wrapper">
                         <div class="status-bar" style="background: #27272a;">
@@ -590,6 +696,13 @@
         let currentTheme = "light"; // 'light', 'night'
         let currentFields = {};
         let lastDataHash = "";
+        
+        // Real collection notes state
+        let realNotesList = [];
+        let currentRealIdx = 0;
+
+        // Typing card answer simulation
+        let typedAnswer = "";
 
         // 1. Fetch live models from server
         async function fetchModels() {
@@ -606,6 +719,7 @@
                             currentModel = Object.keys(modelsData)[0];
                             currentFields = { ...modelsData[currentModel].sample_data };
                             renderFieldsEditor();
+                            syncEditorsFromModel();
                         }
                         renderAllDevices();
                     }
@@ -638,14 +752,84 @@
             const select = document.getElementById("modelSelect");
             currentModel = select.value;
             document.getElementById("currentModelLabel").textContent = currentModel;
+            realNotesList = [];
+            document.getElementById("realNav").style.display = "none";
             if (modelsData[currentModel]) {
                 currentFields = { ...modelsData[currentModel].sample_data };
                 renderFieldsEditor();
+                syncEditorsFromModel();
                 renderAllDevices();
             }
         }
 
-        // 2. Render Field Editor Sidebar
+        // 2. Real Note Loader
+        async function loadRealNotes() {
+            if (!currentModel) return;
+            showToast("🎲 Fetching real cards from Anki...", "⏳");
+            try {
+                const res = await fetch(`/api/real_notes?model=${encodeURIComponent(currentModel)}`);
+                const data = await res.json();
+                if (data.status === "ok" && data.notes.length > 0) {
+                    realNotesList = data.notes;
+                    currentRealIdx = 0;
+                    applyRealNote(0);
+                    document.getElementById("realTotal").textContent = realNotesList.length;
+                    document.getElementById("realNav").style.display = "flex";
+                    showToast(`✅ Loaded ${realNotesList.length} real cards from collection!`, "🃏");
+                } else {
+                    showToast("⚠️ No existing notes found for this model in Anki DB", "🃏");
+                }
+            } catch (e) {
+                showToast("❌ Failed to query real notes", "⚠️");
+            }
+        }
+
+        function applyRealNote(idx) {
+            if (!realNotesList || realNotesList.length === 0) return;
+            currentRealIdx = (idx + realNotesList.length) % realNotesList.length;
+            document.getElementById("realIdx").textContent = currentRealIdx + 1;
+            const note = realNotesList[currentRealIdx];
+            currentFields = { ...note.fields };
+            renderFieldsEditor();
+            renderAllDevices();
+        }
+
+        function nextRealNote() { applyRealNote(currentRealIdx + 1); }
+        function prevRealNote() { applyRealNote(currentRealIdx - 1); }
+
+        // 3. Tab Switcher & Code Editors
+        function switchTab(tab) {
+            ["fields", "css", "html"].forEach(t => {
+                document.getElementById(`tabBtn${t.toUpperCase()}`).classList.remove("active");
+                document.getElementById(`tab${t.toUpperCase()}`).classList.remove("active");
+            });
+            document.getElementById(`tabBtn${tab.toUpperCase()}`).classList.add("active");
+            document.getElementById(`tab${tab.toUpperCase()}`).classList.add("active");
+        }
+
+        function syncEditorsFromModel() {
+            if (!modelsData[currentModel]) return;
+            document.getElementById("cssEditor").value = modelsData[currentModel].css || "";
+            document.getElementById("frontEditor").value = modelsData[currentModel].front || "";
+            document.getElementById("backEditor").value = modelsData[currentModel].back || "";
+        }
+
+        function onCssInput() {
+            if (modelsData[currentModel]) {
+                modelsData[currentModel].css = document.getElementById("cssEditor").value;
+                renderAllDevices();
+            }
+        }
+
+        function onHtmlInput() {
+            if (modelsData[currentModel]) {
+                modelsData[currentModel].front = document.getElementById("frontEditor").value;
+                modelsData[currentModel].back = document.getElementById("backEditor").value;
+                renderAllDevices();
+            }
+        }
+
+        // 4. Render Field Editor Sidebar
         function renderFieldsEditor() {
             const container = document.getElementById("fieldsContainer");
             container.innerHTML = "";
@@ -684,22 +868,49 @@
         function resetSampleData() {
             if (modelsData[currentModel]) {
                 currentFields = { ...modelsData[currentModel].sample_data };
+                realNotesList = [];
+                document.getElementById("realNav").style.display = "none";
                 renderFieldsEditor();
                 renderAllDevices();
                 showToast("Sample data reset to defaults.");
             }
         }
 
-        // 3. Render HTML content into device viewports
+        // 5. Anki Typing Comparison Diff Algorithm
+        function generateAnkiTypeDiff(typed, expected) {
+            if (!typed && !expected) return "";
+            if (!typed) return `<code id="typeans"><span class="typeMiss">${expected}</span></code>`;
+            if (typed.toLowerCase() === expected.toLowerCase()) {
+                return `<code id="typeans"><span class="typeGood">${expected}</span></code>`;
+            }
+            
+            // Simple character-level diff comparison like Anki
+            let html = `<code id="typeans">`;
+            let minLen = Math.min(typed.length, expected.length);
+            for (let i = 0; i < minLen; i++) {
+                if (typed[i].toLowerCase() === expected[i].toLowerCase()) {
+                    html += `<span class="typeGood">${expected[i]}</span>`;
+                } else {
+                    html += `<span class="typeBad">${typed[i]}</span>`;
+                }
+            }
+            if (typed.length > expected.length) {
+                html += `<span class="typeBad">${typed.slice(expected.length)}</span>`;
+            } else if (expected.length > typed.length) {
+                html += `<span class="typeMiss">${expected.slice(typed.length)}</span>`;
+            }
+            html += `<br><span id="typearrow">&darr;</span><br><span class="typeGood">${expected}</span></code>`;
+            return html;
+        }
+
+        // 6. Render HTML content into device viewports
         function renderAllDevices() {
             if (!currentModel || !modelsData[currentModel]) return;
 
             const model = modelsData[currentModel];
             const css = model.css || "";
-            let htmlContent = "";
 
-            // Replace Anki field placeholders e.g. {{Word}}, {{#Field}}...{{/Field}}, {{^Field}}...{{/Field}}
-            function replaceFields(tpl) {
+            function processTemplate(tpl, isBack) {
                 let res = tpl;
                 
                 // 1. Conditional sections {{#Field}}content{{/Field}}
@@ -720,21 +931,37 @@
                     }
                 });
 
-                // 2. Simple replacements {{Field}}, {{text:Field}}
+                // 2. Anki Typing Field {{type:Field}}
+                const typeRegex = /{{type:([^}]+)}}/gi;
+                res = res.replace(typeRegex, (match, fieldName) => {
+                    const expectedVal = currentFields[fieldName.trim()] || "";
+                    if (!isBack && currentFace !== "back") {
+                        // Render typable input on Front view
+                        return `<div style="margin: 12px 0; text-align: center;">
+                            <input type="text" id="liveTypeInput" class="typeans" placeholder="Type answer for ${fieldName}... (Press Enter to check)" value="${typedAnswer}"
+                            style="width: 80%; max-width: 300px; padding: 10px; font-size: 1rem; border-radius: 8px; border: 2px solid #6366f1; background: rgba(0,0,0,0.5); color: #fff; text-align: center; outline: none;">
+                            </div>`;
+                    } else {
+                        // Render exact Anki green/red comparison diff on Back view
+                        return generateAnkiTypeDiff(typedAnswer, expectedVal);
+                    }
+                });
+
+                // 3. Simple replacements {{Field}}, {{text:Field}}
                 Object.keys(currentFields).forEach(key => {
                     const val = currentFields[key] || "";
-                    const regex = new RegExp(`{{(text:|type:|#|\\^)?${key}}}`, "gi");
+                    const regex = new RegExp(`{{(text:|#|\\^)?${key}}}`, "gi");
                     res = res.replace(regex, val);
                 });
 
-                // Remove unreplaced placeholders
                 res = res.replace(/{{[^{}]+}}/g, "");
                 return res;
             }
 
-            const frontHtml = replaceFields(model.front || "");
-            const backHtml = replaceFields(model.back || "");
+            const frontHtml = processTemplate(model.front || "", false);
+            const backHtml = processTemplate(model.back || "", true);
 
+            let htmlContent = "";
             if (currentFace === "front") {
                 htmlContent = frontHtml;
             } else if (currentFace === "back") {
@@ -743,7 +970,6 @@
                 htmlContent = `<div style="margin-bottom: 24px; padding-bottom: 24px; border-bottom: 2px dashed #999;">${frontHtml}</div>${backHtml}`;
             }
 
-            // Construct full iframe document
             const isNight = currentTheme === "night";
             const nightClass = isNight ? "night_mode nightMode card night_mode" : "";
             const bgHex = isNight ? "#2f2f31" : "#f9f9fb";
@@ -766,12 +992,31 @@
                         /* Inject Anki Card CSS */
                         ${css}
                         
-                        /* Fix image sizes for mobile preview */
+                        /* Default Anki Typing styles if not present in user CSS */
+                        .typeGood { background: #10b981; color: #fff; padding: 1px 3px; border-radius: 3px; }
+                        .typeBad { background: #ef4444; color: #fff; padding: 1px 3px; border-radius: 3px; }
+                        .typeMiss { background: #6b7280; color: #fff; padding: 1px 3px; border-radius: 3px; }
+                        #typeans { font-family: monospace; font-size: 1.1rem; display: inline-block; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px; }
+                        
                         img { max-width: 100%; height: auto; }
                     </style>
                 </head>
                 <body class="card ${nightClass}">
                     ${htmlContent}
+                    <script>
+                        const inp = document.getElementById('liveTypeInput');
+                        if (inp) {
+                            inp.focus();
+                            inp.addEventListener('input', (e) => {
+                                window.parent.postMessage({ type: 'typedUpdate', val: e.target.value }, '*');
+                            });
+                            inp.addEventListener('keydown', (e) => {
+                                if (e.key === 'Enter') {
+                                    window.parent.postMessage({ type: 'typedSubmit' }, '*');
+                                }
+                            });
+                        }
+                    <\/script>
                 </body>
                 </html>
             `;
@@ -784,7 +1029,16 @@
             });
         }
 
-        // 4. UI Controls
+        // Listen for typing messages from iframes
+        window.addEventListener('message', (e) => {
+            if (e.data && e.data.type === 'typedUpdate') {
+                typedAnswer = e.data.val;
+            } else if (e.data && e.data.type === 'typedSubmit') {
+                setCardFace('back');
+            }
+        });
+
+        // 7. UI Controls
         function setCardFace(face) {
             currentFace = face;
             ["btnFront", "btnBack", "btnBoth"].forEach(id => document.getElementById(id).classList.remove("active"));
@@ -817,33 +1071,26 @@
             }
         }
 
-        // 5. Server Actions (Push / Pull)
-        async function pushToAnki() {
+        // 8. Save & Push
+        async function saveAndPush() {
             try {
-                showToast("🚀 Pushing templates to AnkiConnect...", "⏳");
-                const res = await fetch("/api/push");
+                showToast("💾 Saving to disk & pushing to Anki...", "⏳");
+                const payload = {
+                    model: currentModel,
+                    css: modelsData[currentModel].css,
+                    front: modelsData[currentModel].front,
+                    back: modelsData[currentModel].back
+                };
+                const res = await fetch("/api/save_model", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
                 const data = await res.json();
                 if (data.status === "ok") {
-                    showToast("✅ Successfully pushed all templates to Anki!", "🚀");
+                    showToast("🚀 Saved CSS/HTML & updated Anki database!", "✅");
                 } else {
-                    showToast("❌ Push failed: " + data.message, "⚠️");
-                }
-            } catch (e) {
-                showToast("❌ Error communicating with dev server", "⚠️");
-            }
-        }
-
-        async function pullFromAnki() {
-            try {
-                showToast("📥 Pulling templates from Anki...", "⏳");
-                const res = await fetch("/api/pull");
-                const data = await res.json();
-                if (data.status === "ok") {
-                    lastDataHash = ""; // force refresh
-                    await fetchModels();
-                    showToast("✅ Pulled latest templates from Anki!", "📥");
-                } else {
-                    showToast("❌ Pull failed: " + data.message, "⚠️");
+                    showToast("❌ Save failed: " + data.message, "⚠️");
                 }
             } catch (e) {
                 showToast("❌ Error communicating with dev server", "⚠️");
