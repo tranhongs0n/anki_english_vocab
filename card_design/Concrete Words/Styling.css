@@ -1,0 +1,119 @@
+.card {        
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 20px;
+    text-align: center;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.container {
+    padding:0px 20px;
+    padding-bottom: 80px; 
+}
+
+.top-block {
+    height: 160px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.word {
+    font-size: 3rem;
+    font-weight: 700;
+    margin: 0 0 10px 0 !important;
+    line-height: 1.2 !important;
+}
+
+.type-box {
+    min-height: 3.6rem;
+    width: 100%;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+input#typeans, 
+code#typeans, 
+.typeGood, 
+.typeBad, 
+.typeMissed {
+    font-size: 3rem !important;
+    font-weight: 700 !important;
+    font-family: system-ui, -apple-system, sans-serif !important;
+    text-align: center !important;
+    background: transparent !important;
+    border: none !important;
+    line-height: 1.2 !important;
+}
+
+input#typeans {
+    width: 100%;
+    height: 3.6rem;
+    box-sizing: border-box;
+    border: none !important;
+    outline: none !important;
+    caret-color: transparent !important;
+}
+
+code#typeans {
+    display: block !important;
+    word-break: break-word;
+}
+
+.typeGood { color: #0f9d58 !important; }
+.typeBad { color: #db4437 !important; }
+.typeMissed { color: #7f8c8d !important; }
+
+.nightMode .typeGood { color: #81c995 !important; }
+.nightMode .typeBad { color: #f28b82 !important; }
+.nightMode .typeMissed { color: #9aa0a6 !important; }
+
+.ipa {
+    font-family: "Charis SIL", "Doulos SIL", serif; 
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+}
+
+.reference {
+    font-size: 1.1rem;
+    margin-top: 15px;
+}
+
+img {
+    max-width: 300px;
+}
+
+.scratchpad {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 20px;
+    padding: 15px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-family: inherit;
+    background: white;
+    z-index: 100;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.nightMode .scratchpad {
+    color: white;
+    background: #2f2f31;
+    border-color: #666;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+.iphone .scratchpad,
+.ipad .scratchpad,
+.ipod .scratchpad {
+    display: none !important;
+}

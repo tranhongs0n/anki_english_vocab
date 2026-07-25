@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anki Multi-Device Responsive Card Dev Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0f1117;
+            --bg-secondary: #181b24;
+            --bg-tertiary: #222633;
+            --accent-primary: #6366f1;
+            --accent-hover: #4f46e5;
+            --accent-glow: rgba(99, 102, 241, 0.25);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --glass-bg: rgba(24, 27, 36, 0.75);
+            
+            /* Anki Night Mode exact theme colors */
+            --anki-night-bg: #2f2f31;
+            --anki-light-bg: #f9f9fb;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* Top Navbar */
+        .navbar {
+            height: 64px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 1.25rem;
+            background: linear-gradient(135deg, #a855f7, #6366f1, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-badge {
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 999px;
+            background: rgba(99, 102, 241, 0.2);
+            color: #818cf8;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .controls-bar {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 4px;
+            gap: 4px;
+        }
+
+        select, .btn {
+            background: transparent;
+            color: var(--text-main);
+            border: none;
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            outline: none;
+            font-family: inherit;
+        }
+
+        select {
+            padding-right: 28px;
+            background: var(--bg-tertiary);
+        }
+
+        .btn:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .btn.active {
+            background: var(--accent-primary);
+            color: #fff;
+            box-shadow: 0 0 12px var(--accent-glow);
+        }
+
+        .btn-primary {
+            background: var(--accent-primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        /* Main Workspace Layout */
+        .workspace {
+            display: flex;
+            flex: 1;
+            height: calc(100vh - 64px);
+            overflow: hidden;
+        }
+
+        /* Sidebar for Sample Data */
+        .sidebar {
+            width: 320px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            transition: width 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #e2e8f0;
+        }
+
+        .fields-container {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .field-item {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .field-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .field-input {
+            width: 100%;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 8px 10px;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 0.85rem;
+            transition: border-color 0.2s;
+        }
+
+        .field-input:focus {
+            border-color: var(--accent-primary);
+            outline: none;
+        }
+
+        textarea.field-input {
+            min-height: 60px;
+            resize: vertical;
+        }
+
+        /* Devices Stage */
+        .stage {
+            flex: 1;
+            background: radial-gradient(circle at 50% 50%, #1e2130 0%, var(--bg-primary) 100%);
+            padding: 32px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            align-items: center;
+        }
+
+        .stage-header {
+            width: 100%;
+            max-width: 1600px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-pill {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            background: rgba(16, 185, 129, 0.1);
+            color: #34d399;
+            padding: 6px 14px;
+            border-radius: 999px;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            box-shadow: 0 0 8px #10b981;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.4; }
+            100% { opacity: 1; }
+        }
+
+        /* Devices Grid */
+        .devices-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 32px;
+            justify-content: center;
+            align-items: flex-start;
+            width: 100%;
+            max-width: 1600px;
+            padding-bottom: 40px;
+        }
+
+        .device-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .device-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), 0 0 20px rgba(99, 102, 241, 0.15);
+        }
+
+        .device-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 4px;
+        }
+
+        .device-title {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #cbd5e1;
+        }
+
+        .device-badge {
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: var(--bg-tertiary);
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Viewports / Frames */
+        .viewport-wrapper {
+            position: relative;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid #334155;
+            transition: all 0.3s ease;
+        }
+
+        .device-pc .viewport-wrapper {
+            width: 720px;
+            height: 480px;
+            border-radius: 8px;
+        }
+
+        .device-android .viewport-wrapper {
+            width: 360px;
+            height: 740px;
+            border-radius: 24px;
+            border-width: 8px;
+            border-color: #1e293b;
+        }
+
+        .device-iphone .viewport-wrapper {
+            width: 390px;
+            height: 800px;
+            border-radius: 36px;
+            border-width: 10px;
+            border-color: #27272a;
+        }
+
+        .device-ipad .viewport-wrapper {
+            width: 640px;
+            height: 800px;
+            border-radius: 20px;
+            border-width: 10px;
+            border-color: #3f3f46;
+        }
+
+        /* Simulated Status Bars for Phones */
+        .status-bar {
+            height: 28px;
+            background: #111;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            font-size: 0.7rem;
+            font-family: -apple-system, sans-serif;
+            font-weight: 600;
+            user-select: none;
+            z-index: 10;
+            position: relative;
+        }
+
+        .iphone-notch {
+            width: 120px;
+            height: 20px;
+            background: #000;
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            border-bottom-left-radius: 14px;
+            border-bottom-right-radius: 14px;
+        }
+
+        /* iframe container */
+        .viewport-frame {
+            width: 100%;
+            height: calc(100% - 28px);
+            border: none;
+            background: var(--anki-light-bg);
+            transition: background 0.3s ease;
+        }
+
+        .device-pc .viewport-frame {
+            height: 100%;
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--accent-primary);
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Hide elements conditionally based on layout */
+        .layout-pc-only .device-android,
+        .layout-pc-only .device-iphone,
+        .layout-pc-only .device-ipad { display: none; }
+        
+        .layout-mobile-only .device-pc,
+        .layout-mobile-only .device-ipad { display: none; }
+    </style>
+</head>
+<body>
+
+    <!-- Top Navigation Bar -->
+    <header class="navbar">
+        <div class="logo">
+            <span>Anki Card Studio</span>
+            <span class="logo-badge">Live Multi-Device</span>
+        </div>
+
+        <div class="controls-bar">
+            <!-- Note Type Selector -->
+            <div class="control-group">
+                <select id="modelSelect" onchange="switchModel()">
+                    <option value="">Loading Models...</option>
+                </select>
+            </div>
+
+            <!-- Card Face Selector -->
+            <div class="control-group">
+                <button class="btn" id="btnFront" onclick="setCardFace('front')">Front</button>
+                <button class="btn active" id="btnBack" onclick="setCardFace('back')">Back</button>
+                <button class="btn" id="btnBoth" onclick="setCardFace('both')">Both</button>
+            </div>
+
+            <!-- Theme / Night Mode Selector -->
+            <div class="control-group">
+                <button class="btn active" id="btnLight" onclick="setTheme('light')">☀️ Light</button>
+                <button class="btn" id="btnNight" onclick="setTheme('night')">🌙 Night Mode</button>
+            </div>
+
+            <!-- Layout Filter -->
+            <div class="control-group">
+                <button class="btn active" id="btnLayoutAll" onclick="setLayout('all')">All 4 Devices</button>
+                <button class="btn" id="btnLayoutMobile" onclick="setLayout('mobile')">Phones Only</button>
+                <button class="btn" id="btnLayoutPC" onclick="setLayout('pc')">PC Only</button>
+            </div>
+
+            <!-- Auto Reload Status -->
+            <div class="status-pill" title="Polling local files for live updates every 1.5s">
+                <div class="status-dot"></div>
+                <span>Live Sync On</span>
+            </div>
+
+            <!-- Push to Anki Button -->
+            <button class="btn btn-primary" onclick="pushToAnki()">
+                <span>🚀 Push to Anki</span>
+            </button>
+            <button class="btn btn-success" onclick="pullFromAnki()">
+                <span>📥 Pull</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <div class="workspace">
+        
+        <!-- Left Sidebar: Field Data Editor -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <span>📝 Mock Card Data</span>
+                <button class="btn" style="font-size: 0.75rem; padding: 2px 6px;" onclick="resetSampleData()">Reset</button>
+            </div>
+            <div class="fields-container" id="fieldsContainer">
+                <!-- Dynamic Field Inputs will be rendered here -->
+            </div>
+        </aside>
+
+        <!-- Right Stage: Side-by-Side Device Viewports -->
+        <main class="stage" id="stage">
+            <div class="stage-header">
+                <div style="font-size: 0.9rem; color: var(--text-muted);">
+                    Previewing <strong style="color: #fff;" id="currentModelLabel">-</strong> across responsive viewports. Edits in IDE update live.
+                </div>
+            </div>
+
+            <div class="devices-grid" id="devicesGrid">
+                
+                <!-- 1. PC Mode -->
+                <div class="device-card device-pc">
+                    <div class="device-header">
+                        <span class="device-title">💻 PC / Desktop Mode</span>
+                        <span class="device-badge">720 × 480</span>
+                    </div>
+                    <div class="viewport-wrapper">
+                        <iframe class="viewport-frame" id="frame-pc" sandbox="allow-same-origin allow-scripts"></iframe>
+                    </div>
+                </div>
+
+                <!-- 2. Android Mode -->
+                <div class="device-card device-android">
+                    <div class="device-header">
+                        <span class="device-title">🤖 Android Mode</span>
+                        <span class="device-badge">AnkiDroid • 360 × 740</span>
+                    </div>
+                    <div class="viewport-wrapper">
+                        <div class="status-bar" style="background: #1e293b;">
+                            <span>12:30</span>
+                            <span>📶 🔋 100%</span>
+                        </div>
+                        <iframe class="viewport-frame" id="frame-android" sandbox="allow-same-origin allow-scripts"></iframe>
+                    </div>
+                </div>
+
+                <!-- 3. iPhone Mode -->
+                <div class="device-card device-iphone">
+                    <div class="device-header">
+                        <span class="device-title">📱 iPhone Mode</span>
+                        <span class="device-badge">AnkiMobile • 390 × 800</span>
+                    </div>
+                    <div class="viewport-wrapper">
+                        <div class="status-bar" style="background: #000;">
+                            <span>9:41</span>
+                            <div class="iphone-notch"></div>
+                            <span>5G 🔋</span>
+                        </div>
+                        <iframe class="viewport-frame" id="frame-iphone" sandbox="allow-same-origin allow-scripts"></iframe>
+                    </div>
+                </div>
+
+                <!-- 4. iPad Mode -->
+                <div class="device-card device-ipad">
+                    <div class="device-header">
+                        <span class="device-title">📟 iPad Mode</span>
+                        <span class="device-badge">Tablet • 640 × 800</span>
+                    </div>
+                    <div class="viewport-wrapper">
+                        <div class="status-bar" style="background: #27272a;">
+                            <span>9:41 AM</span>
+                            <span>iPad • Wi-Fi 🔋 98%</span>
+                        </div>
+                        <iframe class="viewport-frame" id="frame-ipad" sandbox="allow-same-origin allow-scripts"></iframe>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <span id="toastIcon">✅</span>
+        <span id="toastMsg">Action completed successfully!</span>
+    </div>
+
+    <script>
+        let modelsData = {};
+        let currentModel = "";
+        let currentFace = "back"; // 'front', 'back', 'both'
+        let currentTheme = "light"; // 'light', 'night'
+        let currentFields = {};
+        let lastDataHash = "";
+
+        // 1. Fetch live models from server
+        async function fetchModels() {
+            try:
+                const res = await fetch("/api/models");
+                const data = await res.json();
+                if (data.status === "ok") {
+                    const newHash = JSON.stringify(data.models);
+                    if (newHash !== lastDataHash) {
+                        lastDataHash = newHash;
+                        modelsData = data.models;
+                        updateModelDropdown();
+                        if (!currentModel && Object.keys(modelsData).length > 0) {
+                            currentModel = Object.keys(modelsData)[0];
+                            currentFields = { ...modelsData[currentModel].sample_data };
+                            renderFieldsEditor();
+                        }
+                        renderAllDevices();
+                    }
+                }
+            } catch (err) {
+                console.warn("Server polling error:", err);
+            }
+        }
+
+        function updateModelDropdown() {
+            const select = document.getElementById("modelSelect");
+            const names = Object.keys(modelsData);
+            if (names.length === 0) return;
+
+            const oldVal = select.value;
+            select.innerHTML = "";
+            names.forEach(name => {
+                const opt = document.createElement("option");
+                opt.value = name;
+                opt.textContent = name;
+                if (name === oldVal || (!oldVal && name === currentModel)) {
+                    opt.selected = true;
+                }
+                select.appendChild(opt);
+            });
+            document.getElementById("currentModelLabel").textContent = currentModel || names[0];
+        }
+
+        function switchModel() {
+            const select = document.getElementById("modelSelect");
+            currentModel = select.value;
+            document.getElementById("currentModelLabel").textContent = currentModel;
+            if (modelsData[currentModel]) {
+                currentFields = { ...modelsData[currentModel].sample_data };
+                renderFieldsEditor();
+                renderAllDevices();
+            }
+        }
+
+        // 2. Render Field Editor Sidebar
+        function renderFieldsEditor() {
+            const container = document.getElementById("fieldsContainer");
+            container.innerHTML = "";
+            
+            Object.keys(currentFields).forEach(key => {
+                const item = document.createElement("div");
+                item.className = "field-item";
+                
+                const label = document.createElement("label");
+                label.className = "field-label";
+                label.textContent = key;
+                
+                const val = currentFields[key] || "";
+                let input;
+                if (val.length > 50 || key.toLowerCase().includes("def") || key.toLowerCase().includes("sent")) {
+                    input = document.createElement("textarea");
+                    input.rows = 2;
+                } else {
+                    input = document.createElement("input");
+                    input.type = "text";
+                }
+                
+                input.className = "field-input";
+                input.value = val;
+                input.oninput = (e) => {
+                    currentFields[key] = e.target.value;
+                    renderAllDevices();
+                };
+                
+                item.appendChild(label);
+                item.appendChild(input);
+                container.appendChild(item);
+            });
+        }
+
+        function resetSampleData() {
+            if (modelsData[currentModel]) {
+                currentFields = { ...modelsData[currentModel].sample_data };
+                renderFieldsEditor();
+                renderAllDevices();
+                showToast("Sample data reset to defaults.");
+            }
+        }
+
+        // 3. Render HTML content into device viewports
+        function renderAllDevices() {
+            if (!currentModel || !modelsData[currentModel]) return;
+
+            const model = modelsData[currentModel];
+            const css = model.css || "";
+            let htmlContent = "";
+
+            // Replace Anki field placeholders e.g. {{Word}}, {{#Field}}...{{/Field}}, {{^Field}}...{{/Field}}
+            function replaceFields(tpl) {
+                let res = tpl;
+                
+                // 1. Conditional sections {{#Field}}content{{/Field}}
+                Object.keys(currentFields).forEach(key => {
+                    const val = currentFields[key];
+                    const regexPos = new RegExp(`{{#${key}}}([\\s\\S]*?){{\\/${key}}}`, "gi");
+                    if (val && val.trim() !== "") {
+                        res = res.replace(regexPos, "$1");
+                    } else {
+                        res = res.replace(regexPos, "");
+                    }
+
+                    const regexNeg = new RegExp(`{{^${key}}}([\\s\\S]*?){{\\/${key}}}`, "gi");
+                    if (!val || val.trim() === "") {
+                        res = res.replace(regexNeg, "$1");
+                    } else {
+                        res = res.replace(regexNeg, "");
+                    }
+                });
+
+                // 2. Simple replacements {{Field}}, {{text:Field}}
+                Object.keys(currentFields).forEach(key => {
+                    const val = currentFields[key] || "";
+                    const regex = new RegExp(`{{(text:|type:|#|\\^)?${key}}}`, "gi");
+                    res = res.replace(regex, val);
+                });
+
+                // Remove unreplaced placeholders
+                res = res.replace(/{{[^{}]+}}/g, "");
+                return res;
+            }
+
+            const frontHtml = replaceFields(model.front || "");
+            const backHtml = replaceFields(model.back || "");
+
+            if (currentFace === "front") {
+                htmlContent = frontHtml;
+            } else if (currentFace === "back") {
+                htmlContent = backHtml;
+            } else {
+                htmlContent = `<div style="margin-bottom: 24px; padding-bottom: 24px; border-bottom: 2px dashed #999;">${frontHtml}</div>${backHtml}`;
+            }
+
+            // Construct full iframe document
+            const isNight = currentTheme === "night";
+            const nightClass = isNight ? "night_mode nightMode card night_mode" : "";
+            const bgHex = isNight ? "#2f2f31" : "#f9f9fb";
+            const textHex = isNight ? "#ffffff" : "#111111";
+
+            const fullDoc = `
+                <!DOCTYPE html>
+                <html class="${nightClass}">
+                <head>
+                    <meta charset="utf-8">
+                    <style>
+                        body {
+                            margin: 0;
+                            padding: 16px;
+                            background-color: ${bgHex};
+                            color: ${textHex};
+                            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+                            overflow-x: hidden;
+                        }
+                        /* Inject Anki Card CSS */
+                        ${css}
+                        
+                        /* Fix image sizes for mobile preview */
+                        img { max-width: 100%; height: auto; }
+                    </style>
+                </head>
+                <body class="card ${nightClass}">
+                    ${htmlContent}
+                </body>
+                </html>
+            `;
+
+            ["frame-pc", "frame-android", "frame-iphone", "frame-ipad"].forEach(id => {
+                const iframe = document.getElementById(id);
+                if (iframe) {
+                    iframe.srcdoc = fullDoc;
+                }
+            });
+        }
+
+        // 4. UI Controls
+        function setCardFace(face) {
+            currentFace = face;
+            ["btnFront", "btnBack", "btnBoth"].forEach(id => document.getElementById(id).classList.remove("active"));
+            if (face === "front") document.getElementById("btnFront").classList.add("active");
+            if (face === "back") document.getElementById("btnBack").classList.add("active");
+            if (face === "both") document.getElementById("btnBoth").classList.add("active");
+            renderAllDevices();
+        }
+
+        function setTheme(theme) {
+            currentTheme = theme;
+            document.getElementById("btnLight").classList.toggle("active", theme === "light");
+            document.getElementById("btnNight").classList.toggle("active", theme === "night");
+            renderAllDevices();
+        }
+
+        function setLayout(layout) {
+            ["btnLayoutAll", "btnLayoutMobile", "btnLayoutPC"].forEach(id => document.getElementById(id).classList.remove("active"));
+            const grid = document.getElementById("devicesGrid");
+            grid.className = "devices-grid";
+
+            if (layout === "all") {
+                document.getElementById("btnLayoutAll").classList.add("active");
+            } else if (layout === "mobile") {
+                document.getElementById("btnLayoutMobile").classList.add("active");
+                grid.classList.add("layout-mobile-only");
+            } else if (layout === "pc") {
+                document.getElementById("btnLayoutPC").classList.add("active");
+                grid.classList.add("layout-pc-only");
+            }
+        }
+
+        // 5. Server Actions (Push / Pull)
+        async function pushToAnki() {
+            try {
+                showToast("🚀 Pushing templates to AnkiConnect...", "⏳");
+                const res = await fetch("/api/push");
+                const data = await res.json();
+                if (data.status === "ok") {
+                    showToast("✅ Successfully pushed all templates to Anki!", "🚀");
+                } else {
+                    showToast("❌ Push failed: " + data.message, "⚠️");
+                }
+            } catch (e) {
+                showToast("❌ Error communicating with dev server", "⚠️");
+            }
+        }
+
+        async function pullFromAnki() {
+            try {
+                showToast("📥 Pulling templates from Anki...", "⏳");
+                const res = await fetch("/api/pull");
+                const data = await res.json();
+                if (data.status === "ok") {
+                    lastDataHash = ""; // force refresh
+                    await fetchModels();
+                    showToast("✅ Pulled latest templates from Anki!", "📥");
+                } else {
+                    showToast("❌ Pull failed: " + data.message, "⚠️");
+                }
+            } catch (e) {
+                showToast("❌ Error communicating with dev server", "⚠️");
+            }
+        }
+
+        function showToast(msg, icon = "✅") {
+            const toast = document.getElementById("toast");
+            document.getElementById("toastMsg").textContent = msg;
+            document.getElementById("toastIcon").textContent = icon;
+            toast.classList.add("show");
+            setTimeout(() => {
+                toast.classList.remove("show");
+            }, 3500);
+        }
+
+        // Initialize & Poll every 1.5s
+        fetchModels();
+        setInterval(fetchModels, 1500);
+    </script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+<div class="container">{{#Image}}
+  <div class="top-block">
+    <div class="word">{{type:Word}}</div>
+    {{#IPA}}<div class="ipa">{{IPA}}</div>{{/IPA}}
+  </div>
+  <div class="image-box">{{Image}}</div>
+{{#Reference}}<div class="reference">{{Reference}}</div>{{/Reference}}
+
+{{/Image}}
+
+{{^Image}}
+  <div class="top-block">
+    <div class="type-box">{{type:Word}}</div>
+    <div class="word" style="display: none;">{{Word}}</div>
+    {{#IPA}}<div class="ipa">{{IPA}}</div>{{/IPA}}
+  </div>
+{{#Reference}}<div class="reference">{{Reference}}</div>{{/Reference}}
+
+{{/Image}}
+</div>
+
+
+<script> window.scrollTo(0, 0); </script>

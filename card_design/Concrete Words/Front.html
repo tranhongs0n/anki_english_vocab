@@ -1,0 +1,16 @@
+<div class="container">{{#Image}}
+  <div class="top-block">
+    <div class="word">{{type:Word}}</div>
+    {{#IPA}}<div class="ipa" style="visibility: hidden;">{{IPA}}</div>{{/IPA}}
+  </div>
+  <div class="image-box">{{Image}}</div>
+{{/Image}}
+
+{{^Image}}
+  <div class="top-block">
+    <div class="type-box">{{type:Word}}</div>
+    <div class="word">{{Word}}</div>
+    {{#IPA}}<div class="ipa" style="visibility: hidden;">{{IPA}}</div>{{/IPA}}
+  </div>
+{{/Image}}
+</div>

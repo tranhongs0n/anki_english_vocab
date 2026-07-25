@@ -1,0 +1,108 @@
+/* --- Main Background & Font --- */
+.card {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+    font-size: 20px;
+    text-align: center;
+    color: #e8eaed; /* Light Grey Text */
+    background-color: #202124; /* Dark Background */
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* --- The Card Container (Required for Tags) --- */
+.container {
+    position: relative; /* Anchors the tag to this box */
+    margin: 40px auto; /* Centers the card */
+    padding: 30px 20px 20px 20px; /* Extra top padding for the tag */
+    background-color: #2d2e31; /* Slightly lighter card background */
+}
+
+/* --- Content Styles --- */
+.word {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 10px;
+}
+
+.ipa {
+    font-family: "Charis SIL", "Doulos SIL", serif; 
+    font-size: 1.8rem;
+    color: #8ab4f8; /* Soft Blue */
+    margin-bottom: 20px;
+}
+
+.separator {
+    height: 1px;
+    background-color: #5f6368;
+    margin: 25px 0;
+}
+
+.reference {
+    text-align: left;
+    font-size: 1.1rem;
+    color: #bdc1c6;
+}
+
+.replay-button svg {
+    width: 40px;
+    height: 40px;
+    fill: #8ab4f8;
+}
+
+/* --- Tag Designs --- */
+.feature-tag {
+    position: absolute;
+    top: -12px; /* Hangs off the top edge */
+    left: 20px;
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    z-index: 10;
+}
+
+/* Purple: Pronunciation / IPA */
+.tag-speak {
+    background-color: #2D1B2E; 
+    color: #E0B0FF; 
+    border: 1px solid #7B52AB;
+}
+
+/* Blue: Listening / Audio */
+.tag-listen {
+    background-color: #1A2634; 
+    color: #8AB4F8; 
+    border: 1px solid #44689E;
+}
+
+/* Green: Meaning / Context */
+.tag-meaning {
+    background-color: #1E3A29; 
+    color: #94F7B5; 
+    border: 1px solid #3E7C56;
+}
+
+.tag-abstract {
+    background-color: #1E3A29; 
+    color: #94F7B5; 
+    border: 1px solid #3E7C56;
+}
+
+
+
+.definition{
+	text-align: left;
+}
+
+.sentence{
+	text-align: left;
+	font-style: italic;
+}
+
+.synonym{
+	text-align: left;
+}
