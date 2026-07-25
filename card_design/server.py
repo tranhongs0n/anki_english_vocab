@@ -111,16 +111,30 @@ class CardDevHandler(http.server.SimpleHTTPRequestHandler):
                 model_name = params.get("model", [""])[0]
                 
                 # Try exact match, then wildcard match
-                nids = invoke_anki("findNotes", query=f'note:"{model_name}"')
-                if not nids and " " in model_name:
-                    nids = invoke_anki("findNotes", query=f'note:*{model_name.split()[0]}*')
+                nids_img = []
+                try:
+                    nids_img = invoke_anki("findNotes", query=f'note:"{model_name}" "Image:*<img*"')
+                except Exception:
+                    pass
+                nids_all = invoke_anki("findNotes", query=f'note:"{model_name}"')
+                if not nids_all and " " in model_name:
+                    nids_all = invoke_anki("findNotes", query=f'note:*{model_name.split()[0]}*')
+                
+                nids_no_img = [nid for nid in nids_all if nid not in set(nids_img[:50])][:10]
+                nids_img_sample = nids_img[:10]
+                
+                info_no = invoke_anki("notesInfo", notes=nids_no_img) if nids_no_img else []
+                info_img = invoke_anki("notesInfo", notes=nids_img_sample) if nids_img_sample else []
                 
                 notes_data = []
-                if nids:
-                    info = invoke_anki("notesInfo", notes=nids[:15])
-                    for n in info:
-                        fields_dict = {k: v.get("value", "") for k, v in n.get("fields", {}).items()}
-                        notes_data.append({"noteId": n.get("noteId"), "fields": fields_dict})
+                max_len = max(len(info_no), len(info_img))
+                for i in range(max_len):
+                    if i < len(info_no):
+                        n = info_no[i]
+                        notes_data.append({"noteId": n.get("noteId"), "fields": {k: v.get("value", "") for k, v in n.get("fields", {}).items()}})
+                    if i < len(info_img):
+                        n = info_img[i]
+                        notes_data.append({"noteId": n.get("noteId"), "fields": {k: v.get("value", "") for k, v in n.get("fields", {}).items()}})
                 
                 res = {"status": "ok", "notes": notes_data, "count": len(notes_data)}
             except Exception as e:

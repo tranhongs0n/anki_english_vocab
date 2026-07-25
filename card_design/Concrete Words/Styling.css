@@ -12,11 +12,15 @@
 }
 
 .top-block {
-    height: 160px;
+    min-height: 160px;
+    height: auto;
+    width: 100%;
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
     align-items: center;
+    overflow-wrap: break-word;
 }
 
 .word {
@@ -24,6 +28,9 @@
     font-weight: 700;
     margin: 0 0 10px 0 !important;
     line-height: 1.2 !important;
+    max-width: 100%;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 
 .type-box {
@@ -34,6 +41,8 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 input#typeans, 
@@ -62,6 +71,10 @@ input#typeans {
 code#typeans {
     display: block !important;
     word-break: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+    box-sizing: border-box;
+    margin: 5px 0 !important;
 }
 
 .typeGood { color: #0f9d58 !important; }
@@ -116,4 +129,19 @@ img {
 .ipad .scratchpad,
 .ipod .scratchpad {
     display: none !important;
+}
+
+/* Responsive Scaling for Mobile Screens (iPhone & Android) */
+@media (max-width: 500px) {
+    .word,
+    input#typeans, 
+    code#typeans, 
+    .typeGood, 
+    .typeBad, 
+    .typeMissed {
+        font-size: 2.2rem !important;
+    }
+    .top-block {
+        min-height: 120px;
+    }
 }

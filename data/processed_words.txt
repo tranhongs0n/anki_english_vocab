@@ -160,3 +160,6 @@ deduce
 falter
 tack
 balky
+enforce
+sloppy
+hyperbole
