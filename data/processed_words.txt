@@ -163,3 +163,8 @@ balky
 enforce
 sloppy
 hyperbole
+radical
+setback
+lance
+ramp
+eloquence
