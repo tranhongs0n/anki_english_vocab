@@ -16,7 +16,7 @@ cls
 echo ==================================================
 echo             Anki Vocabulary Suite Launcher
 echo ==================================================
-echo [1] Start All Services (API + Crawler + Vocab)
+echo [1] Start Vocabulary Monitor
 echo [2] Run End Session Sync and Push to GitHub (Auto in Anki Sync)
 echo [3] Clean Duplicate Vocabulary Cards (Auto in Anki Sync)
 echo [4] Change LLM Provider (Current: !LLM_PROVIDER!)
@@ -41,7 +41,7 @@ cls
 echo ==================================================
 echo             Select LLM Provider
 echo ==================================================
-echo [1] Local Gemini API (gemini-api)
+echo [1] Local Gemini API (Removed - Do Not Use)
 echo [2] Google AI Studio (aistudio)
 echo [3] xah.io (ckey.vn)
 echo [4] Back to Menu
@@ -90,30 +90,11 @@ pause
 goto end_arg
 
 :run_all_services
-echo Starting Gemini API Server...
-start "Gemini API Server" /min cmd /c "cd /d "%~dp0gemini-api" && set PYTHONPATH=src && python -m uvicorn app:app --host 127.0.0.1 --port 8000"
-
-echo Starting Google Image Crawler...
-start "Google Image Crawler" /min cmd /c "cd /d "%~dp0crawl-google-image" && npm start"
-
-echo Waiting for servers to boot (3s)...
-ping -n 4 127.0.0.1 >nul
-
-echo ==================================================
-echo Local Host URLs for access:
-echo Gemini API:     http://localhost:8000
-echo Image Crawler:  http://localhost:3000
-echo ==================================================
-
 echo Starting Vocabulary Tool in monitor mode...
 if exist "%~dp0anki-get-related-vocab\venv\Scripts\activate.bat" (
     call "%~dp0anki-get-related-vocab\venv\Scripts\activate.bat"
 )
 python "%~dp0anki-get-related-vocab\script.py" monitor
-
-echo Cleaning up servers...
-taskkill /fi "windowtitle eq Gemini API Server*" /f /t >nul 2>&1
-taskkill /fi "windowtitle eq Google Image Crawler*" /f /t >nul 2>&1
 
 :end_arg
 if "%1"=="" (
