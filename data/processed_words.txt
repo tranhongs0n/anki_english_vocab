@@ -34,3 +34,7 @@ encyclopedia
 cod
 slot
 remote control
+workshop
+flock
+turtle
+enclose
