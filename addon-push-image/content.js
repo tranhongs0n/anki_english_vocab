@@ -28,7 +28,7 @@ function findTargetImage() {
 }
 
 document.addEventListener('keydown', (e) => {
-  if (e.altKey && e.key === 'Enter') {
+  if (e.key === 'F8') {
     e.preventDefault();
     
     const imageUrl = findTargetImage();

@@ -117,14 +117,16 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           }
         });
 
-        // 5. Check if card is new and schedule
+        // 5. Check if card is new and schedule (Removed setSpecificDueDate as it's unsupported)
         const cards = note.cards; // array of card IDs
         if (cards && cards.length > 0) {
           const cardsInfo = await invokeAnki('cardsInfo', { cards });
           for (const card of cardsInfo) {
             // queue 0 means new
             if (card.queue === 0) {
-              await invokeAnki('setSpecificDueDate', { cards: [card.cardId], due: "0" });
+              // Usually people want to move it to the front, but setSpecificDueDate is unsupported in standard AnkiConnect.
+              // Skipping this step to prevent errors.
+              console.log('Card is new, skipping schedule modification');
             }
           }
         }

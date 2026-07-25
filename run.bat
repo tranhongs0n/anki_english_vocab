@@ -17,8 +17,8 @@ echo ==================================================
 echo             Anki Vocabulary Suite Launcher
 echo ==================================================
 echo [1] Start All Services (API + Crawler + Vocab)
-echo [2] Run End Session Sync and Push to GitHub
-echo [3] Clean Duplicate Vocabulary Cards
+echo [2] Run End Session Sync and Push to GitHub (Auto in Anki Sync)
+echo [3] Clean Duplicate Vocabulary Cards (Auto in Anki Sync)
 echo [4] Change LLM Provider (Current: !LLM_PROVIDER!)
 echo [5] Exit
 echo ==================================================

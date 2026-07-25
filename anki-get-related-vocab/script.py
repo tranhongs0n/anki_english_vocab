@@ -184,8 +184,7 @@ def add_notes_to_anki(flashcard_data_list, ram_cache):
         except Exception as e:
             log_error(f"Anki Import Error: {e}")
 
-def generate_flashcard_data(target_word):
-    prompt = f'Related words for "{target_word}": US IPA, Vietnamese meaning. Format: [["word", "ipa", "meaning"], ...]. Raw JSON only, no markdown.'
+def call_llm(prompt):
     if LLM_PROVIDER == "local":
         try:
             response = get_session().post(
@@ -197,10 +196,10 @@ def generate_flashcard_data(target_word):
                 }
             )
             response.raise_for_status()
-            raw_content = response.json()["text"].strip()
+            return response.json()["text"].strip()
         except Exception as e:
             log_error(f"Local LLM API Error: {e}")
-            return []
+            return None
     else:
         headers = {
             "Authorization": f"Bearer {LLM_API_KEY}",
@@ -219,10 +218,14 @@ def generate_flashcard_data(target_word):
                 json=payload
             )
             response.raise_for_status()
-            raw_content = response.json()["choices"][0]["message"]["content"].strip()
+            return response.json()["choices"][0]["message"]["content"].strip()
         except Exception as e:
             log_error(f"LLM API Error: {e}")
-            return []
+            return None
+
+def extract_json_from_llm(raw_content):
+    if not raw_content:
+        return None
     try:
         raw_content = re.sub(r'<think>.*?</think>', '', raw_content, flags=re.DOTALL).strip()
         start_index = raw_content.find('[')
@@ -232,40 +235,67 @@ def generate_flashcard_data(target_word):
         else:
             content = raw_content
         try:
-            data = json.loads(content.strip())
+            return json.loads(content.strip())
         except json.JSONDecodeError as e:
             data = try_repair_json(content.strip())
             if data is None:
                 log_error(f"JSON Decode Error: {e}")
                 log_error(f"Raw Content: {raw_content}")
-                return []
-        formatted_data = []
-        for item in data:
-            if len(item) >= 3:
-                formatted_data.append({
-                    'word': item[0].strip().lower(),
-                    'ipa': item[1],
-                    'meaning': item[2]
-                })
-        return formatted_data
+            return data
     except Exception as e:
         log_error(f"Response processing error: {e}")
-        return []
+        return None
 
 def process_target_word(target_word, ram_cache):
     with ram_cache_lock:
         ram_cache.add(target_word.lower())
-    print(f"\n[{get_timestamp()}] Querying LLM for: '{target_word}'...")
-    generated_data = generate_flashcard_data(target_word)
-    if not generated_data:
+    print(f"\n[{get_timestamp()}] Querying LLM for related words: '{target_word}'...")
+    
+    prompt1 = f'List 10-15 related words for "{target_word}". Format: ["word1", "word2", ...]. Raw JSON list of strings only, no markdown.'
+    raw1 = call_llm(prompt1)
+    words_list = extract_json_from_llm(raw1)
+    
+    if not words_list or not isinstance(words_list, list):
+        log_error("Failed to get related words list.")
         return
+        
+    with ram_cache_lock:
+        missing_words = [w.strip().lower() for w in words_list if isinstance(w, str) and w.strip().lower() not in ram_cache]
+        
+    if not missing_words:
+        log_info(f"No new related words found for '{target_word}' (all exist in cache).")
+        return
+        
+    print(f"[{get_timestamp()}] Found {len(missing_words)} new words. Generating flashcard data...")
+    
+    prompt2 = f'For these words: {json.dumps(missing_words)}, provide US IPA and Vietnamese meaning. Format: [["word", "ipa", "meaning"], ...]. Raw JSON only, no markdown.'
+    raw2 = call_llm(prompt2)
+    data = extract_json_from_llm(raw2)
+    
+    if not data or not isinstance(data, list):
+        log_error("Failed to get flashcard data.")
+        return
+        
+    formatted_data = []
+    for item in data:
+        if isinstance(item, list) and len(item) >= 3:
+            formatted_data.append({
+                'word': item[0].strip().lower(),
+                'ipa': item[1],
+                'meaning': item[2]
+            })
+            
+    if not formatted_data:
+        return
+        
     with ram_cache_lock:
         new_flashcards = [
-            item for item in generated_data 
+            item for item in formatted_data 
             if item['word'] not in ram_cache
         ]
         for item in new_flashcards:
             ram_cache.add(item['word'])
+            
     if new_flashcards:
         add_notes_to_anki(new_flashcards, ram_cache)
 
@@ -445,7 +475,7 @@ def suspend_target_cards():
     else:
         log_info("No cards found to suspend.")
 
-def end_session_process():
+def end_session_process(skip_sync=False):
     log_info("Starting End Session Process...")
     dump_gibberish()
     log_info(f"Checking for notes in deck '{GIBBERISH_SOURCE_DECK}'...")
@@ -457,9 +487,12 @@ def end_session_process():
     else:
         log_info("No notes found to delete.")
     suspend_target_cards()
-    log_info("Syncing Anki...")
-    invoke('sync')
-    log_info("Anki sync completed.")
+    if not skip_sync:
+        log_info("Syncing Anki...")
+        invoke('sync')
+        log_info("Anki sync completed.")
+    else:
+        log_info("Skipping AnkiConnect sync (handled by native sync).")
     log_info("Checking Git status...")
     status_res = run_git_command(["git", "status", "-s"])
     if not status_res.stdout.strip():
@@ -491,8 +524,8 @@ def end_session_process():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Anki Vocabulary Tool")
-    parser.add_argument("mode", nargs="?", choices=["monitor", "clean", "dump", "end", "endsession"], default="monitor",
-                        help="Operation mode: monitor (default), clean, dump, end")
+    parser.add_argument("mode", nargs="?", choices=["monitor", "clean", "dump", "end", "endsession", "pre_sync"], default="monitor",
+                        help="Operation mode: monitor (default), clean, dump, end, pre_sync")
     args = parser.parse_args()
     if args.mode == "monitor":
         background_monitor()
@@ -501,4 +534,7 @@ if __name__ == "__main__":
     elif args.mode == "dump":
         dump_gibberish()
     elif args.mode in ("end", "endsession"):
-        end_session_process()
+        end_session_process(skip_sync=False)
+    elif args.mode == "pre_sync":
+        clean_duplicates()
+        end_session_process(skip_sync=True)
