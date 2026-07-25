@@ -593,7 +593,7 @@
 
         // 1. Fetch live models from server
         async function fetchModels() {
-            try:
+            try {
                 const res = await fetch("/api/models");
                 const data = await res.json();
                 if (data.status === "ok") {
