@@ -674,3 +674,8 @@ theorist
 line
 heap
 predictive
+joint
+tame
+cope
+adore
+servant
