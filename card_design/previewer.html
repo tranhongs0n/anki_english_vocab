@@ -528,8 +528,11 @@
             <!-- Real Note Loader -->
             <div class="real-card-nav" id="realNav" style="display: none;">
                 <span>🃏 Real Note: <strong id="realIdx">1</strong>/<strong id="realTotal">0</strong></span>
-                <button class="btn" style="padding: 2px 6px; color:#fbbf24;" onclick="prevRealNote()">⬅️</button>
-                <button class="btn" style="padding: 2px 6px; color:#fbbf24;" onclick="nextRealNote()">➡️</button>
+                <button class="btn" style="padding: 2px 6px; color:#fbbf24;" onclick="prevRealNote()" title="Previous Real Card">⬅️</button>
+                <button class="btn" style="padding: 2px 6px; color:#fbbf24;" onclick="nextRealNote()" title="Next Real Card">➡️</button>
+                <span style="border-left: 1px solid rgba(245,158,11,0.4); margin: 0 4px; height: 16px;"></span>
+                <button class="btn" style="padding: 2px 8px; background: rgba(245, 158, 11, 0.25); color:#fff; font-size: 0.75rem;" onclick="jumpToRealNoteType(false)" title="Jump to card without image">🚫 No Image</button>
+                <button class="btn" style="padding: 2px 8px; background: rgba(16, 185, 129, 0.25); color:#fff; font-size: 0.75rem;" onclick="jumpToRealNoteType(true)" title="Jump to card with image">🖼️ With Image</button>
             </div>
             <button class="btn btn-real" onclick="loadRealNotes()">
                 <span>🎲 Load Real Cards</span>
@@ -796,6 +799,22 @@
 
         function nextRealNote() { applyRealNote(currentRealIdx + 1); }
         function prevRealNote() { applyRealNote(currentRealIdx - 1); }
+
+        function jumpToRealNoteType(wantsImg) {
+            if (!realNotesList || realNotesList.length === 0) return;
+            for (let i = 0; i < realNotesList.length; i++) {
+                const idx = (currentRealIdx + 1 + i) % realNotesList.length;
+                const note = realNotesList[idx];
+                const imgVal = note.fields && note.fields.Image ? note.fields.Image : "";
+                const hasImg = imgVal.indexOf("<img") !== -1 || imgVal.trim().length > 5;
+                if (hasImg === wantsImg) {
+                    applyRealNote(idx);
+                    showToast(`🃏 Switched to card #${idx+1} (${wantsImg ? 'WITH Image' : 'NO Image'})`, wantsImg ? "🖼️" : "🚫");
+                    return;
+                }
+            }
+            showToast(`⚠️ No loaded real cards found ${wantsImg ? 'WITH Image' : 'WITHOUT Image'}`, "⚠️");
+        }
 
         // 3. Tab Switcher & Code Editors
         function switchTab(tab) {
