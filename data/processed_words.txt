@@ -782,3 +782,4 @@ refugee
 determiner
 haste
 cruelly
+frigorifically
