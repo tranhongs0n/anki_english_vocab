@@ -1,62 +1,89 @@
-.card {        
+.card {
+    --word-font-size: 3rem;
     font-family: system-ui, -apple-system, sans-serif;
     font-size: 20px;
     text-align: center;
     line-height: 1.6;
     margin: 0;
+    padding: 24px 20px;
+    box-sizing: border-box;
 }
 
 .container {
-    padding:0px 20px;
+    padding: 24px;
     padding-bottom: 80px; 
-}
-
-.top-block {
-    min-height: 160px;
-    height: auto;
-    width: 100%;
-    box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
     align-items: center;
-    overflow-wrap: break-word;
+    max-width: 600px;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+/* Image Slot (Top) */
+.image-slot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+}
+
+.image-slot:empty,
+.image-slot:not(:has(img)) {
+    display: none !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+img {
+    max-width: 300px;
+    max-height: 300px;
+    object-fit: contain;
+    border-radius: 16px;
+}
+
+/* Word & Typing Answer Slot (Middle) */
+.word-slot {
+    min-height: 3.6rem;
+    width: 100%;
+    display: flex;
+    flex-direction: column; /* Stack word and input on 2 vertical lines */
+    align-items: center;     /* Center align horizontally */
+    justify-content: center;
+    margin-bottom: 12px;
+    box-sizing: border-box;
+    position: relative;
 }
 
 .word {
-    font-size: 3rem;
+    font-size: var(--word-font-size);
     font-weight: 700;
-    margin: 0 0 10px 0 !important;
     line-height: 1.2 !important;
     max-width: 100%;
-    overflow-wrap: break-word;
-    word-break: break-word;
+    white-space: nowrap !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+    margin: 0 !important;
 }
 
-.type-box {
-    min-height: 3.6rem;
-    width: 100%;
-    margin-bottom: 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    max-width: 100%;
-    box-sizing: border-box;
+.nightMode .word {
+    color: #e8eaed;
 }
 
+/* Typing Input Custom Styling: Invisible Box (No Border, No Cursor, Text Shows Normally) */
 input#typeans, 
 code#typeans, 
 .typeGood, 
 .typeBad, 
 .typeMissed {
-    font-size: 3rem !important;
+    font-size: var(--word-font-size) !important;
     font-weight: 700 !important;
     font-family: system-ui, -apple-system, sans-serif !important;
     text-align: center !important;
-    background: transparent !important;
-    border: none !important;
     line-height: 1.2 !important;
+    white-space: nowrap !important;
+    word-break: normal !important;
 }
 
 input#typeans {
@@ -65,41 +92,53 @@ input#typeans {
     box-sizing: border-box;
     border: none !important;
     outline: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
     caret-color: transparent !important;
+    color: inherit !important;
 }
 
+/* Typed result: no backgrounds */
 code#typeans {
     display: block !important;
-    word-break: break-word;
-    overflow-wrap: break-word;
+    white-space: nowrap !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
     max-width: 100%;
     box-sizing: border-box;
-    margin: 5px 0 !important;
+    margin: 0 !important;
 }
 
-.typeGood { color: #0f9d58 !important; }
-.typeBad { color: #db4437 !important; }
-.typeMissed { color: #7f8c8d !important; }
+.typeGood { color: #15803d !important; background: none !important; }
+.typeBad { color: #b91c1c !important; background: none !important; }
+.typeMissed { color: #95a0ad !important; background: none !important; }
 
-.nightMode .typeGood { color: #81c995 !important; }
-.nightMode .typeBad { color: #f28b82 !important; }
-.nightMode .typeMissed { color: #9aa0a6 !important; }
+.nightMode .typeGood { color: #4ade80 !important; }
+.nightMode .typeBad { color: #f87171 !important; }
+.nightMode .typeMissed { color: #6b7280 !important; }
+
+/* IPA Slot (Bottom - Hidden on Front, Revealed on Back) */
+.ipa-slot {
+    min-height: 2.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+}
 
 .ipa {
     font-family: "Charis SIL", "Doulos SIL", serif; 
     font-size: 1.8rem;
-    margin-bottom: 20px;
+    line-height: 1.2;
 }
 
-.reference {
+/* Reference / Source Slot */
+.reference-slot {
     font-size: 1.1rem;
-    margin-top: 15px;
+    margin-top: 8px;
 }
 
-img {
-    max-width: 300px;
-}
-
+/* Scratchpad: Injected by add-on for desktop scratch input */
 .scratchpad {
     position: fixed;
     bottom: 20px;
@@ -133,15 +172,81 @@ img {
 
 /* Responsive Scaling for Mobile Screens (iPhone & Android) */
 @media (max-width: 500px) {
-    .word,
-    input#typeans, 
-    code#typeans, 
-    .typeGood, 
-    .typeBad, 
-    .typeMissed {
-        font-size: 2.2rem !important;
+    .container {
+        padding: 12px 14px;
+        padding-bottom: 40px;
     }
-    .top-block {
-        min-height: 120px;
+    .card {
+        --word-font-size: 2.0rem;
+    }
+
+    .word-slot {
+        min-height: 2.8rem;
+        margin-bottom: 8px;
+    }
+    .ipa {
+        font-size: 1.4rem;
+    }
+    .ipa-slot {
+        min-height: 1.8rem;
+        margin-bottom: 10px;
+    }
+    .image-slot {
+        margin-bottom: 10px;
+    }
+    img {
+        max-width: 220px;
+        max-height: 220px;
+    }
+    .reference-slot {
+        font-size: 0.95rem;
+    }
+}
+
+/* Extra Narrow Phone Screens (< 360px) */
+@media (max-width: 360px) {
+    .card {
+        --word-font-size: 1.7rem;
+    }
+    img {
+        max-width: 180px;
+        max-height: 180px;
+    }
+}
+
+/* iPad / iPad Mini / AnkiMobile Overrides (Zero Padding) */
+.ipad .card,
+.mobile .card,
+.ios .card,
+body.ipad .card,
+body.mobile .card,
+html.ipad .card,
+html.mobile .card,
+.ipad,
+.mobile,
+.ios {
+    padding: 0 !important;
+}
+
+.ipad .container,
+.mobile .container,
+.ios .container,
+body.ipad .container,
+body.mobile .container,
+html.ipad .container,
+html.mobile .container {
+    padding: 0 !important;
+    max-width: 100% !important;
+}
+
+@media only screen and (max-device-width: 1024px) {
+    .ipad .card, .mobile .card, .ios .card,
+    body.ipad .card, body.mobile .card, body.ios .card {
+        padding: 0 !important;
+    }
+    .ipad .container, .mobile .container, .ios .container,
+    body.ipad .container, body.mobile .container, body.ios .container {
+        padding: 0 !important;
+        max-width: 100% !important;
     }
 }

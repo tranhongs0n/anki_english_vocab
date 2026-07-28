@@ -1,16 +1,19 @@
-<div class="container">{{#Image}}
-  <div class="top-block">
-    <div class="word">{{type:Word}}</div>
-    {{#IPA}}<div class="ipa" style="visibility: hidden;">{{IPA}}</div>{{/IPA}}
+<div class="container">
+  {{#Image}}
+  <!-- Cards WITH Image: Image is prompt -->
+  <div class="image-slot">
+    {{Image}}
   </div>
-  <div class="image-box">{{Image}}</div>
-{{/Image}}
+  <div class="word-slot">
+    {{type:Word}}
+  </div>
+  {{/Image}}
 
-{{^Image}}
-  <div class="top-block">
-    <div class="type-box">{{type:Word}}</div>
+  {{^Image}}
+  <!-- Cards WITHOUT Image: Word is prompt -->
+  <div class="word-slot">
     <div class="word">{{Word}}</div>
-    {{#IPA}}<div class="ipa" style="visibility: hidden;">{{IPA}}</div>{{/IPA}}
+    {{type:Word}}
   </div>
-{{/Image}}
+  {{/Image}}
 </div>
