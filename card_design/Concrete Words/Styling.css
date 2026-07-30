@@ -45,26 +45,30 @@ img {
 
 /* Word & Typing Answer Slot (Middle) */
 .word-slot {
-    min-height: 3.6rem;
+    min-height: 4.2rem;
     width: 100%;
     display: flex;
     flex-direction: column; /* Stack word and input on 2 vertical lines */
     align-items: center;     /* Center align horizontally */
     justify-content: center;
     margin-bottom: 12px;
+    padding: 4px 0;
     box-sizing: border-box;
     position: relative;
+    overflow: visible !important;
 }
 
 .word {
     font-size: var(--word-font-size);
     font-weight: 700;
-    line-height: 1.2 !important;
+    line-height: 1.4 !important;
     max-width: 100%;
     white-space: nowrap !important;
     word-break: normal !important;
     overflow-wrap: normal !important;
+    overflow: visible !important;
     margin: 0 !important;
+    padding-bottom: 4px;
 }
 
 .nightMode .word {
@@ -81,14 +85,17 @@ code#typeans,
     font-weight: 700 !important;
     font-family: system-ui, -apple-system, sans-serif !important;
     text-align: center !important;
-    line-height: 1.2 !important;
+    line-height: 1.4 !important;
     white-space: nowrap !important;
     word-break: normal !important;
+    overflow: visible !important;
 }
 
 input#typeans {
     width: 100%;
-    height: 3.6rem;
+    min-height: 4.2rem;
+    height: auto;
+    padding: 4px 0;
     box-sizing: border-box;
     border: none !important;
     outline: none !important;
@@ -107,6 +114,8 @@ code#typeans {
     max-width: 100%;
     box-sizing: border-box;
     margin: 0 !important;
+    padding: 4px 0;
+    overflow: visible !important;
 }
 
 .typeGood { color: #15803d !important; background: none !important; }
