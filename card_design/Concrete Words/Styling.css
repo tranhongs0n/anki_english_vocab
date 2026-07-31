@@ -20,12 +20,15 @@
     box-sizing: border-box;
 }
 
-/* Image Slot (Top) */
+/* Image Slot (Top) - Multiple rows, 1 image per row, centered with gap */
 .image-slot {
     display: flex;
-    align-items: center;
+    flex-direction: column; /* Stack images in vertical rows (1 image per row) */
+    align-items: center;    /* Center horizontally */
     justify-content: center;
+    gap: 12px;             /* Space between multiple images */
     margin-bottom: 16px;
+    width: 100%;
 }
 
 .image-slot:empty,
@@ -37,8 +40,11 @@
 }
 
 img {
-    max-width: 300px;
+    display: block;
+    height: 300px;
     max-height: 300px;
+    width: auto;
+    max-width: 100%;
     object-fit: contain;
     border-radius: 16px;
 }
