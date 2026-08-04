@@ -5532,3 +5532,7 @@ glowing
 nodule
 corpulence
 emblem
+revitalize
+gallstone
+scarce
+dharma
