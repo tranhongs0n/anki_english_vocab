@@ -1,0 +1,3 @@
+<think>The user wants me to extract all English text from the scanned page. Looking at the image, I can see there's only a single line of text centered on the page.</think>
+
+To Nancy, Philip, and Christina

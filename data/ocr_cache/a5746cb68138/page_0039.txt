@@ -1,0 +1,31 @@
+<think>The user wants me to extract all English text from this scanned page. Let me transcribe it carefully and verbatim.</think>
+
+Questions 151-152 refer to the following article.
+
+**Rainsy To Move Headquarters**
+
+DADE (July 11)—Rainsy LLC announced yesterday that it is moving its headquarters to Dade.
+
+A data storage and analytics firm currently based in Salt Creek, Rainsy has clients that include some of the country's largest credit card companies, online retailers, and software providers. Rainsy helps these businesses manage and understand their customer data.
+
+Rainsy is not planning to close its current offices in Salt Creek. However, the Dade location will become its new base of operations, as several members of its executive team will work there. The company's chief executive officer and chief financial officer will relocate to Dade along with approximately 50 percent of the company's workforce.
+
+The office of Rainsy's chief technology officer will remain in Salt Creek, as will the account management team. The company's new Dade offices are located at 12 Glacier Parkway.
+
+**151.** What does Rainsy LLC do?
+   (A) It stores and analyzes consumer information.
+   (B) It sells technology products online.
+   (C) It processes credit card payments for retailers.
+   (D) It develops computer software programs.
+
+**152.** Who will be based in Dade?
+   (A) Rainsy's chief technology officer
+   (B) The entire Rainsy executive team
+   (C) About half of Rainsy's employees
+   (D) The Rainsy account management team
+
+TEST 2
+
+GO ON TO THE NEXT PAGE
+
+TEST 2 59

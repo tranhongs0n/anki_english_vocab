@@ -1,0 +1,13 @@
+<think>The user wants me to extract all English text from this scanned page. Let me look at what's visible:
+
+1. "RC" - large letters in the background
+2. "기출 TEST" - Korean text meaning "Past Test" followed by "TEST"
+3. "06" - a number
+
+The main English text I can identify is "TEST" and "06". The "기출" is Korean, not English.
+
+Let me transcribe what I see accurately.</think>
+
+RC
+
+기출 TEST 06

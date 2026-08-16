@@ -1,0 +1,49 @@
+Fowler Office Supplies
+
+Receipt for Order: B19849
+Order Date: August 18
+
+| Item | Price | Quantity | Total |
+| Printer paper | $8.00/500 sheets | 10 | $ 80.00 |
+| Toner (black) | $50.00/cartridge | 1 | $ 50.00 |
+| Gel pens (blue) | $5.00/8-pack | 3 | $ 15.00 |
+| Staples | $3.50/box | 2 | $ 7.00 |
+| GRAND TOTAL | | | $152.00 |
+
+Return Policy: Unopened merchandise may be returned by mail or in one of our stores within 60 days of purchase. For returns by mail, log in to your www.fowlerofficesupplies.com account to print a shipping label. For in-store returns, bring the item and the order number to any Fowler Office Supplies location.
+
+TEST 2
+
+186. Why did Mr. Nakashima send the e-mail?
+(A) He did not receive an item he ordered.
+(B) He was mistakenly charged twice for an item.
+(C) He received a receipt that was not detailed enough.
+(D) He did not get a confirmation e-mail for a purchase he made.
+
+187. According to the second e-mail, what will Mr. Nakashima receive with his next order?
+(A) A catalog
+(B) A free pen
+(C) A printed receipt
+(D) A price discount
+
+188. For what item does Mr. Higgins suggest that Mr. Nakashima select "Recurring Order"?
+(A) Printer paper
+(B) Toner
+(C) Gel pens
+(D) Staples
+
+189. What will Mr. Higgins ask the technical team to look into?
+(A) Improving the Web site's response rate
+(B) Providing an option to send receipts to multiple e-mail addresses
+(C) Placing a link to customers' order history on the home page
+(D) Making return labels printable from any device
+
+190. What is needed to return an item at a Fowler Office Supplies store?
+(A) The original receipt
+(B) A credit card number
+(C) A confirmation e-mail
+(D) The order number
+
+GO ON TO THE NEXT PAGE
+
+TEST 2   73

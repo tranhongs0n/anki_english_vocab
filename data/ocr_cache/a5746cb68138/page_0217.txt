@@ -1,0 +1,41 @@
+Questions 161-163 refer to the following e-mail.
+
+To: All staff
+From: Liza Chu, IT Department
+Date: June 8, 1:13 P.M.
+Subject: Network issues
+
+Good afternoon everyone. — [1] —.
+
+At 10:00 this morning, the Information Technology team did some network maintenance, resulting in a series of issues across the building. — [2] —. We quickly received reports of printer malfunctions, missing network drives, difficulty loading e-mail messages, and other problems. — [3] —.
+
+We have now stabilized the situation, but if you should still encounter these or similar issues, please attempt first to address them by restarting your computer. — [4] —.
+
+161. What is the e-mail about?
+
+(A) Scheduling a team meeting
+(B) Setting up a new e-mail account
+(C) Concerns about Web browsing security
+(D) Problems with a computer network
+
+162. What probably happened before Ms. Chu sent the e-mail?
+
+(A) Employees requested assistance from the IT department.
+(B) Log-on procedures for company accounts were changed.
+(C) Computer equipment was removed from the building.
+(D) Some staff members received new printers.
+
+163. In which of the positions marked [1], [2], [3], and [4] does the following sentence best belong?
+
+"If you continue to have problems after doing so, then give us a call."
+
+(A) [1]
+(B) [2]
+(C) [3]
+(D) [4]
+
+TEST 8
+
+GO ON TO THE NEXT PAGE
+
+TEST 8   243

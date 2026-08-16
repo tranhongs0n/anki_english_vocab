@@ -1,0 +1,39 @@
+Questions 135-138 refer to the following e-mail.
+
+To: All employees
+From: Cecil Radu, Information Technology Manager
+Date: April 8
+Re: Network alert
+
+We are experiencing some problems with our local network. Some of the affected services
+include the ------- company Web site and the payroll database. We have also received
+135.
+information ------- network data becoming corrupted and files not saving properly. Therefore, to
+136.
+ensure that you do not lose any work, please avoid using the network this morning while my
+team addresses these ------- . We anticipate that the systems will be fully functional by this
+137.
+afternoon. ------- .
+138.
+
+135. (A) internalizing
+(B) internalize
+(C) internally
+(D) internal
+
+136. (A) as
+(B) in
+(C) about
+(D) with
+
+137. (A) issues
+(B) clients
+(C) articles
+(D) proposals
+
+138. (A) The network server will be expensive.
+(B) Your computer may be corrupted.
+(C) Thank you for your patience.
+(D) Contact the IT help desk.
+
+294

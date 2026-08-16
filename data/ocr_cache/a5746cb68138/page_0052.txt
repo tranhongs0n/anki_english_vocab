@@ -1,0 +1,40 @@
+Questions 186-190 refer to the following e-mails and receipt.
+
+E-Mail Message
+
+From:       Akihito Nakashima <a.nakashima@gilchristshipping.com>
+To:         Fowler Office Supplies <support@fowlerofficesupplies.com>
+Subject:    Order B19849
+Date:       August 19
+
+To Whom It May Concern,
+
+Yesterday, I purchased some office supplies on your Web site. I received an e-mail receipt, but the costs are not itemized on it. To satisfy a new company policy, I must give my supervisor a receipt with the charges for each item listed separately. Could you e-mail me such a receipt? If not, is it possible for me to get this information myself from your Web site? Finally, can confirmations for future orders possibly be sent to more than one e-mail address? It would be ideal for my supervisor to automatically receive one.
+
+Thank you,
+
+Akihito Nakashima, Executive Assistant
+Gilchrist Shipping
+
+E-Mail Message
+
+From:        Fowler Office Supplies <support@fowlerofficesupplies.com>
+To:          Akihito Nakashima <a.nakashima@gilchristshipping.com>
+Subject:     RE: Order B19849
+Date:        August 19
+Attachment:  B19849
+
+Dear Mr. Nakashima,
+
+Attached is the receipt you requested. In apology for the inconvenience, we will provide you with 10 percent off the total price of your next order. To view a full description of any previous order, first log in to your account on our Web site, go to the "My Orders" tab, and then click on any order number.
+
+I noticed that included in each of your last few orders was an identical order for ten of a particular item. You should know that we will reduce the price for that item by 5 percent if you mark this as a recurring order. To do this, simply check the "Recurring Order" box on the online order form.
+
+As for your final query, this is not possible right now. However, I will share the idea with our technical team.
+
+All the best,
+
+Cameron Higgins, Customer Relations
+Fowler Office Supplies
+
+72

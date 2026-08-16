@@ -1,0 +1,32 @@
+Questions 191-195 refer to the following reservation and e-mails.
+
+Your Move Vehicle Rental Company
+
+Reservation Number: 15288242
+
+Pickup Location: 2833 Centennial Rd., Muncie, IN 47303
+
+Date and Time: October 31, 10:00 A.M.
+
+Drop-off Location: Same as pickup
+
+Date and Time: October 31, 6:30 P.M.
+
+Vehicle Description: 5-meter moving van
+
+If you need to change your reservation, you can do so via your online account until three days before your scheduled pickup. After that point, contact customer support at reservations@yourmove.com. Please include your reservation number in the e-mail subject.
+
+To:        reservations@yourmove.com
+From:      selina_os@chestnutmail.com
+Date:      October 29
+Subject:   Reservation 15288242
+
+Hello,
+
+I reserved a moving van online and was given an estimated price of $150. However, I mistakenly listed the same location for both pickup and drop-off. I'd like to know if there is a drop-off location closer to my destination in Cumberland. If so, can you please help me update the reservation?
+
+Sincerely,
+
+Selina Osman
+
+254

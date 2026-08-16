@@ -1,0 +1,48 @@
+Questions 153-154 refer to the following form.
+
+Cortica Bank
+
+Please fill out the following form to open a new bank account.
+
+Is this your first account with Cortica Bank? __ Yes  X No
+
+Existing account number (if applicable): 190-37580
+
+New account type: __ Chequing  X Savings __ Investment
+
+Name: Frances Wilkes
+
+Mailing address: 17 Jones Street
+                 North Sydney NSW 2060
+
+Phone number: (02) 7010 8624
+
+E-mail address: fwilkes@myemail.com.au
+
+Initial deposit amount (minimum $500): $1,500
+
+Would you like to sign up for electronic communications? __ Yes  X No
+
+If you select "Yes," we will contact you via voice mail, e-mail, or text.
+If you select "No," you will receive monthly paper statements in the mail.
+
+Please note that accounts take up to two business days to be established. Your funds
+will be available after this period. You will receive your debit card in the mail in up to five
+business days.
+
+153. What is indicated about Ms. Wilkes?
+(A) She has another account with Cortica
+    Bank.
+(B) She plans to open an investment
+    account.
+(C) She has lost a debit card.
+(D) She placed an order for checks.
+
+154. How will the bank most likely contact
+     Ms. Wilkes?
+(A) By e-mail
+(B) By text message
+(C) By telephone
+(D) By letter
+
+150

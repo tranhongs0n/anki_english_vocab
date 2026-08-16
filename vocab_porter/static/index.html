@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Anki Vocab Porter | Smart Text & Book Importer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Header Bar -->
+  <header class="app-header">
+    <div class="header-brand">
+      <div class="logo-badge">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"></path>
+          <path d="M6 6h10"></path>
+          <path d="M6 10h10"></path>
+        </svg>
+      </div>
+      <div>
+        <h1 class="brand-title">Anki Vocab Porter</h1>
+        <p class="brand-subtitle">PDF • Ebooks • Text • AnkiConnect Bridge</p>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <!-- Deck Configuration -->
+      <div class="control-group">
+        <label for="targetDeckInput">Target Deck</label>
+        <input type="text" id="targetDeckInput" value="English::toeic" placeholder="Target Deck" />
+      </div>
+
+      <!-- Anki Status Indicator -->
+      <div class="anki-status-pill" id="ankiStatusPill">
+        <span class="status-dot"></span>
+        <span class="status-text" id="ankiStatusText">Checking Anki...</span>
+        <button id="btnRefreshStatus" class="btn-icon" title="Check Connection">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Application Grid -->
+  <main class="app-layout">
+    <!-- Left Column: Input & Analysis Area -->
+    <section class="main-column" aria-label="Main Vocab Extraction Section">
+      
+      <!-- Input Panel -->
+      <div class="card panel-input">
+        <div class="tabs-header" role="tablist">
+          <button class="tab-btn active" id="tabUploadBtn" role="tab" aria-selected="true" data-tab="uploadPanel">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+            Upload File
+          </button>
+          <button class="tab-btn" id="tabPasteBtn" role="tab" aria-selected="false" data-tab="pastePanel">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+            Paste Text
+          </button>
+        </div>
+
+        <div class="tab-content">
+          <!-- File Upload Tab -->
+          <div class="tab-pane active" id="uploadPanel">
+            <div class="dropzone" id="dropzone">
+              <input type="file" id="fileInput" accept=".pdf,.epub,.mobi,.fb2,.txt,.md,.srt" class="file-input-hidden" />
+              <div class="dropzone-inner">
+                <div class="dropzone-icon">
+                  <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="12" y1="18" x2="12" y2="12"></line>
+                    <line x1="9" y1="15" x2="15" y2="15"></line>
+                  </svg>
+                </div>
+                <div class="dropzone-text">
+                  <p class="primary-text"><strong>Click to browse</strong> or drag & drop a file</p>
+                  <p class="secondary-text">Supports PDF, EPUB, MOBI, FB2, TXT, MD</p>
+                </div>
+              </div>
+            </div>
+            <div class="selected-file-banner hidden" id="fileBanner">
+              <div class="file-info">
+                <span class="file-name" id="selectedFileName">sample.pdf</span>
+                <span class="file-size" id="selectedFileSize">0 KB</span>
+              </div>
+              <button class="btn-text-danger" id="btnRemoveFile">Remove</button>
+            </div>
+          </div>
+
+          <!-- Paste Text Tab -->
+          <div class="tab-pane" id="pastePanel">
+            <div class="textarea-wrapper">
+              <textarea id="rawTextInput" placeholder="Paste your English article, chapter, or vocabulary list here..." rows="6"></textarea>
+              <div class="textarea-footer">
+                <span id="charCount">0 words</span>
+                <button type="button" class="btn-link" id="btnLoadSample">Insert Sample Passage</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Extraction Options -->
+        <div class="options-bar">
+          <div class="options-checkboxes">
+            <label class="checkbox-label" title="Filters out 18,000+ known gibberish fragments">
+              <input type="checkbox" id="chkGibberish" checked />
+              <span>Gibberish Filter</span>
+            </label>
+            <label class="checkbox-label" title="Exclude common stopwords (the, about, have, etc.)">
+              <input type="checkbox" id="chkStopwords" checked />
+              <span>Stopwords Filter</span>
+            </label>
+          </div>
+
+          <div class="options-controls">
+            <div class="page-limit-input">
+              <label for="ocrModeSelect">Mode:</label>
+              <select id="ocrModeSelect" style="padding: 0.35rem 0.5rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); font-size: 0.8rem; background-color: var(--bg-surface);">
+                <option value="auto">Auto (Text first, OCR only image pages)</option>
+                <option value="pure_text">Pure Text Only (Fastest, No OCR)</option>
+                <option value="force_ocr">Force Vision OCR (All Pages)</option>
+              </select>
+            </div>
+            <div class="page-limit-input">
+              <label for="pageRangeInput">Pages:</label>
+              <input type="text" id="pageRangeInput" placeholder="1-30 / All" style="width: 85px;" />
+            </div>
+            <button id="btnAnalyze" class="btn-primary">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              <span>Extract & Analyze</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results & Anki Actions Area -->
+      <div class="card panel-results" id="resultsPanel">
+        <!-- Metric Summary Cards -->
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <span class="metric-label">Total Unique Words</span>
+            <span class="metric-val" id="metricTotal">0</span>
+          </div>
+          <div class="metric-card highlight-move">
+            <span class="metric-label">Move to Target Deck</span>
+            <span class="metric-val" id="metricMove">0</span>
+          </div>
+          <div class="metric-card highlight-new">
+            <span class="metric-label">Brand New to Anki</span>
+            <span class="metric-val" id="metricNew">0</span>
+          </div>
+          <div class="metric-card highlight-examples">
+            <span class="metric-label">Example Updates</span>
+            <span class="metric-val" id="metricExamples">0</span>
+          </div>
+        </div>
+
+        <!-- Actions & Filter Bar -->
+        <div class="results-toolbar">
+          <div class="search-filter-group">
+            <input type="search" id="wordSearchInput" placeholder="Search candidate words..." />
+            <select id="statusFilterSelect">
+              <option value="all">All Words</option>
+              <option value="move_to_deck">Move to Deck Only</option>
+              <option value="brand_new">Brand New Only</option>
+              <option value="already_in_deck">Already in Deck</option>
+            </select>
+          </div>
+
+          <div class="sync-actions-group">
+            <button id="btnDryRun" class="btn-secondary" title="Simulate sync without modifying Anki">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+              Dry Run
+            </button>
+            <button id="btnSyncAnki" class="btn-accent" title="Execute move and additions in Anki">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path></svg>
+              Sync to Anki
+            </button>
+          </div>
+        </div>
+
+        <!-- Live Progress Banner -->
+        <div class="progress-banner hidden" id="syncProgressBanner">
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill" id="syncProgressBar" style="width: 0%"></div>
+          </div>
+          <span class="progress-text" id="syncProgressText">Processing...</span>
+        </div>
+
+        <!-- Extracted Words Table -->
+        <div class="table-container">
+          <table class="data-table" id="wordsTable">
+            <thead>
+              <tr>
+                <th style="width: 180px;">Word</th>
+                <th style="width: 140px;">Status</th>
+                <th>Extracted Example Sentence</th>
+              </tr>
+            </thead>
+            <tbody id="wordsTableBody">
+              <tr>
+                <td colspan="3" class="empty-state-cell">
+                  No words analyzed yet. Select a file or paste text above, then click <strong>Extract & Analyze</strong>.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Right Column: Dedicated Debugging & Issue Center -->
+    <aside class="debug-column" aria-label="Debugging & Diagnostics Console">
+      <div class="card panel-debug">
+        <div class="debug-header">
+          <div class="debug-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="m8 2 1.88 1.88M14.12 3.88 16 2M9 7.13v-1a3.003 3.003 0 1 1 6 0v1"></path>
+              <path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6"></path>
+              <path d="M12 20v-9"></path>
+              <path d="M6.53 9C4.6 8.8 3 7.1 3 5M6 13H2M3 21c0-2.1 1.7-3.9 3.8-4M20.97 5c0 2.1-1.6 3.8-3.5 4M18 13h4M21 21c0-2.1-1.7-3.9-3.8-4"></path>
+            </svg>
+            <span>Diagnostics & Debug</span>
+          </div>
+
+          <div class="debug-tab-switcher">
+            <button class="debug-tab active" data-target="logView">Logs</button>
+            <button class="debug-tab" data-target="payloadView">Payload</button>
+            <button class="debug-tab" data-target="reportView">Report Bug</button>
+          </div>
+        </div>
+
+        <div class="debug-body">
+          <!-- Live Logs Tab -->
+          <div class="debug-pane active" id="logView">
+            <div class="console-box" id="consoleBox">
+              <div class="log-line info"><span class="log-time">[Init]</span> Anki Vocab Porter initialized.</div>
+            </div>
+            <div class="console-actions">
+              <button id="btnClearLogs" class="btn-micro">Clear Console</button>
+              <button id="btnCopyLogs" class="btn-micro">Copy Logs</button>
+            </div>
+          </div>
+
+          <!-- Payload Inspector Tab -->
+          <div class="debug-pane" id="payloadView">
+            <div class="payload-box">
+              <pre id="payloadContent"><code>// Last Anki API request/response will appear here</code></pre>
+            </div>
+            <div class="console-actions">
+              <button id="btnCopyPayload" class="btn-micro">Copy Payload</button>
+            </div>
+          </div>
+
+          <!-- Bug & Issue Reporter Tab -->
+          <div class="debug-pane" id="reportView">
+            <div class="bug-reporter-form">
+              <label for="bugDescriptionInput">Describe issue or paste traceback:</label>
+              <textarea id="bugDescriptionInput" rows="5" placeholder="e.g. Card move failed with error code... or paste stacktrace here"></textarea>
+              
+              <div class="bundle-preview-box">
+                <span class="preview-title">Debug Bundle includes:</span>
+                <ul class="preview-list">
+                  <li>Anki API status & decks</li>
+                  <li>Last file / input stats</li>
+                  <li>Last error payload & stack trace</li>
+                  <li>Your notes / description</li>
+                </ul>
+              </div>
+
+              <button id="btnCopyDebugBundle" class="btn-accent-full">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                Copy AI Debug Bundle
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

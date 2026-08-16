@@ -1,0 +1,36 @@
+Questions 186-190 refer to the following sales report, memo, and article.
+
+Margot's House of Ice Cream
+Flavor Purchases by Percentage of Sales
+July
+
+Flavor | Percent
+Chocolate | 22
+Vanilla | 18
+Strawberry | 11
+Cookies and cream | 8
+Butter pecan | 8
+Mint chocolate chip | 7
+All others | 26
+
+MEMO
+
+To: All Store Managers
+From: June Willcox, CEO, Margot's House of Ice Cream
+Subject: New Stores
+Date: October 5
+
+Margot's House of Ice Cream is proud to welcome the following new stores.
+
+Store Number | Location | Opening Date | Manager
+66 | Framingham, Massachusetts, United States | September 1 | Inga Slavin
+67 | Appleton, Wisconsin, United States | September 7 | Zheng Tong
+68 | Wollongong, New South Wales, Australia | September 14 | Geoffrey Pratt
+69 | Rotorua, New Zealand | September 15 | Kehinde Ilogu
+70 | Greater Sudbury, Ontario, Canada | September 29 | Hallie Strafford
+
+For the next six months, we will be supporting these stores with advertisements in their local media markets.
+
+In December, we plan to open stores in Italy and Switzerland. Demand for our quality product is higher than ever, our market share is increasing, and we are not finished expanding! Stay tuned for more information!
+
+312

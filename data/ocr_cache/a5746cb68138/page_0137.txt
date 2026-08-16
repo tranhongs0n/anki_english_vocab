@@ -1,0 +1,51 @@
+Questions 181-185 refer to the following form and e-mail.
+
+PURCHASE ORDER
+
+Pirate's Bounty Seafood
+11 Harbor Street
+Charlottetown, Prince Edward Island, C1A 0A5
+
+2 October
+Purchase Order: 5338
+
+VENDOR
+Rochette's Commercial Refrigeration
+2175 Lyons Avenue
+Guelph, Ontario, N1C 0A1
+519-555-0112
+
+SHIP TO
+Pirate's Bounty Seafood
+11 Harbor Street
+Charlottetown, Prince Edward Island, C1A 0A5
+Attn: Lenore Okiya
+782-555-0145
+
+ITEM NUMBER | DESCRIPTION | QUANTITY | PRICE | TOTAL
+BF550 | Blizzard walk-in freezer | 1 | $6,400.00 | $6,400.00
+ | Features: 1.5m x 2m x 2.5m, adjustable shelves, aluminum flooring, galvanized steel panels | | |
+
+COMMENTS OR SPECIAL INSTRUCTIONS
+Restaurant expanding. Need unit by 17 November.
+
+SUBTOTAL $6,400.00
+TAX $960.00
+GRAND TOTAL $7,360.00
+
+To: Lenore Okiya <l.okiya@piratesbounty.ca>
+From: Shaliya Umuma <customerservice@rochettesrefrigeration.ca>
+Date: 3 October
+Subject: Purchase Order 5338
+
+Dear Ms. Okiya,
+
+We received your purchase order for the Blizzard walk-in freezer. Unfortunately, the model you requested is on back order and will not be available for three months. We regret the inconvenience and would like to offer you some options.
+
+I can offer you the Blizzard BF600, which measures 2m x 2.5m x 3m, at the discounted price of $6,900 plus tax. It comes with the same features as the item you ordered. Alternately, we have a refurbished BF400 in stock. It's the same size as the BF550; however, while the BF550 includes a remote control for setting the temperature, the BF400 has a wall-mounted device for that purpose. The BF400 unit comes with a two-year warranty. It is priced at $5,600 plus tax.
+
+Please let me know how you wish to proceed. Just reply to this e-mail.
+
+Shaliya Umuma, Customer Service Manager
+
+160
