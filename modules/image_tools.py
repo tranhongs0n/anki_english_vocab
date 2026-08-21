@@ -42,8 +42,12 @@ def crop_current_card_image():
         if new_name:
             note[img_field] = RE_IMG_SRC.sub(f'<img src="{new_name}">', note[img_field], count=1)
             mw.col.update_notes([note])
-            mw.reviewer.card.load()
-            mw.reset()
+            if mw.reviewer and mw.reviewer.card and mw.reviewer.card.id == mw.reviewer.card.id:
+                mw.reviewer.card.load()
+                if hasattr(mw.reviewer, '_showQuestion') and mw.reviewer.state == 'question':
+                    mw.reviewer._showQuestion()
+                elif hasattr(mw.reviewer, '_showAnswer') and mw.reviewer.state == 'answer':
+                    mw.reviewer._showAnswer()
             tooltip("Cropped.", period=1000)
 
 def process_notes_images(note_ids, prefix="Batch"):

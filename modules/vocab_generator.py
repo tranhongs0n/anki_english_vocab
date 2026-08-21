@@ -126,11 +126,29 @@ def update_card_ai(cfg: dict):
         try:
             note = card.note()
             fnames = list(note.keys())
-            if 'IPA' in fnames: note['IPA'] = res['ipa']
-            if 'Reference' in fnames: note['Reference'] = res['meaning']
-            if 'example' in fnames: note['example'] = res['example']
+            f_ipa = cfg.get('note_types', {}).get('field_ipa', 'IPA')
+            f_mean = cfg.get('note_types', {}).get('field_meaning', 'Reference')
+            f_ex = cfg.get('note_types', {}).get('field_example', 'example')
+
+            if f_ipa in fnames: note[f_ipa] = res['ipa']
+            elif 'IPA' in fnames: note['IPA'] = res['ipa']
+
+            if f_mean in fnames: note[f_mean] = res['meaning']
+            elif 'Reference' in fnames: note['Reference'] = res['meaning']
+
+            if f_ex in fnames: note[f_ex] = res['example']
+            elif 'example' in fnames: note['example'] = res['example']
             elif 'Example' in fnames: note['Example'] = res['example']
+
             mw.col.update_notes([note])
+
+            if mw.reviewer and mw.reviewer.card and mw.reviewer.card.id == card.id:
+                mw.reviewer.card.load()
+                if hasattr(mw.reviewer, '_showQuestion') and mw.reviewer.state == 'question':
+                    mw.reviewer._showQuestion()
+                elif hasattr(mw.reviewer, '_showAnswer') and mw.reviewer.state == 'answer':
+                    mw.reviewer._showAnswer()
+
             r_ipa, r_mean = res['ipa'], res['meaning']
             tooltip(f"{word}: {r_ipa} | {r_mean}", period=2000)
         except Exception as e: tooltip(f'Update error: {e}', period=1500)
