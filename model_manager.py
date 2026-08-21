@@ -133,7 +133,8 @@ def test_deepseek_chat(api_key: str, base_url: str, model: str) -> tuple[bool, s
     payload = {
         "model": model,
         "messages": [{"role": "user", "content": "ping"}],
-        "max_tokens": 5
+        "max_tokens": 50,
+        "thinking": {"type": "disabled"}
     }
     req = urllib.request.Request(
         url,
