@@ -51,23 +51,24 @@ def save_env(key: str, base: str, model: str) -> bool:
         return True
     except Exception: return False
 
-def _http(url: str, key: str, payload: dict = None, to: float = 8.0) -> tuple[dict, str]:
+def _http(url: str, key: str, payload: dict = None, timeout: float = 8.0) -> tuple[dict, str]:
     headers = {'Content-Type': 'application/json', 'User-Agent': 'AnkiVocab/1.0'}
     if key: headers['Authorization'] = 'Bearer ' + key.strip()
     data = json.dumps(payload).encode('utf-8') if payload else None
     try:
         req = urllib.request.Request(url, data=data, headers=headers, method='POST' if data else 'GET')
-        with urllib.request.urlopen(req, timeout=to) as resp:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
             return json.loads(resp.read().decode('utf-8')), ''
     except Exception as e: return {}, str(e)
 
-def call_llm(prompt: str, sys: str = '', max_tokens: int = 0, to: float = 0.0) -> tuple[str, str]:
+def call_llm(prompt: str, system_prompt: str = '', max_tokens: int = 0, timeout: float = 0.0, sys: str = '', to: float = 0.0) -> tuple[str, str]:
     env, cfg = read_env(), get_llm_cfg()
     b = (env.get('LLM_BASE_URL') or cfg.get('base_url', '')).strip().rstrip('/')
     url = b if b.endswith('/chat/completions') else b + '/chat/completions'
     tokens = max_tokens or cfg.get('max_tokens', 300)
-    timeout = to or cfg.get('timeout_seconds', 8.0)
-    msgs = ([{'role': 'system', 'content': sys}] if sys else []) + [{'role': 'user', 'content': prompt}]
+    to_sec = timeout or to or cfg.get('timeout_seconds', 8.0)
+    sys_text = system_prompt or sys
+    msgs = ([{'role': 'system', 'content': sys_text}] if sys_text else []) + [{'role': 'user', 'content': prompt}]
     
     models = [env.get('LLM_MODEL') or cfg.get('model', 'deepseek-v4-flash')]
     for m in cfg.get('candidate_models', []):
@@ -76,7 +77,7 @@ def call_llm(prompt: str, sys: str = '', max_tokens: int = 0, to: float = 0.0) -
     last_err = ''
     for model in models:
         payload = {'model': model, 'messages': msgs, 'temperature': 0.0, 'max_tokens': tokens, 'thinking': {'type': 'disabled'}}
-        data, err = _http(url, env.get('LLM_API_KEY', ''), payload, timeout)
+        data, err = _http(url, env.get('LLM_API_KEY', ''), payload, to_sec)
         if not err and data:
             try:
                 msg = data['choices'][0]['message']
