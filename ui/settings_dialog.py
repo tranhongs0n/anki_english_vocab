@@ -45,7 +45,8 @@ class UnifiedSettingsDialog(QDialog):
         layout.addLayout(btn_box)
 
     def tab_ai(self) -> QWidget:
-        w, l = QWidget(), QVBoxLayout()
+        w = QWidget()
+        l = QVBoxLayout(w)
         l.setSpacing(6)
         
         self.inputs['url'] = QLineEdit(self.env_cfg.get("LLM_BASE_URL", "https://api.deepseek.com"), w)
@@ -56,7 +57,8 @@ class UnifiedSettingsDialog(QDialog):
         k_row.addWidget(QLabel("API Key (LLM_API_KEY):", w))
         chk = QCheckBox("Show", w)
         chk.toggled.connect(lambda c: self.inputs['key'].setEchoMode(QLineEdit.EchoMode.Normal if c else QLineEdit.EchoMode.Password))
-        k_row.addStretch(); k_row.addWidget(chk)
+        k_row.addStretch()
+        k_row.addWidget(chk)
         l.addLayout(k_row)
 
         k_box = QHBoxLayout()
@@ -84,24 +86,30 @@ class UnifiedSettingsDialog(QDialog):
         btn_test = QPushButton("Ping Test", w)
         btn_test.clicked.connect(self.on_test_llm)
         l.addWidget(btn_test)
-        w.setLayout(l)
         return w
 
     def tab_shortcuts(self) -> QWidget:
-        w, scroll, inner, form = QWidget(), QScrollArea(), QWidget(), QFormLayout()
+        w = QWidget()
+        scroll = QScrollArea(w)
         scroll.setWidgetResizable(True)
+        inner = QWidget()
+        form = QFormLayout(inner)
         sc = self.cfg.get("shortcuts", {})
         for k, lbl in SHORTCUTS:
             self.inputs[f'sc_{k}'] = QLineEdit(sc.get(k, ""), inner)
             form.addRow(lbl, self.inputs[f'sc_{k}'])
-        inner.setLayout(form)
         scroll.setWidget(inner)
-        main_l = QVBoxLayout(w); main_l.addWidget(scroll); w.setLayout(main_l)
+        main_l = QVBoxLayout(w)
+        main_l.setContentsMargins(0, 0, 0, 0)
+        main_l.addWidget(scroll)
         return w
 
     def tab_decks(self) -> QWidget:
-        w, form = QWidget(), QFormLayout(w)
-        decks, notes, feat = self.cfg.get("decks", {}), self.cfg.get("note_types", {}), self.cfg.get("features", {})
+        w = QWidget()
+        form = QFormLayout(w)
+        decks = self.cfg.get("decks", {})
+        notes = self.cfg.get("note_types", {})
+        feat = self.cfg.get("features", {})
         fields = [
             ('d_learn', 'Target Learning Deck:', decks.get('target_learning', 'English::00_Learning')),
             ('d_later', 'Later Deck (F5):', decks.get('deck_later', 'English::98_Later')),
@@ -119,8 +127,12 @@ class UnifiedSettingsDialog(QDialog):
         return w
 
     def tab_tuning(self) -> QWidget:
-        w, form = QWidget(), QFormLayout(w)
-        img, pad, gen, zm = self.cfg.get("image", {}), self.cfg.get("practice_pad", {}), self.cfg.get("vocab_generator", {}), self.cfg.get("zoom", {})
+        w = QWidget()
+        form = QFormLayout(w)
+        img = self.cfg.get("image", {})
+        pad = self.cfg.get("practice_pad", {})
+        gen = self.cfg.get("vocab_generator", {})
+        zm = self.cfg.get("zoom", {})
         
         self.inputs['img_h'] = QSpinBox(w); self.inputs['img_h'].setRange(50, 2000); self.inputs['img_h'].setValue(img.get('target_height', 300))
         self.inputs['img_q'] = QSpinBox(w); self.inputs['img_q'].setRange(1, 100); self.inputs['img_q'].setValue(img.get('webp_quality', 80))
@@ -133,7 +145,7 @@ class UnifiedSettingsDialog(QDialog):
 
         form.addRow("Image Height (px):", self.inputs['img_h'])
         form.addRow("WebP Quality (1-100):", self.inputs['img_q'])
-        form.addRow("Pad Width/Height:", self.inputs['pad_w'])
+        form.addRow("Pad Width:", self.inputs['pad_w'])
         form.addRow("Pad Height:", self.inputs['pad_h'])
         form.addRow("Pad Font Size:", self.inputs['pad_f'])
         form.addRow("Vocab Batch Size:", self.inputs['b_size'])
@@ -190,4 +202,5 @@ class UnifiedSettingsDialog(QDialog):
         tooltip("Settings saved.", period=1200)
         self.accept()
 
-def open_settings_dialog(): UnifiedSettingsDialog(mw).exec()
+def open_settings_dialog():
+    UnifiedSettingsDialog(mw).exec()
