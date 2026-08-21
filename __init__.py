@@ -70,9 +70,6 @@ def init_addon():
         if hasattr(gui_hooks, "reviewer_did_show_question"):
             gui_hooks.reviewer_did_show_question.append(lambda c: clear_practice_pad())
 
-        if cfg.get("features", {}).get("enable_pre_sync_pipeline", True) and hasattr(gui_hooks, "sync_will_start"):
-            gui_hooks.sync_will_start.append(lambda: run_pipeline(cfg))
-
     if mw and hasattr(mw, "form") and mw.form: setup_global_shortcuts_and_menu()
     elif gui_hooks and hasattr(gui_hooks, "main_window_did_init"): gui_hooks.main_window_did_init.append(setup_global_shortcuts_and_menu)
 

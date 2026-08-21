@@ -65,7 +65,6 @@
   "features": {
     "enable_background_related_vocab": true,
     "enable_zoom_persist": true,
-    "enable_pre_sync_pipeline": true,
     "git_repo_path": ""
   }
 }
