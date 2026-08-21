@@ -50,10 +50,16 @@ def setup_global_shortcuts_and_menu():
         seq = sc.get(key, default)
         if seq:
             s = QShortcut(QKeySequence(seq), mw)
+            if hasattr(Qt, "ShortcutContext"):
+                s.setContext(Qt.ShortcutContext.ApplicationShortcut)
             s.activated.connect(fn)
             mw._vocab_suite_shortcuts.append(s)
 
     if hasattr(mw, "form") and hasattr(mw.form, "menuTools"):
+        act_img = QAction("Image Search Dock (Ctrl+I)", mw)
+        act_img.triggered.connect(toggle_image_browser)
+        mw.form.menuTools.addAction(act_img)
+
         act = QAction("Vocab Suite Settings...", mw)
         act.triggered.connect(open_settings_dialog)
         mw.form.menuTools.addAction(act)

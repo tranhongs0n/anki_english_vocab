@@ -279,6 +279,7 @@ class EmbeddedImageDock(QDockWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(self.web)
         self.setWidget(container)
+        self.setMinimumWidth(380)
 
     def _on_load_finished(self, success: bool):
         if not success: return
@@ -286,7 +287,7 @@ class EmbeddedImageDock(QDockWidget):
         self.web.page().runJavaScript(js_code)
 
     def search_word(self, word: str):
-        cleaned = RE_NON_WORD.sub("", clean_html(word)).strip()
+        cleaned = RE_NON_WORD.sub("", clean_html_text(word)).strip()
         if not cleaned or cleaned == self.current_query: return
         self.current_query = cleaned
 
@@ -321,19 +322,22 @@ def toggle_image_browser():
         if mw and mw.reviewer and mw.reviewer.web:
             mw.reviewer.web.setFocus()
     else:
+        dock.setVisible(True)
         dock.show()
         dock.raise_()
+        dock.setFocus()
         sync_active_card_image()
 
 def sync_active_card_image():
     dock = get_image_dock()
     if not dock or not dock.isVisible(): return
-    if not mw or not mw.reviewer or not mw.reviewer.card: return
 
-    card = mw.reviewer.card
-    cfg = get_addon_config()
-    word_field = cfg.get("note_types", {}).get("field_word", "Word")
-    cleaned = extract_word_from_card(card, word_field)
+    cleaned = ""
+    if mw and mw.reviewer and mw.reviewer.card:
+        card = mw.reviewer.card
+        cfg = get_addon_config()
+        word_field = cfg.get("note_types", {}).get("field_word", "Word")
+        cleaned = extract_word_from_card(card, word_field)
 
     if cleaned:
         if not dock.web.url() or dock.web.url().isEmpty() or "google.com" not in dock.web.url().toString():
@@ -341,3 +345,5 @@ def sync_active_card_image():
             dock.web.setUrl(QUrl(f"https://www.google.com/search?udm=2&q={cleaned}"))
         else:
             dock.search_word(cleaned)
+    elif not dock.web.url() or dock.web.url().isEmpty() or "google.com" not in dock.web.url().toString():
+        dock.web.setUrl(QUrl("https://www.google.com/imghp"))
