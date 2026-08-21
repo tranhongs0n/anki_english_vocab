@@ -16,7 +16,7 @@ except ImportError:
     QWidget, QVBoxLayout, QWebEngineView, QWebEngineProfile = None, None, None, None
     QWebChannel, QObject, pyqtSlot, Qt, QUrl, QFile, QIODevice, QImage = None, None, None, None, None, None, None, None
 
-from ..core.deck_utils import get_addon_config, clean_html
+from ..core.deck_utils import get_addon_config, clean_html_text, extract_word_from_card
 from ..core.media_utils import normalize_image, save_media_webp
 
 RE_NON_WORD = re.compile(r"[^a-zA-Z0-9\s-]")
@@ -331,11 +331,9 @@ def sync_active_card_image():
     if not mw or not mw.reviewer or not mw.reviewer.card: return
 
     card = mw.reviewer.card
-    note = card.note()
     cfg = get_addon_config()
     word_field = cfg.get("note_types", {}).get("field_word", "Word")
-    raw_word = note[word_field] if word_field in note else note[list(note.keys())[0]]
-    cleaned = RE_NON_WORD.sub("", clean_html(raw_word)).strip()
+    cleaned = extract_word_from_card(card, word_field)
 
     if cleaned:
         if not dock.web.url() or dock.web.url().isEmpty() or "google.com" not in dock.web.url().toString():
