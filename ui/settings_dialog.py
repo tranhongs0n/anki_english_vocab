@@ -5,6 +5,7 @@ from aqt.qt import (
     QComboBox, QCheckBox, QTabWidget, QWidget, QFormLayout, QScrollArea, QSpinBox, QDoubleSpinBox
 )
 from ..core.llm_client import read_env, save_env, ping_llm, fetch_models
+from ..core.deck_utils import get_addon_config
 
 SHORTCUTS = [
     ("root_word", "Root Word (F4)"), ("move_to_later", "Move to Later (F5)"),
@@ -19,7 +20,7 @@ class UnifiedSettingsDialog(QDialog):
         super().__init__(parent)
         self.setWindowTitle("Vocab Suite Settings")
         self.resize(560, 500)
-        self.cfg = mw.addonManager.getConfig("anki_vocab_suite") or {}
+        self.cfg = get_addon_config()
         self.env_cfg = read_env()
         self.inputs = {}
         self.init_ui()

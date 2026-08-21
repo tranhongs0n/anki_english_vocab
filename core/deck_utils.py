@@ -1,9 +1,30 @@
+import os
+import json
 import re
 import html
-from aqt import mw
+try: from aqt import mw
+except ImportError: mw = None
 
 RE_TAG = re.compile(r'<[^>]+>')
 RE_SPACE = re.compile(r'\s+')
+
+def get_addon_config() -> dict:
+    cfg = {}
+    cfg_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'config.json')
+    if os.path.exists(cfg_file):
+        try:
+            with open(cfg_file, 'r', encoding='utf-8-sig') as f:
+                cfg = json.load(f)
+        except Exception: pass
+    if mw and mw.addonManager:
+        user_cfg = mw.addonManager.getConfig('anki_vocab_suite')
+        if user_cfg and isinstance(user_cfg, dict):
+            for sec, val in user_cfg.items():
+                if isinstance(val, dict) and sec in cfg and isinstance(cfg[sec], dict):
+                    cfg[sec].update(val)
+                else:
+                    cfg[sec] = val
+    return cfg
 
 def clean_html_text(s: str) -> str:
     return RE_SPACE.sub(' ', html.unescape(str(s or '')).replace('\xa0', ' ')).strip()

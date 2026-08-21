@@ -2,6 +2,7 @@ from aqt import mw, gui_hooks
 from aqt.qt import QAction, QShortcut, QKeySequence
 
 from .core.db_registry import init_db_registry
+from .core.deck_utils import get_addon_config
 from .ui.practice_pad import toggle_practice_pad, clear_practice_pad
 from .ui.settings_dialog import open_settings_dialog
 from .modules.move_cards import move_current_card
@@ -10,9 +11,6 @@ from .modules.vocab_generator import init_vocab_module, update_card_ai, check_gi
 from .modules.image_tools import crop_current_card_image, process_notes_images
 from .modules.sync_pipeline import run_pipeline, run_pipeline_and_sync
 from .modules.zoom_manager import init_zoom, zoom_in, zoom_out, zoom_reset
-
-def get_addon_config() -> dict:
-    return mw.addonManager.getConfig(__name__) or {} if (mw and mw.addonManager) else {}
 
 def on_state_shortcuts(state: str, shortcuts: list):
     if state == "review":

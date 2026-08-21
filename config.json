@@ -1,4 +1,4 @@
-﻿{
+{
   "shortcuts": {
     "root_word": "F4",
     "move_to_later": "F5",
@@ -30,7 +30,6 @@
   },
   "llm": {
     "base_url": "https://api.deepseek.com",
-    "api_key": "",
     "model": "deepseek-v4-flash",
     "candidate_models": [
       "deepseek-v4-flash",
