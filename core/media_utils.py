@@ -1,11 +1,15 @@
 import os
 import uuid
 from typing import Union, Optional
-from aqt import mw
-from aqt.qt import QImage, QPainter, QColor, Qt
+try:
+    from aqt import mw
+    from aqt.qt import QImage, QPainter, QColor, Qt
+except ImportError:
+    mw, QImage, QPainter, QColor, Qt = None, None, None, None, None
+from .deck_utils import get_addon_config
 
 def get_image_cfg() -> dict:
-    return (mw.addonManager.getConfig('anki_vocab_suite') or {}).get('image', {}) if (mw and mw.addonManager) else {}
+    return get_addon_config().get('image', {})
 
 def normalize_image(src: Union[str, QImage], target_size: Optional[int] = None) -> Optional[QImage]:
     dim = target_size or get_image_cfg().get('target_height', 300)

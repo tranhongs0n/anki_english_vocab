@@ -1,5 +1,8 @@
-from aqt import mw, gui_hooks
-from aqt.qt import QAction, QShortcut, QKeySequence
+try:
+    from aqt import mw, gui_hooks
+    from aqt.qt import QAction, QShortcut, QKeySequence
+except ImportError:
+    mw, gui_hooks, QAction, QShortcut, QKeySequence = None, None, None, None, None
 
 from .core.db_registry import init_db_registry
 from .core.deck_utils import get_addon_config
@@ -58,16 +61,19 @@ def init_addon():
     init_vocab_module(cfg)
     if cfg.get("features", {}).get("enable_zoom_persist", True): init_zoom()
 
-    if hasattr(gui_hooks, "state_shortcuts_will_change"): gui_hooks.state_shortcuts_will_change.append(on_state_shortcuts)
-    elif hasattr(gui_hooks, "reviewer_did_init_shortcuts"): gui_hooks.reviewer_did_init_shortcuts.append(lambda sc, rev: on_state_shortcuts("review", sc))
+    if gui_hooks:
+        if hasattr(gui_hooks, "state_shortcuts_will_change"): gui_hooks.state_shortcuts_will_change.append(on_state_shortcuts)
+        elif hasattr(gui_hooks, "reviewer_did_init_shortcuts"): gui_hooks.reviewer_did_init_shortcuts.append(lambda sc, rev: on_state_shortcuts("review", sc))
 
-    gui_hooks.browser_menus_did_init.append(lambda b: b.form.menuEdit.addAction("Square and White BG (WebP)", lambda: process_notes_images(b.selectedNotes(), "Selected")))
-    gui_hooks.reviewer_did_show_question.append(lambda c: clear_practice_pad())
+        if hasattr(gui_hooks, "browser_menus_did_init"):
+            gui_hooks.browser_menus_did_init.append(lambda b: b.form.menuEdit.addAction("Square and White BG (WebP)", lambda: process_notes_images(b.selectedNotes(), "Selected")))
+        if hasattr(gui_hooks, "reviewer_did_show_question"):
+            gui_hooks.reviewer_did_show_question.append(lambda c: clear_practice_pad())
 
-    if cfg.get("features", {}).get("enable_pre_sync_pipeline", True):
-        gui_hooks.sync_will_start.append(lambda: run_pipeline(cfg))
+        if cfg.get("features", {}).get("enable_pre_sync_pipeline", True) and hasattr(gui_hooks, "sync_will_start"):
+            gui_hooks.sync_will_start.append(lambda: run_pipeline(cfg))
 
     if mw and hasattr(mw, "form") and mw.form: setup_global_shortcuts_and_menu()
-    else: gui_hooks.main_window_did_init.append(setup_global_shortcuts_and_menu)
+    elif gui_hooks and hasattr(gui_hooks, "main_window_did_init"): gui_hooks.main_window_did_init.append(setup_global_shortcuts_and_menu)
 
 init_addon()

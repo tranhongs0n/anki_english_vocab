@@ -1,8 +1,11 @@
 import re
 import json
 import time
-from aqt import mw
-from aqt.utils import tooltip
+try:
+    from aqt import mw
+    from aqt.utils import tooltip
+except ImportError:
+    mw, tooltip = None, lambda *a, **k: None
 from ..core.llm_client import call_llm, get_prompt
 from ..core.deck_utils import get_deck_id, get_target_model, extract_word_from_card, find_card_by_word, clean_html_text
 from ..core.db_registry import get_root, set_root

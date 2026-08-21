@@ -1,9 +1,12 @@
 import os
 import re
 import time
-from aqt import mw
-from aqt.utils import tooltip
-from aqt.qt import QDialog
+try:
+    from aqt import mw
+    from aqt.utils import tooltip
+    from aqt.qt import QDialog
+except ImportError:
+    mw, tooltip, QDialog = None, lambda *a, **k: None, None
 from ..core.media_utils import normalize_image, save_media_webp
 from ..ui.image_cropper import ImageCropDialog
 

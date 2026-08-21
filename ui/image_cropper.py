@@ -1,12 +1,13 @@
-import re
-from aqt import mw
-from aqt.qt import (
-    QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QImage, QPixmap, QPainter, QColor, QPen, QBrush, QKeyEvent, Qt
-)
-from ..core.media_utils import normalize_image, save_media_webp
-
-RE_IMG_SRC = re.compile(r'<img[^>]+src=["\']([^"\']+)["\'][^>]*>', re.IGNORECASE)
+try:
+    from aqt import mw
+    from aqt.qt import (
+        QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
+        QImage, QPixmap, QPainter, QColor, QPen, QBrush, QKeyEvent, Qt
+    )
+except ImportError:
+    mw, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QImage, QPixmap, QPainter, QColor, QPen, QBrush, QKeyEvent, Qt = [None] * 13
+    class QDialog:
+        def __init__(self, *a, **k): pass
 
 class ImageCropDialog(QDialog):
     AXES = ("bottom", "top", "left", "right")

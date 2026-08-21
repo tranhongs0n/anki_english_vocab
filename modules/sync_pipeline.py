@@ -5,9 +5,12 @@ import subprocess
 import threading
 import html
 from collections import defaultdict
-from aqt import mw
-from aqt.utils import tooltip, showInfo
-from aqt.qt import QCoreApplication
+try:
+    from aqt import mw
+    from aqt.utils import tooltip, showInfo
+    from aqt.qt import QCoreApplication
+except ImportError:
+    mw, tooltip, showInfo, QCoreApplication = None, lambda *a, **k: None, lambda *a, **k: None, None
 from ..core.deck_utils import clean_html_text
 from ..core.db_registry import add_gibberish_batch, export_repo_txt
 from .image_tools import process_notes_images

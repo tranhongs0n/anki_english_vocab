@@ -1,5 +1,8 @@
-from aqt import mw
-from aqt.utils import tooltip
+try:
+    from aqt import mw
+    from aqt.utils import tooltip
+except ImportError:
+    mw, tooltip = None, lambda *a, **k: None
 from ..core.deck_utils import move_card_to_deck
 
 def move_current_card(deck_name: str):

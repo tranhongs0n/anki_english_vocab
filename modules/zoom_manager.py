@@ -1,11 +1,16 @@
 import os
 import json
-from aqt import mw, gui_hooks
+try:
+    from aqt import mw, gui_hooks
+except ImportError:
+    mw, gui_hooks = None, None
+
+from ..core.deck_utils import get_addon_config
 
 _CFG_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data', 'zoom_config.json')
 
 def get_zoom_rules() -> dict:
-    return (mw.addonManager.getConfig('anki_vocab_suite') or {}).get('zoom', {}) if (mw and mw.addonManager) else {'step': 0.1, 'min': 0.3, 'max': 3.0, 'default': 1.0}
+    return get_addon_config().get('zoom', {}) or {'step': 0.1, 'min': 0.3, 'max': 3.0, 'default': 1.0}
 
 def load_zoom() -> float:
     try:
@@ -43,5 +48,7 @@ def zoom_reset():
     apply_target_zoom()
 
 def init_zoom():
-    for hook in (gui_hooks.sync_did_finish, gui_hooks.reviewer_did_show_question, gui_hooks.reviewer_did_show_answer):
-        hook.append(lambda *args: apply_target_zoom())
+    if not gui_hooks: return
+    for hook in (getattr(gui_hooks, 'sync_did_finish', None), getattr(gui_hooks, 'reviewer_did_show_question', None), getattr(gui_hooks, 'reviewer_did_show_answer', None)):
+        if hook and hasattr(hook, 'append'):
+            hook.append(lambda *args: apply_target_zoom())

@@ -1,9 +1,14 @@
-from aqt import mw
-from aqt.utils import tooltip, showWarning
-from aqt.qt import (
-    QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QLineEdit,
-    QComboBox, QCheckBox, QTabWidget, QWidget, QFormLayout, QScrollArea, QSpinBox, QDoubleSpinBox
-)
+try:
+    from aqt import mw
+    from aqt.utils import tooltip, showWarning
+    from aqt.qt import (
+        QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QLineEdit,
+        QComboBox, QCheckBox, QTabWidget, QWidget, QFormLayout, QScrollArea, QSpinBox, QDoubleSpinBox
+    )
+except ImportError:
+    mw, tooltip, showWarning, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QLineEdit, QComboBox, QCheckBox, QTabWidget, QWidget, QFormLayout, QScrollArea, QSpinBox, QDoubleSpinBox = [None] * 16
+    class QDialog:
+        def __init__(self, *a, **k): pass
 from ..core.llm_client import read_env, save_env, ping_llm, fetch_models
 from ..core.deck_utils import get_addon_config
 

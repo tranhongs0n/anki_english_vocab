@@ -1,8 +1,15 @@
-from aqt import mw
-from aqt.qt import QDialog, QVBoxLayout, QTextEdit, QFont, QShortcut, QKeySequence, QGuiApplication, Qt
+try:
+    from aqt import mw
+    from aqt.qt import QDialog, QVBoxLayout, QTextEdit, QFont, QShortcut, QKeySequence, QGuiApplication, Qt
+except ImportError:
+    mw, QVBoxLayout, QTextEdit, QFont, QShortcut, QKeySequence, QGuiApplication, Qt = [None] * 8
+    class QDialog:
+        def __init__(self, *a, **k): pass
+
+from ..core.deck_utils import get_addon_config
 
 def get_pad_cfg() -> dict:
-    return (mw.addonManager.getConfig('anki_vocab_suite') or {}).get('practice_pad', {}) if (mw and mw.addonManager) else {}
+    return get_addon_config().get('practice_pad', {})
 
 class PracticePadDialog(QDialog):
     def __init__(self, parent=None):

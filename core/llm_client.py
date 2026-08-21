@@ -23,9 +23,9 @@ def get_prompt(cat: str, key: str = 'user', **kwargs) -> str:
     except Exception: return tpl
 
 def get_llm_cfg() -> dict:
+    from .deck_utils import get_addon_config
     cfg = {'base_url': 'https://api.deepseek.com', 'model': 'deepseek-v4-flash', 'candidate_models': [], 'timeout_seconds': 8.0, 'max_tokens': 300}
-    if mw and mw.addonManager:
-        cfg.update((mw.addonManager.getConfig('anki_vocab_suite') or {}).get('llm', {}))
+    cfg.update(get_addon_config().get('llm', {}))
     return cfg
 
 def read_env() -> dict:

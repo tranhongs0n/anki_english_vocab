@@ -3,8 +3,11 @@ import json
 import time
 import queue
 import threading
-from aqt import mw, gui_hooks
-from aqt.utils import tooltip
+try:
+    from aqt import mw, gui_hooks
+    from aqt.utils import tooltip
+except ImportError:
+    mw, gui_hooks, tooltip = None, None, lambda *a, **k: None
 from ..core.llm_client import call_llm, get_prompt
 from ..core.deck_utils import get_deck_id, get_target_model, clean_html_text, extract_word_from_card, move_card_to_deck
 from ..core.db_registry import is_gibberish, is_processed, add_processed, add_gibberish
@@ -163,4 +166,5 @@ def check_gibberish_ai(cfg: dict):
 def init_vocab_module(cfg: dict):
     if cfg.get('features', {}).get('enable_background_related_vocab', True):
         threading.Thread(target=batch_worker, args=(cfg,), daemon=True).start()
-        gui_hooks.reviewer_did_show_question.append(lambda c: push_word_to_batch(extract_word_from_card(c)) if c else None)
+        if gui_hooks and hasattr(gui_hooks, 'reviewer_did_show_question'):
+            gui_hooks.reviewer_did_show_question.append(lambda c: push_word_to_batch(extract_word_from_card(c)) if c else None)
