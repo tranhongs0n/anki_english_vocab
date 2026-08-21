@@ -15,6 +15,7 @@ from ..core.deck_utils import get_addon_config
 SHORTCUTS = [
     ("root_word", "Root Word (F4)"), ("move_to_later", "Move to Later (F5)"),
     ("move_to_other", "Move to Other (F6)"), ("image_cropper", "Image Cropper (F7)"),
+    ("image_browser", "Image Browser Dock (Ctrl+I)"),
     ("practice_pad", "Practice Pad (F8)"), ("update_card_ai", "AI Update Card (F9)"),
     ("check_gibberish_ai", "AI Check Gibberish (F10)"), ("sync_pipeline", "Pipeline & Sync (Ctrl+Y)"),
     ("zoom_in", "Zoom In (Ctrl+=)"), ("zoom_out", "Zoom Out (Ctrl+-)"), ("zoom_reset", "Zoom Reset (Ctrl+0)")

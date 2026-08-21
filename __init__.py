@@ -7,6 +7,7 @@ except ImportError:
 from .core.db_registry import init_db_registry
 from .core.deck_utils import get_addon_config
 from .ui.practice_pad import toggle_practice_pad, clear_practice_pad
+from .ui.embedded_browser import toggle_image_browser, sync_active_card_image
 from .ui.settings_dialog import open_settings_dialog
 from .modules.move_cards import move_current_card
 from .modules.root_words import process_root_word
@@ -24,6 +25,7 @@ def on_state_shortcuts(state: str, shortcuts: list):
             ("move_to_later", lambda: move_current_card(decks.get("deck_later", ""))),
             ("move_to_other", lambda: move_current_card(decks.get("deck_other", ""))),
             ("image_cropper", crop_current_card_image),
+            ("image_browser", toggle_image_browser),
             ("update_card_ai", lambda: update_card_ai(cfg)),
             ("check_gibberish_ai", lambda: check_gibberish_ai(cfg))
         ]
@@ -37,6 +39,7 @@ def setup_global_shortcuts_and_menu():
     mw._vocab_suite_shortcuts = []
     
     globals_list = [
+        ("image_browser", "Ctrl+I", toggle_image_browser),
         ("practice_pad", "F8", toggle_practice_pad),
         ("sync_pipeline", "Ctrl+Y", lambda: run_pipeline_and_sync(cfg)),
         ("zoom_in", "Ctrl+=", zoom_in),
@@ -68,7 +71,7 @@ def init_addon():
         if hasattr(gui_hooks, "browser_menus_did_init"):
             gui_hooks.browser_menus_did_init.append(lambda b: b.form.menuEdit.addAction("Square and White BG (WebP)", lambda: process_notes_images(b.selectedNotes(), "Selected")))
         if hasattr(gui_hooks, "reviewer_did_show_question"):
-            gui_hooks.reviewer_did_show_question.append(lambda c: clear_practice_pad())
+            gui_hooks.reviewer_did_show_question.append(lambda c: (clear_practice_pad(), sync_active_card_image()))
 
     if mw and hasattr(mw, "form") and mw.form: setup_global_shortcuts_and_menu()
     elif gui_hooks and hasattr(gui_hooks, "main_window_did_init"): gui_hooks.main_window_did_init.append(setup_global_shortcuts_and_menu)

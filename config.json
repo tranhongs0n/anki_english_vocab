@@ -4,6 +4,7 @@
     "move_to_later": "F5",
     "move_to_other": "F6",
     "image_cropper": "F7",
+    "image_browser": "Ctrl+I",
     "practice_pad": "F8",
     "update_card_ai": "F9",
     "check_gibberish_ai": "F10",
