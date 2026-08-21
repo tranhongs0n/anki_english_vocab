@@ -1,8 +1,8 @@
 try:
     from aqt import mw, gui_hooks
-    from aqt.qt import QAction, QShortcut, QKeySequence
+    from aqt.qt import QAction, QShortcut, QKeySequence, Qt
 except ImportError:
-    mw, gui_hooks, QAction, QShortcut, QKeySequence = None, None, None, None, None
+    mw, gui_hooks, QAction, QShortcut, QKeySequence, Qt = None, None, None, None, None, None
 
 from .core.db_registry import init_db_registry
 from .core.deck_utils import get_addon_config
