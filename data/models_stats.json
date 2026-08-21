@@ -1,0 +1,200 @@
+{
+  "mimo-v2.5": {
+    "total_calls": 5,
+    "success_calls": 2,
+    "failed_calls": 3,
+    "avg_ms": 2821.1,
+    "min_ms": 412.5,
+    "max_ms": 5229.6,
+    "last_ms": 5229.6,
+    "total_tokens": 503,
+    "last_used": "2026-08-21 17:03:24"
+  },
+  "nemotron-3-ultra-free": {
+    "total_calls": 4,
+    "success_calls": 3,
+    "failed_calls": 1,
+    "avg_ms": 2231.7,
+    "min_ms": 520.0,
+    "max_ms": 3732.4,
+    "last_ms": 2442.8,
+    "total_tokens": 659,
+    "last_used": "2026-08-21 17:03:27"
+  },
+  "Ntthin/Grok-4.6": {
+    "total_calls": 2,
+    "success_calls": 1,
+    "failed_calls": 1,
+    "avg_ms": 310.2,
+    "min_ms": 310.2,
+    "max_ms": 310.2,
+    "last_ms": 310.2,
+    "total_tokens": 110,
+    "last_used": "2026-08-21 17:03:10"
+  },
+  "deepseek-v4-flash-free": {
+    "total_calls": 10,
+    "success_calls": 1,
+    "failed_calls": 9,
+    "avg_ms": 680.0,
+    "min_ms": 680.0,
+    "max_ms": 680.0,
+    "last_ms": 680.0,
+    "total_tokens": 130,
+    "last_used": "2026-08-21 17:08:38"
+  },
+  "sypham98/qwen3.8-fast": {
+    "total_calls": 9,
+    "success_calls": 1,
+    "failed_calls": 8,
+    "avg_ms": 3884.5,
+    "min_ms": 3884.5,
+    "max_ms": 3884.5,
+    "last_ms": 3884.5,
+    "total_tokens": 369,
+    "last_used": "2026-08-21 17:08:44"
+  },
+  "ngovutuananh/qwen-3.8-max": {
+    "total_calls": 1,
+    "success_calls": 0,
+    "failed_calls": 1,
+    "avg_ms": 0.0,
+    "min_ms": 999999.0,
+    "max_ms": 0.0,
+    "last_ms": 0.0,
+    "total_tokens": 0,
+    "last_used": "2026-08-21 17:02:38"
+  },
+  "openai/minimax-m3": {
+    "total_calls": 1,
+    "success_calls": 0,
+    "failed_calls": 1,
+    "avg_ms": 0.0,
+    "min_ms": 999999.0,
+    "max_ms": 0.0,
+    "last_ms": 0.0,
+    "total_tokens": 0,
+    "last_used": "2026-08-21 17:02:44"
+  },
+  "qwen3-coder-next": {
+    "total_calls": 1,
+    "success_calls": 0,
+    "failed_calls": 1,
+    "avg_ms": 0.0,
+    "min_ms": 999999.0,
+    "max_ms": 0.0,
+    "last_ms": 0.0,
+    "total_tokens": 0,
+    "last_used": "2026-08-21 17:02:49"
+  },
+  "openai/glm-5.2-free": {
+    "total_calls": 1,
+    "success_calls": 0,
+    "failed_calls": 1,
+    "avg_ms": 0.0,
+    "min_ms": 999999.0,
+    "max_ms": 0.0,
+    "last_ms": 0.0,
+    "total_tokens": 0,
+    "last_used": "2026-08-21 17:02:54"
+  },
+  "nemotron-3-ultra-550b-a55b": {
+    "total_calls": 1,
+    "success_calls": 0,
+    "failed_calls": 1,
+    "avg_ms": 0.0,
+    "min_ms": 999999.0,
+    "max_ms": 0.0,
+    "last_ms": 0.0,
+    "total_tokens": 0,
+    "last_used": "2026-08-21 17:02:59"
+  },
+  "openai/grok-4.5-free": {
+    "total_calls": 1,
+    "success_calls": 0,
+    "failed_calls": 1,
+    "avg_ms": 0.0,
+    "min_ms": 999999.0,
+    "max_ms": 0.0,
+    "last_ms": 0.0,
+    "total_tokens": 0,
+    "last_used": "2026-08-21 17:03:04"
+  },
+  "Ntthin/grok-4.5_console": {
+    "total_calls": 1,
+    "success_calls": 0,
+    "failed_calls": 1,
+    "avg_ms": 0.0,
+    "min_ms": 999999.0,
+    "max_ms": 0.0,
+    "last_ms": 0.0,
+    "total_tokens": 0,
+    "last_used": "2026-08-21 17:03:15"
+  },
+  "siwaaphm/qwen3.5-flash": {
+    "total_calls": 5,
+    "success_calls": 0,
+    "failed_calls": 5,
+    "avg_ms": 0.0,
+    "min_ms": 999999.0,
+    "max_ms": 0.0,
+    "last_ms": 0.0,
+    "total_tokens": 0,
+    "last_used": "2026-08-21 17:08:49"
+  },
+  "pthung310106/deepseek-v4-flash0731": {
+    "total_calls": 5,
+    "success_calls": 0,
+    "failed_calls": 5,
+    "avg_ms": 0.0,
+    "min_ms": 999999.0,
+    "max_ms": 0.0,
+    "last_ms": 0.0,
+    "total_tokens": 0,
+    "last_used": "2026-08-21 17:08:54"
+  },
+  "thanhnhan9023/kimi-2.7": {
+    "total_calls": 1,
+    "success_calls": 0,
+    "failed_calls": 1,
+    "avg_ms": 0.0,
+    "min_ms": 999999.0,
+    "max_ms": 0.0,
+    "last_ms": 0.0,
+    "total_tokens": 0,
+    "last_used": "2026-08-21 17:03:31"
+  },
+  "nhatnam201104/deepseek-v4-flash": {
+    "total_calls": 4,
+    "success_calls": 0,
+    "failed_calls": 4,
+    "avg_ms": 0.0,
+    "min_ms": 999999.0,
+    "max_ms": 0.0,
+    "last_ms": 0.0,
+    "total_tokens": 0,
+    "last_used": "2026-08-21 17:09:00"
+  },
+  "kimdepzai1/deepseek-v4-flash-0731": {
+    "total_calls": 4,
+    "success_calls": 0,
+    "failed_calls": 4,
+    "avg_ms": 0.0,
+    "min_ms": 999999.0,
+    "max_ms": 0.0,
+    "last_ms": 0.0,
+    "total_tokens": 0,
+    "last_used": "2026-08-21 17:09:05"
+  },
+  "thanhnhan9023/deepseek-v4-flash-0731": {
+    "total_calls": 3,
+    "success_calls": 0,
+    "failed_calls": 3,
+    "avg_ms": 0.0,
+    "min_ms": 999999.0,
+    "max_ms": 0.0,
+    "last_ms": 0.0,
+    "total_tokens": 0,
+    "last_used": "2026-08-21 17:05:40"
+  }
+}
