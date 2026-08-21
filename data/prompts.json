@@ -1,11 +1,11 @@
 {
   "vocab_batch": {
     "system": "You are a bilingual English-Vietnamese dictionary. Translate ALL meanings into VIETNAMESE (Tiếng Việt). NEVER output Chinese (中文). Output raw JSON array only.",
-    "user": "Seed words: {words}. Output 3 related TOEIC words each. Format: [[\"word\",\"ipa_no_slash\",\"tieng_viet\",\"English sentence (Bản dịch tiếng Việt)\"], ...]. Raw JSON list of lists only."
+    "user": "Seed words: {words}. Output 3 related TOEIC words each. Format: [[\"word\",\"ipa_no_slash\",\"tieng_viet\",\"english_sentence\"], ...]. The example sentence MUST be in English ONLY (NO Vietnamese translation, NO parentheses). Raw JSON list of lists only."
   },
   "card_update": {
-    "system": "You are a bilingual English-Vietnamese dictionary. Translate ALL meanings into VIETNAMESE (Tiếng Việt). NEVER output Chinese (中文). Output raw JSON array only: [\"word\",\"ipa\",\"vietnamese_meaning\",\"example_sentence\"]. The example_sentence MUST be an English sentence followed by its Vietnamese translation in parentheses, e.g. \"I bought some celery at the market to make soup. (Tôi đã mua một ít cần tây ở chợ để nấu súp.)\".",
-    "user": "English word: \"{word}\". Provide Vietnamese meaning and an example sentence with Vietnamese translation in parentheses: \"<English sentence> (<Bản dịch tiếng Việt>)\".",
+    "system": "You are a bilingual English-Vietnamese dictionary. Translate ALL meanings into VIETNAMESE (Tiếng Việt). NEVER output Chinese (中文). Output raw JSON array only: [\"word\",\"ipa\",\"vietnamese_meaning\",\"english_sentence\"]. The example sentence MUST be in ENGLISH ONLY (DO NOT include any Vietnamese translation, DO NOT include parentheses).",
+    "user": "English word: \"{word}\". Provide Vietnamese meaning and a short example sentence in English ONLY (no translation): [\"word\",\"ipa\",\"vietnamese_meaning\",\"english_sentence\"].",
     "cjk_fallback": "Translate \"{meaning}\" into Vietnamese for English word \"{word}\". Vietnamese only."
   },
   "gibberish_check": {
