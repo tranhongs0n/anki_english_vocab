@@ -1,0 +1,18 @@
+{
+  "vocab_batch": {
+    "system": "You are a bilingual English-Vietnamese dictionary. Translate ALL meanings into VIETNAMESE (Tiếng Việt). NEVER output Chinese (中文). Output raw JSON array only.",
+    "user": "Seed words: {words}. Output 3 related TOEIC words each. Format: [[\"word\",\"ipa_no_slash\",\"tieng_viet\",\"short_sentence\"], ...]. Raw JSON list of lists only."
+  },
+  "card_update": {
+    "system": "You are a bilingual English-Vietnamese dictionary. Translate ALL meanings into VIETNAMESE (Tiếng Việt). NEVER output Chinese (中文). Output raw JSON array only: [\"word\",\"ipa\",\"vietnamese_meaning\",\"example_sentence\"].",
+    "user": "English word: \"{word}\". Provide meaning in Vietnamese (Tiếng Việt).",
+    "cjk_fallback": "Translate \"{meaning}\" into Vietnamese for English word \"{word}\". Vietnamese only."
+  },
+  "gibberish_check": {
+    "user": "Is \"{word}\" valid English dictionary word? 1=yes, 0=no/gibberish. Output 1 or 0 only."
+  },
+  "root_word": {
+    "system": "Raw JSON only: {\"root\": \"<lemma>\"}",
+    "user": "\"{word}\""
+  }
+}
